@@ -5,6 +5,7 @@ Defines the methods to increase verbosity and aid in debugging
 
 from datetime import datetime
 
+
 class Debug:
     def __init__(self, handler, enabled):
         self.handler = handler
