@@ -9,3 +9,4 @@ from .plugins.missions import Missions
 from .plugins.notifications import Notifications
 from .plugins.targets import Targets
 from .plugins.transactions import Transactions
+from .plugins.users import Users
