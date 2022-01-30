@@ -32,15 +32,14 @@ class AuthTestCase(unittest.TestCase):
         pyotp.TOTP.return_value.now.assert_called_with()
 
     def test_check_api_token(self):
-        """Should make a request to profiles/me"""
+        """Should make a request to get_profile"""
         self.auth.handler.api.session.headers = dict()
-        self.auth.handler.api.request.return_value.status_code = 200
-        self.auth.handler.api.request.return_value.json.return_value = {
+        self.auth.handler.users = MagicMock()
+        self.auth.handler.users.get_profile.return_value = {
             'user_id': 'sumwon'
         }
         self.auth.check_api_token()
-        self.auth.handler.api.request.assert_called_with("GET",
-                                                         "profiles/me")
+        self.auth.handler.users.get_profile.assert_called_with()
         self.assertEqual('sumwon', self.auth.handler.api.session.headers.get('user_id'))
 
     def test_get_login_progress_token(self):

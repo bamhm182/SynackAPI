@@ -15,7 +15,6 @@ class Handler:
             .Api(self)
         self.auth = self.import_plugin("auth")\
             .Auth(self)
-        self.compat = self.import_plugin("compat")
         self.debug = self.import_plugin("debug")\
             .Debug(self, debug)
         self.missions = self.import_plugin("missions")\
@@ -28,6 +27,8 @@ class Handler:
             .Templates(self)
         self.transactions = self.import_plugin("transactions")\
             .Transactions(self)
+        self.users = self.import_plugin("users")\
+            .Users(self)
 
         if login and not self.auth.check_api_token():
             self.auth.get_api_token()
