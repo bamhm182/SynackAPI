@@ -22,12 +22,12 @@ class Auth:
 
     def check_api_token(self):
         """Check to see if the api token exists and is valid."""
-        res = self.handler.api.request('GET', 'profiles/me')
-        if res.status_code == 200:
+        user = self.handler.users.get_profile()
+        if user:
             self.handler.api.session.headers.update({
-                'user_id': res.json().get('user_id')
+                'user_id': user.get('user_id')
             })
-        return res.status_code == 200
+        return True if user else False
 
     def get_login_progress_token(self, csrf):
         """Get progress token from email and password login"""
