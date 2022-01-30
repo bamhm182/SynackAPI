@@ -3,8 +3,6 @@
 Functions dealing with users
 """
 
-import json
-
 
 class Users:
     def __init__(self, handler):
