@@ -18,7 +18,10 @@ setuptools.setup(
         "Operating System :: OS Independent"
     ],
     python_requires=">=3.6",
-    packages=['synack'],
+    packages=find_packages(where='src'),
+    package_data={
+        'synack': ['alembic.ini', 'alembic/*', 'alembic/**/*'],
+    },
     py_modules=['api', 'auth'],
     package_dir={'':'src'},
     install_requires=[
@@ -28,6 +31,8 @@ setuptools.setup(
         "pyaml==21.8.3",
         "pyotp==2.6.0",
         "requests==2.25.1",
+        "SQLAlchemy==1.4.31",
+        "alembic==1.7.5",
         "urllib3==1.26.3",
     ]
 )
