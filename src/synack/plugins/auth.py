@@ -88,7 +88,7 @@ class Auth:
                 return j.get('access_token')
 
     def get_notifications_token(self):
-        """Request a new Notification Token"""
+        """Request a new Notifications Token"""
         res = self.handler.api.request('GET', 'users/notifications_token')
         if res.status_code == 200:
             j = res.json()
