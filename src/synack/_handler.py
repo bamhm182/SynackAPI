@@ -9,13 +9,12 @@ import importlib
 class Handler:
     def __init__(self, config_dir='~/.config/synack/',
                  template_dir='~/Templates', debug=False, login=True):
-        self.db = self.import_plugin("db")\
+        self.db = importlib.import_module('synack.db')\
             .Db(self, config_dir, template_dir)
         self.api = self.import_plugin("api")\
             .Api(self)
         self.auth = self.import_plugin("auth")\
             .Auth(self)
-        self.compat = self.import_plugin("compat")
         self.debug = self.import_plugin("debug")\
             .Debug(self, debug)
         self.missions = self.import_plugin("missions")\
