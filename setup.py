@@ -5,7 +5,7 @@ with open("README.md", "r") as fp:
 
 setuptools.setup(
     name="SynackAPI",
-    version="0.0.2",
+    version="0.0.0",
     author="bamhm182",
     author_email="bamhm182@gmail.com",
     description="A package to interact with Synack's API",
@@ -18,8 +18,7 @@ setuptools.setup(
         "Operating System :: OS Independent"
     ],
     python_requires=">=3.6",
-    packages=['synack'],
-    py_modules=['api', 'auth'],
+    packages=['synack', 'synack.plugins'],
     package_dir={'':'src'},
     install_requires=[
         "netaddr==0.8.0",
