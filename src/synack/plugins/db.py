@@ -23,10 +23,15 @@ class Db(Plugin):
         super().__init__(*args, **kwargs)
         self.sqlite_db = self.config_dir / 'synackapi.db'
         engine = sa.create_engine(f'sqlite:///{str(self.sqlite_db)}')
+        sa.event.listen(engine, 'connect', self._fk_pragma_on_connect)
         self.Session = sessionmaker(bind=engine)
 
         if not self.sqlite_db.is_file():
             self.migrate()
+
+    @staticmethod
+    def _fk_pragma_on_connect(dbapi_con, con_record):
+        dbapi_con.execute('pragma foreign_keys=ON')
 
     def migrate(self):
         alembic_ini = Path(__file__).parent.parent / 'db/alembic.ini'
@@ -35,14 +40,14 @@ class Db(Plugin):
         config.set_main_option('sqlalchemy.url', f'sqlite:///{str(self.sqlite_db)}')
         alembic.command.upgrade(config, 'head')
 
-    def get_config(self, name):
+    def get_config(self, name=None):
         session = self.Session()
         config = session.query(Config).filter_by(id=1).first()
         if not config:
             config = Config()
             session.add(config)
         session.close()
-        return getattr(config, name)
+        return getattr(config, name) if name else config
 
     def set_config(self, name, value):
         session = self.Session()
@@ -58,24 +63,27 @@ class Db(Plugin):
         session = self.Session()
         q = session.query(Category)
         for c in categories:
-            db_c = q.filter_by(id=c.get('id')).first()
+            db_c = q.filter_by(id=c.get('category_id')).first()
             if not db_c:
-                db_c = Category()
+                db_c = Category(id=c['category_id'])
                 session.add(db_c)
-            db_c.id = c['category_id']
             db_c.name = c['category_name']
             db_c.passed_practical = c['practical_assessment']['passed']
             db_c.passed_written = c['written_assessment']['passed']
         session.commit()
         session.close()
 
-    def update_targets(self, targets):
+    def update_targets(self, targets, **kwargs):
         session = self.Session()
         q = session.query(Target)
         for t in targets:
-            db_t = q.filter_by(slug=t.get('slug', t.get('id'))).first()
+            slug = t.get('slug', t.get('id'))
+            try:
+                db_t = q.filter_by(slug=slug).first()
+            except:
+                pass
             if not db_t:
-                db_t = Target(id=t.get('slug', t.get('id')))
+                db_t = Target(slug=slug)
                 session.add(db_t)
             for k in t.keys():
                 setattr(db_t, k, t[k])
@@ -86,6 +94,8 @@ class Db(Plugin):
             db_t.is_registered = t.get('isRegistered')
             db_t.is_updated = t.get('isUpdated')
             db_t.last_submitted = t.get('lastSubmitted')
+            for k in kwargs.keys():
+                setattr(db_t, k, kwargs[k])
         session.commit()
         session.close()
 
@@ -95,13 +105,28 @@ class Db(Plugin):
         session.commit()
         session.close()
 
+    def filter_targets(self, **kwargs):
+        session = self.Session()
+        targets = session.query(Target).filter_by(**kwargs).all()
+        session.expunge_all()
+        session.close()
+        return targets
+
     @property
     def targets(self):
         session = self.Session()
         targets = session.query(Target).all()
         session.close()
         return targets
-        
+    
+    @property
+    def user_id(self):
+        return self.get_config('user_id')
+
+    @user_id.setter
+    def user_id(self, value):
+        self.set_config('user_id', value)
+
     @property
     def api_token(self):
         return self.get_config('api_token')
@@ -128,11 +153,31 @@ class Db(Plugin):
 
     @property
     def use_proxies(self):
-        return self.get_config('use_proxies')
+        if self.state.use_proxies:
+            return self.state.use_proxies
+        else:
+            return self.get_config('use_proxies')
 
     @use_proxies.setter
     def use_proxies(self, value):
         self.set_config('use_proxies', value)
+
+    @property
+    def proxies(self):
+        if self.state.http_proxy:
+            http_proxy = self.state.http_proxy
+        else:
+            http_proxy = self.get_config('http_proxy')
+
+        if self.state.https_proxy:
+            https_proxy = self.state.http_proxy
+        else:
+            https_proxy = self.get_config('http_proxy')
+
+        return {
+            'http': http_proxy,
+            'https': https_proxy
+        }
 
     @property
     def template_dir(self):
@@ -152,7 +197,11 @@ class Db(Plugin):
 
     @property
     def email(self):
-        return self.get_config('email')
+        ret = self.get_config('email')
+        if not ret:
+            ret = input("Synack Email: ")
+            self.email = ret
+        return ret
 
     @email.setter
     def email(self, value):
@@ -160,7 +209,11 @@ class Db(Plugin):
 
     @property
     def password(self):
-        return self.get_config('password')
+        ret = self.get_config('password')
+        if not ret:
+            ret = input("Synack Password: ")
+            self.password = ret
+        return ret
 
     @password.setter
     def password(self, value):
@@ -168,7 +221,11 @@ class Db(Plugin):
 
     @property
     def otp_secret(self):
-        return self.get_config('otp_secret')
+        ret = self.get_config('otp_secret')
+        if not ret:
+            ret = input("Synack OTP Secret: ")
+            self.otp_secret = ret
+        return ret
 
     @otp_secret.setter
     def otp_secret(self, value):
@@ -205,12 +262,7 @@ class Db(Plugin):
         session = self.Session()
         categories = session.query(Category).all()
         session.close()
-        print(categories)
         return categories
-
-    @categories.setter
-    def categories(self, value):
-        self.update_categories(value)
 
     @property
     def debug(self):

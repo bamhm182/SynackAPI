@@ -27,11 +27,14 @@ def upgrade():
         sa.Column('password', sa.VARCHAR(150), server_default=""),
         sa.Column('otp_secret', sa.VARCHAR(50), server_default=""),
         sa.Column('api_token', sa.VARCHAR(200), server_default=""),
-        sa.Column('notifications_token', sa.VARCHAR(1000), server_default=""))
+        sa.Column('notifications_token', sa.VARCHAR(1000), server_default=""),
+        sa.Column('user_id', sa.VARCHAR(20), server_defaut=""),
+        sa.Column('debug', sa.BOOLEAN, server_default='f'),
+        sa.Column('login', sa.BOOLEAN, server_default='f'))
 
     op.create_table('categories',
         sa.Column('id', sa.INTEGER, primary_key=True),
-        sa.Column('category_name', sa.VARCHAR(100)),
+        sa.Column('name', sa.VARCHAR(100)),
         sa.Column('passed_practical', sa.BOOLEAN, server_default='f'),
         sa.Column('passed_written', sa.BOOLEAN, server_default='f'))
 
