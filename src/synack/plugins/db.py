@@ -11,17 +11,17 @@ import sqlalchemy as sa
 
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
-from .models import Target
-from .models import Config
-from .models import Category
+from synack.db.models import Target
+from synack.db.models import Config
+from synack.db.models import Category
+
+from .base import Plugin
 
 
-class Db:
-    def __init__(self, handler, config_dir, template_dir):
-        self.config_dir = Path(config_dir).expanduser()
+class Db(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.sqlite_db = self.config_dir / 'synackapi.db'
-        self.config_dir.mkdir(parents=True, exist_ok=True)
-
         engine = sa.create_engine(f'sqlite:///{str(self.sqlite_db)}')
         self.Session = sessionmaker(bind=engine)
 
@@ -29,7 +29,7 @@ class Db:
             self.migrate()
 
     def migrate(self):
-        alembic_ini = Path(__file__).parent / 'alembic.ini'
+        alembic_ini = Path(__file__).parent.parent / 'db/alembic.ini'
 
         config = alembic.config.Config(str(alembic_ini))
         config.set_main_option('sqlalchemy.url', f'sqlite:///{str(self.sqlite_db)}')
@@ -173,3 +173,50 @@ class Db:
     @otp_secret.setter
     def otp_secret(self, value):
         self.set_config('otp_secret', value)
+
+    @property
+    def config_dir(self):
+        if not self.state.config_dir:
+            ret = pathlib.Path(self.get_config('config_dir')).expanduser().resolve()
+            self.state.config_dir = ret
+        else:
+            ret = self.state.config_dir
+        return ret
+
+    @config_dir.setter
+    def config_dir(self, value):
+        self.set_config('config_dir', value)
+
+    @property
+    def template_dir(self):
+        if not self.state.template_dir:
+            ret = pathlib.Path(self.get_config('template_dir')).expanduser().resolve()
+            self.state.template_dir = ret
+        else:
+            ret = self.state.template_dir
+        return ret
+
+    @template_dir.setter
+    def template_dir(self, value):
+        self.set_config('template_dir', value)
+
+    @property
+    def categories(self):
+        session = self.Session()
+        categories = session.query(Category).all()
+        session.close()
+        print(categories)
+        return categories
+
+    @categories.setter
+    def categories(self, value):
+        self.update_categories(value)
+
+    @property
+    def debug(self):
+        return self.state.debug if self.state.debug != None else self.get_config('debug')
+
+    @debug.setter
+    def debug(self, value):
+        self.set_config('debug', value)
+        

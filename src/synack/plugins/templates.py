@@ -6,13 +6,19 @@ This contains the Templates class
 import re
 from pathlib import Path
 
+from .base import Plugin
 
-class Templates:
-    def __init__(self, handler):
-        self.handler = handler
+
+class Templates(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Db']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
 
     def get_template(self, mission):
-        f = self.handler.db.tempalte_dir
+        f = self.db.template_dir
         f = f / self.do_convert_name(mission['taskType'])
         f = f / self.do_convert_name(mission['assetTypes'][0])
         f = f / self.do_convert_name(mission['title'])
@@ -33,7 +39,7 @@ class Templates:
         Arguments:
         template -- A template object from missions.get_evidences
         """
-        f = self.handler.db.template_dir
+        f = self.db.template_dir
         f = f / self.do_convert_name(template['type'])
         f = f / self.do_convert_name(template['asset'])
         f.mkdir(parents=True, exist_ok=True)

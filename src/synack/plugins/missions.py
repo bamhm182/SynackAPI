@@ -8,10 +8,16 @@ import random
 
 from datetime import datetime
 
+from .base import Plugin
 
-class Missions:
-    def __init__(self, handler):
-        self.handler = handler
+
+class Missions(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Api', 'Targets', 'Templates']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
 
     def get_approved_missions(self):
         """Get a list of missions currently approved"""
@@ -35,9 +41,9 @@ class Missions:
         which target has the mission and submit a ticket.
         """
         ret = []
-        targets = self.handler.db.known_targets
+        targets = self.db.targets
         if not targets:
-            targets = self.handler.targets.get_registered_summary()
+            targets = self.targets.get_registered_summary()
         for t in targets.keys():
             count = self.get_missions_count("PUBLISHED", t)
             if count >= 1:
@@ -63,9 +69,9 @@ class Missions:
         }
         if listing_uids:
             query["listingUid"] = listing_uids
-        res = self.handler.api.request('HEAD',
-                                       'tasks/v1/tasks',
-                                       query=query)
+        res = self.api.request('HEAD',
+                               'tasks/v1/tasks',
+                               query=query)
         if res.status_code == 204:
             return int(res.headers.get('x-count', 0))
 
@@ -115,9 +121,9 @@ class Missions:
         }
         if listing_uids:
             query["listingUids"] = listing_uids
-        res = self.handler.api.request('GET',
-                                       'tasks/v2/tasks',
-                                       query=query)
+        res = self.api.request('GET',
+                               'tasks/v2/tasks',
+                               query=query)
         if res.status_code == 200:
             ret = res.json()
             if len(ret) == per_page and page < max_pages:
@@ -160,14 +166,14 @@ class Missions:
         payout = str(mission["payout"]["amount"])
         title = mission["title"]
 
-        res = self.handler.api.request('POST',
-                                       'tasks/v1' +
-                                       '/organizations/' + orgId +
-                                       '/listings/' + listingId +
-                                       '/campaigns/' + campaignId +
-                                       '/tasks/' + taskId +
-                                       '/transitions',
-                                       data=data)
+        res = self.api.request('POST',
+                               'tasks/v1' +
+                               '/organizations/' + orgId +
+                               '/listings/' + listingId +
+                               '/campaigns/' + campaignId +
+                               '/tasks/' + taskId +
+                               '/transitions',
+                               data=data)
         return {
             "target": listingId,
             "title": title,
@@ -181,7 +187,7 @@ class Missions:
         Arguments:
         mission -- A single mission
         """
-        template = self.handler.templates.get_template(mission)
+        template = self.templates.get_template(mission)
         if template:
             curr = self.get_evidences(mission)
             safe = True
@@ -191,11 +197,11 @@ class Missions:
                     safe = False
                     break
             if safe:
-                res = self.handler.api.request('PATCH',
-                                               'tasks/v2/tasks/' +
-                                               mission['id'] +
-                                               '/evidences',
-                                               data=template)
+                res = self.api.request('PATCH',
+                                       'tasks/v2/tasks/' +
+                                       mission['id'] +
+                                       '/evidences',
+                                       data=template)
                 if res.status_code == 200:
                     ret = res.json()
                     ret["title"] = mission["title"]
@@ -208,10 +214,10 @@ class Missions:
         Arguments:
         mission -- A single mission
         """
-        res = self.handler.api.request('GET',
-                                       'tasks/v2/tasks/' +
-                                       mission['id'] +
-                                       '/evidences')
+        res = self.api.request('GET',
+                               'tasks/v2/tasks/' +
+                               mission['id'] +
+                               '/evidences')
         if res.status_code == 200:
             ret = res.json()
             ret["title"] = mission["title"]

@@ -3,14 +3,19 @@
 Functions related to handling and checking targets
 """
 
+from .base import Plugin
 
-class Targets:
-    def __init__(self, handler):
-        self.handler = handler
+class Targets(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Api', 'Db']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
 
     def get_assessments(self):
         """Check which assessments have been completed"""
-        res = self.handler.api.request('GET', 'assessments')
+        res = self.api.request('GET', 'assessments')
         if res.status_code == 200:
             ret = []
             for a in res.json():
@@ -21,7 +26,7 @@ class Targets:
                         'name': a['category_name'],
                         'id': a['category_id']
                     })
-            self.handler.db.assessments = ret
+            self.db.categories = ret
             return ret
 
     def get_codename_from_slug(self, slug):
@@ -30,14 +35,14 @@ class Targets:
         Arguments:
         slug -- Slug of desired target
         """
-        target = self.handler.db.known_targets.get(slug)
+        target = self.db.targets.get(slug)
         if not target:
             target = self.get_registered_summary().get(slug)
         return target.get("codename")
 
     def get_current_target(self):
         """Return information about the currenly selected target"""
-        res = self.handler.api.request('GET', 'launchpoint')
+        res = self.api.request('GET', 'launchpoint')
         if res.status_code == 200:
             j = res.json()
             if j['pending_slug'] != '-1':
@@ -55,27 +60,27 @@ class Targets:
 
     def get_registered_summary(self):
         """Get information on your registered targets"""
-        res = self.handler.api.request('GET', 'targets/registered_summary')
+        res = self.api.request('GET', 'targets/registered_summary')
         ret = []
         if res.status_code == 200:
             ret = dict()
             for t in res.json():
                 ret[t['id']] = t
-            self.handler.db.known_targets = ret
+            self.db.targets = ret
         return ret
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
-        if not self.handler.db.assessments:
+        if not self.db.categories:
             self.get_assessments()
-        categories = [a['id'] for a in self.handler.db.assessments]
+        categories = [a['id'] for a in self.db.assessments]
         query = {
                 'filter[primary]': 'unregistered',
                 'filter[secondary]': 'all',
                 'filter[industry]': 'all',
                 'filter[category][]': categories
         }
-        res = self.handler.api.request('GET', 'targets', query=query)
+        res = self.api.request('GET', 'targets', query=query)
         ret = []
         if res.status_code == 200:
             for t in res.json():
@@ -88,9 +93,9 @@ class Targets:
         data = '{"ResearcherListing":{"terms":1}}'
         ret = []
         for t in unreg:
-            res = self.handler.api.request('POST',
-                                           f'targets/{t["slug"]}/signup',
-                                           data=data)
+            res = self.api.request('POST',
+                                   f'targets/{t["slug"]}/signup',
+                                   data=data)
             if res.status_code == 200:
                 ret.append(t)
         if len(unreg) >= 15:
