@@ -4,6 +4,7 @@ Defines the handler class and generally sets up the project.
 """
 
 import pathlib
+import requests
 
 from typing import Union
 
@@ -15,11 +16,14 @@ class State(object):
         self._debug = None
         self._email = None
         self._headers = None
+        self._http_proxy = None
+        self._https_proxy = None
         self._login = None
         self._notifications_token = None
         self._otp_secret = None
         self._password = None
         self._proxies = None
+        self._session = None
         self._template_dir = None
         self._use_proxies = None
         self._user_id = None
@@ -53,8 +57,6 @@ class State(object):
 
     @property
     def debug(self) -> bool:
-        if self._debug == None:
-            return False
         return self._debug
 
     @debug.setter
@@ -62,9 +64,13 @@ class State(object):
         self._debug = value
 
     @property
+    def session(self):
+        if not self._session:
+            self._session = requests.Session()
+        return self._session
+
+    @property
     def login(self) -> bool:
-        if self._login == None:
-            return True
         return self._login
 
     @login.setter
@@ -78,6 +84,22 @@ class State(object):
     @use_proxies.setter
     def use_proxies(self, value: bool) -> None:
         self._use_proxies = value
+
+    @property
+    def http_proxy(self) -> str:
+        return self._http_proxy
+
+    @http_proxy.setter
+    def http_proxy(self, value: str) -> None:
+        self._http_proxy = value
+
+    @property
+    def https_proxy(self) -> str:
+        return self._https_proxy
+
+    @https_proxy.setter
+    def https_proxy(self, value: str) -> None:
+        self._https_proxy = value
 
     @property
     def proxies(self) -> dict():

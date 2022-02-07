@@ -29,15 +29,13 @@ class Auth(Plugin):
         """Check to see if the api token exists and is valid."""
         res = self.api.request('GET', 'profiles/me')
         if res.status_code == 200:
-            self.state.headers.update({
-                'user_id': res.json().get('user_id')
-            })
-        return True if user else False
+            self.db.user_id = res.json().get('user_id')
+        return res.status_code == 200
 
     def get_login_progress_token(self, csrf):
         """Get progress token from email and password login"""
         headers = {
-            'X-Csrf-Token': csrf
+            'X-CSRF-Token': csrf
         }
         data = {
             'email': self.db.email,
@@ -90,6 +88,7 @@ class Auth(Plugin):
             if res.status_code == 200:
                 j = res.json()
                 self.db.api_token = j.get('access_token')
+                self.write_login_script()
                 return j.get('access_token')
 
     def get_notifications_token(self):

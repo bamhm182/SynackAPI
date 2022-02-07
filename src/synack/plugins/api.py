@@ -90,37 +90,42 @@ class Api(Plugin):
             verify = True
             proxies = None
 
-        headers = self.state.headers | kwargs.get('headers', dict())
+        headers = self.state.headers
+        if kwargs.get('headers'):
+            headers.update(kwargs.get('headers', {}))
+        if not headers.get('Authorization'):
+            headers['Authorization'] = f'Bearer {self.db.api_token}'
+        headers['user_id'] = self.db.user_id
         query = kwargs.get('query')
         data = kwargs.get('data')
 
         if method.upper() == 'GET':
-            res = requests.get(url,
+            res = self.state.session.get(url,
+                              headers=headers,
+                              proxies=proxies,
+                              params=query,
+                              verify=verify)
+        elif method.upper() == 'HEAD':
+            res = self.state.session.head(url,
                                headers=headers,
                                proxies=proxies,
                                params=query,
                                verify=verify)
-        elif method.upper() == 'HEAD':
-            res = requests.head(url,
-                                headers=headers,
-                                proxies=proxies,
-                                params=query,
-                                verify=verify)
         elif method.upper() == 'PATCH':
-            res = requests.patch(url,
-                                 json=data,
-                                 headers=headers,
-                                 proxies=proxies,
-                                 verify=verify)
-        elif method.upper() == 'POST':
-            res = requests.post(url,
+            res = self.state.session.patch(url,
                                 json=data,
                                 headers=headers,
                                 proxies=proxies,
                                 verify=verify)
+        elif method.upper() == 'POST':
+            res = self.state.session.post(url,
+                               json=data,
+                               headers=headers,
+                               proxies=proxies,
+                               verify=verify)
 
         self.debug.log("Network Request",
-                       f"{res.status_code} -- {url}" +
+                       f"{res.status_code} -- {method.upper()} -- {url}" +
                        f"\n\tHeaders: {headers}" + 
                        f"\n\tQuery: {query}" +
                        f"\n\tData: {data}" +

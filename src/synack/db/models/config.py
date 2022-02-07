@@ -21,3 +21,6 @@ class Config(Base):
     otp_secret = sa.Column(sa.VARCHAR(50), default='')
     api_token = sa.Column(sa.VARCHAR(200), default='')
     notifications_token = sa.Column(sa.VARCHAR(1000), default='')
+    user_id = sa.Column(sa.VARCHAR(20), default='')
+    debug = sa.Column(sa.BOOLEAN, default=False)
+    login = sa.Column(sa.BOOLEAN, default=True)

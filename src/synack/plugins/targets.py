@@ -17,28 +17,24 @@ class Targets(Plugin):
         """Check which assessments have been completed"""
         res = self.api.request('GET', 'assessments')
         if res.status_code == 200:
-            ret = []
-            for a in res.json():
-                wpass = a['written_assessment']['passed']
-                ppass = a['practical_assessment']['passed']
-                if wpass and ppass:
-                    ret.append({
-                        'name': a['category_name'],
-                        'id': a['category_id']
-                    })
-            self.db.categories = ret
-            return ret
+            self.db.update_categories(res.json())
+            return self.db.categories
 
-    def get_codename_from_slug(self, slug):
+    def get_codename_from_slug(self, slug, try_again=True):
         """Return a codename for a target given its slug
 
         Arguments:
         slug -- Slug of desired target
         """
-        target = self.db.targets.get(slug)
-        if not target:
-            target = self.get_registered_summary().get(slug)
-        return target.get("codename")
+        targets = self.db.filter_targets(slug=slug)
+        if not targets:
+            self.get_registered_summary()
+            if try_again:
+                codename = self.get_codename_from_slug(slug, False)
+        else:
+            codename = targets[0].codename
+        if codename:
+            return codename
 
     def get_current_target(self):
         """Return information about the currenly selected target"""
@@ -63,17 +59,17 @@ class Targets(Plugin):
         res = self.api.request('GET', 'targets/registered_summary')
         ret = []
         if res.status_code == 200:
+            self.db.update_targets(res.json())
             ret = dict()
             for t in res.json():
                 ret[t['id']] = t
-            self.db.targets = ret
         return ret
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
         if not self.db.categories:
             self.get_assessments()
-        categories = [a['id'] for a in self.db.assessments]
+        categories = [c.id for c in self.db.categories]
         query = {
                 'filter[primary]': 'unregistered',
                 'filter[secondary]': 'all',
@@ -83,6 +79,7 @@ class Targets(Plugin):
         res = self.api.request('GET', 'targets', query=query)
         ret = []
         if res.status_code == 200:
+            self.db.update_targets(res.json(), is_registered=True)
             for t in res.json():
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
         return ret
