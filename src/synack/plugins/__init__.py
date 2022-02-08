@@ -7,3 +7,4 @@ from .notifications import Notifications
 from .targets import Targets
 from .templates import Templates
 from .transactions import Transactions
+from .users import Users
