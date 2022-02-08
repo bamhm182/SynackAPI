@@ -1,3 +1,5 @@
+# flake8: noqa
+
 from .api import Api
 from .auth import Auth
 from .db import Db

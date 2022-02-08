@@ -4,9 +4,9 @@ Functions to handle interacting with the Synack APIs
 """
 
 import warnings
-import requests
 
 from .base import Plugin
+
 
 class Api(Plugin):
     def __init__(self, *args, **kwargs):
@@ -101,32 +101,32 @@ class Api(Plugin):
 
         if method.upper() == 'GET':
             res = self.state.session.get(url,
-                              headers=headers,
-                              proxies=proxies,
-                              params=query,
-                              verify=verify)
+                                         headers=headers,
+                                         proxies=proxies,
+                                         params=query,
+                                         verify=verify)
         elif method.upper() == 'HEAD':
             res = self.state.session.head(url,
-                               headers=headers,
-                               proxies=proxies,
-                               params=query,
-                               verify=verify)
+                                          headers=headers,
+                                          proxies=proxies,
+                                          params=query,
+                                          verify=verify)
         elif method.upper() == 'PATCH':
             res = self.state.session.patch(url,
-                                json=data,
-                                headers=headers,
-                                proxies=proxies,
-                                verify=verify)
+                                           json=data,
+                                           headers=headers,
+                                           proxies=proxies,
+                                           verify=verify)
         elif method.upper() == 'POST':
             res = self.state.session.post(url,
-                               json=data,
-                               headers=headers,
-                               proxies=proxies,
-                               verify=verify)
+                                          json=data,
+                                          headers=headers,
+                                          proxies=proxies,
+                                          verify=verify)
 
         self.debug.log("Network Request",
                        f"{res.status_code} -- {method.upper()} -- {url}" +
-                       f"\n\tHeaders: {headers}" + 
+                       f"\n\tHeaders: {headers}" +
                        f"\n\tQuery: {query}" +
                        f"\n\tData: {data}" +
                        f"\n\tContent: {res.content}")

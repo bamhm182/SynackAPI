@@ -164,4 +164,3 @@ class State(object):
     @headers.setter
     def headers(self, value: dict) -> None:
         self._headers = value
-    

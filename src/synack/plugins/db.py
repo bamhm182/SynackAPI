@@ -3,10 +3,8 @@
 Manipulates/Reads the database and provides it to other plugins
 """
 
-import yaml
 import alembic.config
 import alembic.command
-import logging
 import sqlalchemy as sa
 
 from pathlib import Path
@@ -14,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from synack.db.models import Target
 from synack.db.models import Config
 from synack.db.models import Category
+from synack.db.models import Organization
 
 from .base import Plugin
 
@@ -37,7 +36,8 @@ class Db(Plugin):
         alembic_ini = Path(__file__).parent.parent / 'db/alembic.ini'
 
         config = alembic.config.Config(str(alembic_ini))
-        config.set_main_option('sqlalchemy.url', f'sqlite:///{str(self.sqlite_db)}')
+        config.set_main_option('sqlalchemy.url',
+                               f'sqlite:///{str(self.sqlite_db)}')
         alembic.command.upgrade(config, 'head')
 
     def get_config(self, name=None):
@@ -73,21 +73,36 @@ class Db(Plugin):
         session.commit()
         session.close()
 
+    def update_organizations(self, targets, session):
+        q = session.query(Organization)
+        for t in targets:
+            if t.get('organization'):
+                slug = t['organization']['slug']
+            else:
+                slug = t.get('organization_id')
+            db_o = q.filter_by(slug=slug).first()
+            if not db_o:
+                db_o = Organization(slug=slug)
+                session.add(db_o)
+
     def update_targets(self, targets, **kwargs):
         session = self.Session()
+        self.update_organizations(targets, session)
         q = session.query(Target)
         for t in targets:
+            if t.get('organization'):
+                org_slug = t['organization']['slug']
+            else:
+                org_slug = t.get('organization_id')
             slug = t.get('slug', t.get('id'))
-            try:
-                db_t = q.filter_by(slug=slug).first()
-            except:
-                pass
+            db_t = q.filter_by(slug=slug).first()
             if not db_t:
                 db_t = Target(slug=slug)
                 session.add(db_t)
             for k in t.keys():
                 setattr(db_t, k, t[k])
             db_t.category = t['category']['id']
+            db_t.organization = org_slug
             db_t.date_updated = t.get('dateUpdated')
             db_t.is_active = t.get('isActive')
             db_t.is_new = t.get('isNew')
@@ -118,7 +133,7 @@ class Db(Plugin):
         targets = session.query(Target).all()
         session.close()
         return targets
-    
+
     @property
     def user_id(self):
         return self.get_config('user_id')
@@ -234,7 +249,7 @@ class Db(Plugin):
     @property
     def config_dir(self):
         if not self.state.config_dir:
-            ret = pathlib.Path(self.get_config('config_dir')).expanduser().resolve()
+            ret = Path(self.get_config('config_dir')).expanduser().resolve()
             self.state.config_dir = ret
         else:
             ret = self.state.config_dir
@@ -247,7 +262,7 @@ class Db(Plugin):
     @property
     def template_dir(self):
         if not self.state.template_dir:
-            ret = pathlib.Path(self.get_config('template_dir')).expanduser().resolve()
+            ret = Path(self.get_config('template_dir')).expanduser().resolve()
             self.state.template_dir = ret
         else:
             ret = self.state.template_dir
@@ -266,9 +281,11 @@ class Db(Plugin):
 
     @property
     def debug(self):
-        return self.state.debug if self.state.debug != None else self.get_config('debug')
+        if self.state.debug is not None:
+            return self.state.debug
+        else:
+            return self.get_config('debug')
 
     @debug.setter
     def debug(self, value):
         self.set_config('debug', value)
-        

@@ -5,6 +5,7 @@ Functions used to handle notifications on the Synack Platform
 
 from .base import Plugin
 
+
 class Notifications(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

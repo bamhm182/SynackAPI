@@ -5,6 +5,7 @@ Functions related to handling and checking targets
 
 from .base import Plugin
 
+
 class Targets(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,6 +37,18 @@ class Targets(Plugin):
         if codename:
             return codename
 
+    def get_slug_from_codename(self, codename, try_again=True):
+        """Return a slug for a target given its codename"""
+        targets = self.db.filter_targets(codename=codename)
+        if not targets:
+            self.get_registered_summary()
+            if try_again:
+                slug = self.get_slug_from_codename(codename, False)
+        else:
+            slug = targets[0].slug
+        if slug:
+            return slug
+
     def get_current_target(self):
         """Return information about the currenly selected target"""
         res = self.api.request('GET', 'launchpoint')
@@ -64,6 +77,19 @@ class Targets(Plugin):
             for t in res.json():
                 ret[t['id']] = t
         return ret
+
+    def get_credentials(self, **kwargs):
+        """Get Credentials for a target"""
+        target = self.db.filter_targets(kwargs).first()
+        if target:
+            res = self.api.request('POST',
+                                   'asset/v1/organizations/' +
+                                   target.organization +
+                                   f'/owners/listings/{target.slug}' +
+                                   f'/users/{self.db.user_id}' +
+                                   '/credentials')
+            if res.status_code == 200:
+                print(res.json())
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""

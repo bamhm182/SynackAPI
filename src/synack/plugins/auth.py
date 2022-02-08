@@ -12,7 +12,7 @@ from .base import Plugin
 class Auth(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api', 'Db']:
+        for plugin in ['Api', 'Db', 'Users']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -27,10 +27,8 @@ class Auth(Plugin):
 
     def check_api_token(self):
         """Check to see if the api token exists and is valid."""
-        res = self.api.request('GET', 'profiles/me')
-        if res.status_code == 200:
-            self.db.user_id = res.json().get('user_id')
-        return res.status_code == 200
+        profile = self.users.get_profile()
+        return True if profile else False
 
     def get_login_progress_token(self, csrf):
         """Get progress token from email and password login"""
