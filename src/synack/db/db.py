@@ -3,55 +3,17 @@
 Manipulates/Reads the database and provides it to other plugins
 """
 
-from pathlib import Path
 import yaml
 import alembic.config
 import alembic.command
 import logging
 import sqlalchemy as sa
-from sqlalchemy.orm import declarative_base, sessionmaker
 
-
-Base =declarative_base()
-
-
-class Config(Base):
-    __tablename__ = 'config'
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    use_proxies = sa.Column(sa.BOOLEAN, default=False)
-    http_proxy = sa.Column(sa.VARCHAR(50), default='http://localhost:8080')
-    https_proxy = sa.Column(sa.VARCHAR(50), default='http://localhost:8080')
-    template_dir = sa.Column(sa.VARCHAR(250), default='~/Templates')
-    email = sa.Column(sa.VARCHAR(150), default='')
-    password = sa.Column(sa.VARCHAR(150), default='')
-    otp_secret = sa.Column(sa.VARCHAR(50), default='')
-    api_token = sa.Column(sa.VARCHAR(200), default='')
-    notifications_token = sa.Column(sa.VARCHAR(1000), default='')
-
-
-class Category(Base):
-    __tablename__ = 'categories'
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    category_name = sa.Column(sa.VARCHAR(100))
-    passed_pracical = sa.Column(sa.BOOLEAN, default=False)
-    passed_written = sa.Column(sa.BOOLEAN, default=False)
-
-
-class Target(Base):
-    __tablename__ = 'targets'
-    slug = sa.Column(sa.VARCHAR(20), primary_key=True)
-    average_payout = sa.Column(sa.REAL, default=0.0)
-    category = sa.Column(sa.INTEGER, sa.ForeignKey('categories.id'))
-    codename = sa.Column(sa.VARCHAR(100))
-    date_updated = sa.Column(sa.INTEGER, default=0)
-    end_date = sa.Column(sa.INTEGER, default=0)
-    is_active = sa.Column(sa.BOOLEAN, default=False)
-    is_new = sa.Column(sa.BOOLEAN, default=False)
-    is_registered = sa.Column(sa.BOOLEAN, default=True)
-    is_updated = sa.Column(sa.BOOLEAN, default=False)
-    last_submitted = sa.Column(sa.INTEGER, default=0)
-    start_date = sa.Column(sa.INTEGER, default=0)
-    vulnerability_discovery = sa.Column(sa.BOOLEAN, default=False)
+from pathlib import Path
+from sqlalchemy.orm import sessionmaker
+from .models import Target
+from .models import Config
+from .models import Category
 
 
 class Db:
@@ -67,7 +29,7 @@ class Db:
             self.migrate()
 
     def migrate(self):
-        alembic_ini = Path(__file__).parent.parent / 'alembic.ini'
+        alembic_ini = Path(__file__).parent / 'alembic.ini'
 
         config = alembic.config.Config(str(alembic_ini))
         config.set_main_option('sqlalchemy.url', f'sqlite:///{str(self.sqlite_db)}')
