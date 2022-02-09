@@ -22,7 +22,7 @@ setuptools.setup(
     package_data={
         'synack.db': ['alembic.ini', 'alembic/*', 'alembic/**/*', 'models/*'],
     },
-    package_dir={'':'src'},
+    package_dir={'': 'src'},
     install_requires=[
         "netaddr==0.8.0",
         "pathlib2==2.3.5",

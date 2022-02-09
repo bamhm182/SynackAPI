@@ -2,8 +2,10 @@
 
 Tests for the Synack Profiles APIs
 
-NOTE: ALL potentially sensitive variables in the mock returned variable are 100% FAKE. I am not about to leak data here.
-Additionally, values SHOULD, but may not represent exactly what real data would look like. I am only testing types
+=== NOTE ===
+ALL potentially sensitive variables here is FAKE, and NOT real API data!
+Values SHOULD represent exactly what real data would look like.
+Types MUST represent the exact types of real data.
 """
 
 import sys
@@ -13,8 +15,7 @@ import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-from src import synack
-from unittest.mock import MagicMock
+import synack  # noqa: E402
 
 
 profile = {
@@ -85,7 +86,8 @@ profile = {
 class ProfileTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ans = input("These tests run against the live Synack API to easily identify changes.\n" +
+        ans = input("These tests run against the live Synack API " +
+                    "to easily identify changes.\n" +
                     "If you are sure you intend to run these, enter 'yes': ")
         if ans != 'yes' and ans != 'y':
             exit()
@@ -97,7 +99,8 @@ class ProfileTestCase(unittest.TestCase):
         pp = pprint.pformat(ret)
         for k in ret.keys():
             types = [type(v) for v in profile[k]]
-            self.assertTrue(type(ret[k]) in types, f"{k} : Real={ret[k]} : Mock={profile[k]}")
+            err = f"{k} : Real={ret[k]} : Mock={profile[k]}"
+            self.assertTrue(type(ret[k]) in types, err)
 
         prop_count = len(profile.keys())
         self.assertEqual(prop_count, len(ret.keys()), pp)

@@ -27,15 +27,14 @@ class Targets(Plugin):
         Arguments:
         slug -- Slug of desired target
         """
+        codename = None
         targets = self.db.filter_targets(slug=slug)
         if not targets:
             self.get_registered_summary()
-            if try_again:
-                codename = self.get_codename_from_slug(slug, False)
-        else:
+            targets = self.db.filter_targets(slug=slug)
+        if targets:
             codename = targets[0].codename
-        if codename:
-            return codename
+        return codename
 
     def get_slug_from_codename(self, codename, try_again=True):
         """Return a slug for a target given its codename"""
@@ -95,7 +94,10 @@ class Targets(Plugin):
         """Get slugs of all unregistered targets"""
         if not self.db.categories:
             self.get_assessments()
-        categories = [c.id for c in self.db.categories]
+        categories = []
+        for c in self.db.categories:
+            if c.practical_passed and c.written_passed:
+                categories.append(c.id)
         query = {
                 'filter[primary]': 'unregistered',
                 'filter[secondary]': 'all',

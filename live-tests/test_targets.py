@@ -1,6 +1,11 @@
 """test_targets.py
 
 Tests for the Synack Target APIs
+
+=== NOTE ===
+ALL potentially sensitive variables here is FAKE, and NOT real API data!
+Values SHOULD represent exactly what real data would look like.
+Types MUST represent the exact types of real data.
 """
 
 import sys
@@ -10,8 +15,7 @@ import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-from src import synack
-from unittest.mock import MagicMock
+import synack  # noqa: E402
 
 target = {
     "averagePayout": [923.16],
@@ -52,10 +56,12 @@ target = {
     "workspace_access_missing": [False]
 }
 
+
 class TargetsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ans = input("These tests run against the live Synack API to easily identify changes.\n" +
+        ans = input("These tests run against the live Synack API " +
+                    "to easily identify changes.\n" +
                     "If you are sure you intend to run these, enter 'yes': ")
         if ans != 'yes' and ans != 'y':
             exit()
@@ -68,7 +74,8 @@ class TargetsTestCase(unittest.TestCase):
             pp = pprint.pformat(t)
             for k in t.keys():
                 types = [type(v) for v in target[k]]
-                self.assertTrue(type(t[k]) in types, f"{k} : Real={t[k]} : Mock={target[k]}") 
+                err = f"{k} : Real={t[k]} : Mock={target[k]}"
+                self.assertTrue(type(t[k]) in types, err)
 
             prop_count = len(target.keys())
             self.assertEqual(prop_count, len(t.keys()), pp)

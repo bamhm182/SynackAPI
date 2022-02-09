@@ -14,7 +14,7 @@ from .base import Plugin
 class Missions(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api', 'Targets', 'Templates']:
+        for plugin in ['Api', 'Db', 'Targets', 'Templates']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -41,15 +41,13 @@ class Missions(Plugin):
         which target has the mission and submit a ticket.
         """
         ret = []
-        targets = self.db.targets
-        if not targets:
-            targets = self.targets.get_registered_summary()
-        for t in targets.keys():
-            count = self.get_missions_count("PUBLISHED", t)
+        self.targets.get_registered_summary()
+        for t in self.db.targets:
+            count = self.get_missions_count("PUBLISHED", t.slug)
             if count >= 1:
-                missions = self.get_missions("PUBLISHED", 1, 1, count, t)
+                missions = self.get_missions("PUBLISHED", 1, 1, count, t.slug)
                 if len(missions) == 0:
-                    ret.append(targets[t]["codename"])
+                    ret.append(t.codename)
         return ret
 
     def get_in_review_missions(self):

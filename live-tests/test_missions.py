@@ -2,21 +2,21 @@
 
 Tests for the Synack Missions APIs
 
-NOTE: ALL potentially sensitive variables in the mock returned variable are 100% FAKE. I am not about to leak data here.
-Additionally, values SHOULD, but may not represent exactly what real data would look like. I am only testing types
+=== NOTE ===
+ALL potentially sensitive variables here is FAKE, and NOT real API data!
+Values SHOULD represent exactly what real data would look like.
+Types MUST represent the exact types of real data.
 """
 
-import datetime
 import os
 import pprint
-import random
 import sys
 import unittest
 
+
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-from src import synack
-from unittest.mock import MagicMock
+import synack  # noqa: E402
 
 mission = {
     "attackTypes": [
@@ -77,10 +77,12 @@ mission = {
     "version": [22],
 }
 
+
 class MissionsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ans = input("These tests run against the live Synack API to easily identify changes.\n" +
+        ans = input("These tests run against the live Synack API " +
+                    "to easily identify changes.\n" +
                     "If you are sure you intend to run these, enter 'yes': ")
         if ans != 'yes' and ans != 'y':
             exit()
@@ -93,7 +95,8 @@ class MissionsTestCase(unittest.TestCase):
             pp = pprint.pformat(m)
             for k in m.keys():
                 types = [type(v) for v in mission[k]]
-                self.assertTrue(type(m[k]) in types, f"{k} : Real={m[k]} : Mock={mission[k]}")
+                err = f"{k} : Real={m[k]} : Mock={mission[k]}"
+                self.assertTrue(type(m[k]) in types, err)
             self.assertTrue(m["assetTypes"][0] in ["web", "host", "mobile"])
             self.assertTrue(type(m["assetTypes"][0]) in [str])
             self.assertTrue(type(m["validResponses"][0]) in [dict])
@@ -108,7 +111,7 @@ class MissionsTestCase(unittest.TestCase):
                 prop_count -= len(["sv", "cwe", "categories"])
                 if m.get('categories'):
                     self.assertTrue(type(m["categories"][0]) in [str])
-                    prop_count += len(["categories"]) 
+                    prop_count += len(["categories"])
                 self.assertEqual(prop_count, len(m.keys()), pp)
             elif m["taskType"] in ["SV2M"]:
                 prop_count -= len(["attackTypes", "categories"])

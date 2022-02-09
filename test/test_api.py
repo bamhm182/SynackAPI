@@ -3,152 +3,190 @@
 Tests for the plugins/api.py Api Class
 """
 
-import importlib
 import os
-import requests
 import sys
 import unittest
 
+from unittest.mock import MagicMock
+
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-from src import synack
-from unittest.mock import MagicMock
+import synack  # noqa: E402
 
 
 class ApiTestCase(unittest.TestCase):
     def setUp(self):
-        synack.Handler = MagicMock()
-        self.api = synack.Api(synack.Handler())
-        
+        self.state = synack._state.State()
+        self.api = synack.plugins.Api(self.state)
+        self.api.debug = MagicMock()
+        self.api.db = MagicMock()
+
     def test_login_path(self):
         """Login Base URL should prepend and request should be made"""
         self.api.request = MagicMock()
         self.api.login('GET', 'test')
+        url = 'https://login.synack.com/api/test'
         self.api.request.assert_called_with('GET',
-                                            'https://login.synack.com/api/test',
-                                            None,
-                                            None,
-                                            None)
+                                            url)
 
     def test_login_full_path(self):
         """Login Base URL should prepend and request should be made"""
         self.api.request = MagicMock()
         self.api.login('GET', 'http://www.google.com/test')
         self.api.request.assert_called_with('GET',
-                                            'http://www.google.com/test',
-                                            None,
-                                            None,
-                                            None)
+                                            'http://www.google.com/test')
 
     def test_notification_path(self):
         """Notifications Base URL should prepend and request should be made"""
         self.api.request = MagicMock()
-        self.api.handler.db.notifications_token = "something"
+        self.api.db.notifications_token = "something"
+        headers = {"Authorization": "Bearer something"}
+        url = 'https://notifications.synack.com/api/v2/test'
         self.api.notifications('GET', 'test')
         self.api.request.assert_called_with('GET',
-                                              'https://notifications.synack.com/api/v2/test',
-                                              {"Authorization": "Bearer something"},
-                                              None,
-                                              None)
+                                            url,
+                                            headers=headers)
 
     def test_notification_full_path(self):
         """Notifications Base URL should prepend and request should be made"""
         self.api.request = MagicMock()
-        self.api.handler.db.notifications_token = "something"
-        self.api.notifications('GET', 'http://www.google.com/api/test')
+        self.api.db.notifications_token = "something"
+        headers = {"Authorization": "Bearer something"}
+        url = 'http://www.google.com/api/test'
+        self.api.notifications('GET', url)
         self.api.request.assert_called_with('GET',
-                                            'http://www.google.com/api/test',
-                                            {"Authorization": "Bearer something"},
-                                            None,
-                                            None)
+                                            url,
+                                            headers=headers)
 
     def test_notification_no_token(self):
         """Notifications token should be obtained if it doesn't exist"""
         self.api.request = MagicMock()
-        self.api.handler.auth.get_notifications_token = MagicMock()
-        self.api.handler.db.notifications_token = ""
+        self.api.db.notifications_token = ""
         self.api.notifications('GET', 'test')
-        self.api.handler.auth.get_notifications_token.assert_called_with()
 
     def test_notification_bad_token(self):
         """Notifications token should be obtained if it doesn't exist"""
         self.api.request = MagicMock()
         self.api.request.return_value.status_code = 422
-        self.api.handler.db.notifications_token = "bad_token"
+        self.api.db.notifications_token = "bad_token"
+        url = 'https://notifications.synack.com/api/v2/test'
+        headers = {"Authorization": "Bearer bad_token"}
         self.api.notifications('GET', 'test')
         self.api.request.assert_called_with('GET',
-                                              'https://notifications.synack.com/api/v2/test',
-                                              {"Authorization": "Bearer bad_token"},
-                                              None,
-                                              None)
+                                            url,
+                                            headers=headers)
 
     def test_request_full_url(self):
         """Base URL should not be added if a full url is passed"""
-        self.api.session.get = MagicMock()
-        self.api.handler.db.use_proxies = False
-        self.api.request('GET', 'http://www.google.com/api/test')
-        self.api.session.get.assert_called_with('http://www.google.com/api/test',
-                                                headers=None,
-                                                proxies=None,
-                                                params=None,
-                                                verify=True)
+        self.api.state.session.get = MagicMock()
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
+        url = 'http://www.google.com/api/test'
+        self.api.request('GET', url)
+        self.api.state.session.get.assert_called_with(url,
+                                                      headers=headers,
+                                                      proxies=None,
+                                                      params=None,
+                                                      verify=True)
 
     def test_request_get(self):
         """GET requests should work"""
-        self.api.session.get = MagicMock()
-        self.api.handler.db.use_proxies = False
+        self.api.state.session.get = MagicMock()
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
+        url = 'https://platform.synack.com/api/test'
         self.api.request('GET', 'test')
-        self.api.session.get.assert_called_with('https://platform.synack.com/api/test',
-                                                headers=None,
-                                                proxies=None,
-                                                params=None,
-                                                verify=True)
+        self.api.state.session.get.assert_called_with(url,
+                                                      headers=headers,
+                                                      proxies=None,
+                                                      params=None,
+                                                      verify=True)
 
     def test_request_head(self):
         """HEAD requests should work"""
-        self.api.session.head = MagicMock()
-        self.api.handler.db.use_proxies = False
+        self.api.state.session.head = MagicMock()
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
+        url = 'https://platform.synack.com/api/test'
         self.api.request('HEAD', 'test')
-        self.api.session.head.assert_called_with('https://platform.synack.com/api/test',
-                                               headers=None,
-                                               proxies=None,
-                                               params=None,
-                                               verify=True)
+        self.api.state.session.head.assert_called_with(url,
+                                                       headers=headers,
+                                                       proxies=None,
+                                                       params=None,
+                                                       verify=True)
 
     def test_request_logged(self):
         """All requests should call the logger"""
-        self.api.session.get = MagicMock()
-        self.api.session.get.return_value.status_code = 200
-        self.api.session.get.return_value.content = "Returned Content"
-        self.api.handler.db.use_proxies = False
+        self.api.state.session.get = MagicMock()
+        self.api.state.session.get.return_value.status_code = 200
+        self.api.state.session.get.return_value.content = "Returned Content"
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
         self.api.request('GET', 'test')
-        self.api.handler.debug.log.assert_called_with("Network Request",
-                                      "200 -- https://platform.synack.com/api/test " +
-                                      "-- Returned Content")
+        message = "200 -- GET -- https://platform.synack.com/api/test" + \
+                  f"\n\tHeaders: {headers}" + \
+                  "\n\tQuery: None" + \
+                  "\n\tData: None" + \
+                  "\n\tContent: Returned Content"
+        self.api.debug.log.assert_called_with("Network Request", message)
 
     def test_request_post(self):
         """POST requests should work"""
-        self.api.session.post = MagicMock()
+        self.api.state.session.post = MagicMock()
         data = {'test': 'test'}
-        self.api.handler.db.use_proxies = False
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        url = 'https://platform.synack.com/api/test'
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
         self.api.request('POST', 'test', data=data)
-        self.api.session.post.assert_called_with('https://platform.synack.com/api/test',
-                                               json=data,
-                                               headers=None,
-                                               proxies=None,
-                                               verify=True)
+        self.api.state.session.post.assert_called_with(url,
+                                                       json=data,
+                                                       headers=headers,
+                                                       proxies=None,
+                                                       verify=True)
 
     def test_request_patch(self):
         """PATCH requests should work"""
-        self.api.session.patch = MagicMock()
+        self.api.state.session.patch = MagicMock()
         data = {'test': 'test'}
-        self.api.handler.db.use_proxies = False
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        url = 'https://platform.synack.com/api/test'
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
         self.api.request('PATCH', 'test', data=data)
-        self.api.session.patch.assert_called_with('https://platform.synack.com/api/test',
-                                                 json=data,
-                                                 headers=None,
-                                                 proxies=None,
-                                                 verify=True)
+        self.api.state.session.patch.assert_called_with(url,
+                                                        json=data,
+                                                        headers=headers,
+                                                        proxies=None,
+                                                        verify=True)
 
     def test_request_proxies(self):
         """Proxies should be used if set"""
@@ -156,12 +194,19 @@ class ApiTestCase(unittest.TestCase):
             'http': 'http://127.0.0.1:8080',
             'https': 'http://127.0.0.1:8080',
         }
-        self.api.session.get = MagicMock()
-        self.api.handler.db.use_proxies = True
-        self.api.handler.db.proxies = proxies
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
+        url = 'https://platform.synack.com/api/test'
+        self.api.state.session.get = MagicMock()
+        self.api.db.use_proxies = True
+        self.api.db.proxies = proxies
         self.api.request('GET', 'test')
-        self.api.session.get.assert_called_with('https://platform.synack.com/api/test',
-                                              headers=None,
-                                              proxies=proxies,
-                                              params=None,
-                                              verify=False)
+        self.api.state.session.get.assert_called_with(url,
+                                                      headers=headers,
+                                                      proxies=proxies,
+                                                      params=None,
+                                                      verify=False)
