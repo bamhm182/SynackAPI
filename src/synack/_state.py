@@ -53,11 +53,14 @@ class State(object):
     def template_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
         if type(value) == str:
             value = pathlib.Path(value).expanduser().resolve()
-        self._notifications_token = value
+        self._template_dir = value
 
     @property
     def debug(self) -> bool:
-        return self._debug
+        if self._debug == None:
+            return False
+        else:
+            return self._debug
 
     @debug.setter
     def debug(self, value: bool) -> None:
@@ -71,7 +74,10 @@ class State(object):
 
     @property
     def login(self) -> bool:
-        return self._login
+        if self._login == None:
+            return True
+        else:
+            return self._login
 
     @login.setter
     def login(self, value: bool) -> None:
@@ -79,7 +85,10 @@ class State(object):
 
     @property
     def use_proxies(self) -> bool:
-        return self._use_proxies
+        if self._use_proxies == None:
+            return False
+        else:
+            return self._use_proxies
 
     @use_proxies.setter
     def use_proxies(self, value: bool) -> None:
@@ -87,7 +96,10 @@ class State(object):
 
     @property
     def http_proxy(self) -> str:
-        return self._http_proxy
+        if self._http_proxy == None:
+            return 'http://localhost:8080'
+        else:
+            return self._http_proxy
 
     @http_proxy.setter
     def http_proxy(self, value: str) -> None:
@@ -95,7 +107,10 @@ class State(object):
 
     @property
     def https_proxy(self) -> str:
-        return self._https_proxy
+        if self._https_proxy == None:
+            return 'http://localhost:8080'
+        else:
+            return self._https_proxy
 
     @https_proxy.setter
     def https_proxy(self, value: str) -> None:
@@ -103,15 +118,17 @@ class State(object):
 
     @property
     def proxies(self) -> dict():
-        return self._proxies
-
-    @proxies.setter
-    def proxies(self, value: dict) -> None:
-        self._proxies = value
-
+        return {
+            'http': self.http_proxy,
+            'https': self.https_proxy
+        }
+    
     @property
     def api_token(self) -> str:
-        return self._api_token
+        if self._api_token == None:
+            return ''
+        else:
+            return self._api_token
 
     @api_token.setter
     def api_token(self, value: str) -> None:
@@ -119,7 +136,10 @@ class State(object):
 
     @property
     def notifications_token(self) -> str:
-        return self._notifications_token
+        if self._notifications_token == None:
+            return ''
+        else:
+            return self._notifications_token
 
     @notifications_token.setter
     def notifications_token(self, value: str) -> None:
@@ -127,7 +147,10 @@ class State(object):
 
     @property
     def otp_secret(self) -> str:
-        return self._otp_secret
+        if self._otp_secret == None:
+            return ''
+        else:
+            return self._otp_secret
 
     @otp_secret.setter
     def otp_secret(self, value: str) -> None:
@@ -135,7 +158,10 @@ class State(object):
 
     @property
     def email(self) -> str:
-        return self._email
+        if self._email == None:
+            return ''
+        else:
+            return self._email
 
     @email.setter
     def email(self, value: str) -> None:
@@ -143,7 +169,10 @@ class State(object):
 
     @property
     def password(self) -> str:
-        return self._password
+        if self._password == None:
+            return ''
+        else:
+            return self._password
 
     @password.setter
     def password(self, value: str) -> None:
@@ -151,16 +180,11 @@ class State(object):
 
     @property
     def user_id(self) -> str:
-        return self._user_id
+        if self._user_id == None:
+            return ''
+        else:
+            return self._user_id
 
     @user_id.setter
     def user_id(self, value: str) -> None:
         self._user_id = value
-
-    @property
-    def headers(self) -> dict:
-        return self._headers if self._headers else dict()
-
-    @headers.setter
-    def headers(self, value: dict) -> None:
-        self._headers = value

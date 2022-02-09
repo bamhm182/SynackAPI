@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-import synack                        # noqa: E402
+import synack  # noqa: E402
 
 
 class UsersTestCase(unittest.TestCase):

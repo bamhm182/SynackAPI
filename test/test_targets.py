@@ -53,6 +53,30 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.update_categories.assert_called_with(assessments)
 
+    def test_get_slug_from_codename(self):
+        """Should return a slug for a given codename"""
+        ret_targets = [ObjectFactory(slug="qwerty")]
+        self.targets.db.filter_targets.return_value = ret_targets
+        self.assertEqual("qwerty",
+                         self.targets.get_slug_from_codename("qwerty"))
+        self.targets.db.filter_targets.assert_called_with(codename="qwerty")
+        
+    def test_get_slug_from_codename_no_targets(self):
+        """Should update the targets if empty"""
+        self.targets.db.filter_targets.side_effect = [
+            [],
+            [ObjectFactory(slug="qwerty")]
+        ]
+        calls = [
+            unittest.mock.call(codename="CHONKEYMONKEY"),
+            unittest.mock.call(codename="CHONKEYMONKEY")
+        ]
+        self.targets.get_registered_summary = MagicMock()
+        self.assertEqual("qwerty",
+                         self.targets.get_slug_from_codename("CHONKEYMONKEY"))
+        self.targets.db.filter_targets.assert_has_calls(calls)
+        self.targets.get_registered_summary.assert_called_with()
+
     def test_get_codename_from_slug(self):
         """Should return a codename for a given slug"""
         ret_targets = [ObjectFactory(codename="SLOPPYSLUG")]
@@ -62,7 +86,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.filter_targets.assert_called_with(slug="qwfars")
 
     def test_get_codename_from_slug_no_targets(self):
-        """Should update the known_targets if empty"""
+        """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [
             [],
             [ObjectFactory(codename="SLOPPYSLUG")]

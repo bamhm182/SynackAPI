@@ -90,12 +90,12 @@ class Api(Plugin):
             verify = True
             proxies = None
 
-        headers = self.state.headers
+        headers = {
+            'Authorization': f'Bearer {self.db.api_token}',
+            'user_id': self.db.user_id
+        }
         if kwargs.get('headers'):
             headers.update(kwargs.get('headers', {}))
-        if not headers.get('Authorization'):
-            headers['Authorization'] = f'Bearer {self.db.api_token}'
-        headers['user_id'] = self.db.user_id
         query = kwargs.get('query')
         data = kwargs.get('data')
 

@@ -112,6 +112,25 @@ class ApiTestCase(unittest.TestCase):
                                                       params=None,
                                                       verify=True)
 
+    def test_request_header_kwargs(self):
+        """requests should merge in kwargs headers"""
+        self.api.state.session.get = MagicMock()
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco',
+            'test': 'test'
+        }
+        url = 'https://platform.synack.com/api/test'
+        self.api.request('GET', 'test', headers={'test': 'test'})
+        self.api.state.session.get.assert_called_with(url,
+                                                      headers=headers,
+                                                      proxies=None,
+                                                      params=None,
+                                                      verify=True)
+
     def test_request_head(self):
         """HEAD requests should work"""
         self.api.state.session.head = MagicMock()

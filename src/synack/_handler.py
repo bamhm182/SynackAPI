@@ -19,5 +19,8 @@ class Handler:
             instance = subclass(self.state)
             setattr(self, name.lower(), instance)
 
+        self.login()
+
+    def login(self):
         if self.state.login and not self.auth.check_api_token():
             self.auth.get_api_token()
