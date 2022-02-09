@@ -39,6 +39,3 @@ class HandlerTestCase(unittest.TestCase):
         self.handler.auth.check_api_token.return_value = False
         self.handler.login()
         self.handler.auth.get_api_token.assert_called_with()
-        
-        
-        

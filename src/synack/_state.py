@@ -57,7 +57,7 @@ class State(object):
 
     @property
     def debug(self) -> bool:
-        if self._debug == None:
+        if self._debug is None:
             return False
         else:
             return self._debug
@@ -74,7 +74,7 @@ class State(object):
 
     @property
     def login(self) -> bool:
-        if self._login == None:
+        if self._login is None:
             return True
         else:
             return self._login
@@ -85,7 +85,7 @@ class State(object):
 
     @property
     def use_proxies(self) -> bool:
-        if self._use_proxies == None:
+        if self._use_proxies is None:
             return False
         else:
             return self._use_proxies
@@ -96,7 +96,7 @@ class State(object):
 
     @property
     def http_proxy(self) -> str:
-        if self._http_proxy == None:
+        if self._http_proxy is None:
             return 'http://localhost:8080'
         else:
             return self._http_proxy
@@ -107,7 +107,7 @@ class State(object):
 
     @property
     def https_proxy(self) -> str:
-        if self._https_proxy == None:
+        if self._https_proxy is None:
             return 'http://localhost:8080'
         else:
             return self._https_proxy
@@ -122,10 +122,10 @@ class State(object):
             'http': self.http_proxy,
             'https': self.https_proxy
         }
-    
+
     @property
     def api_token(self) -> str:
-        if self._api_token == None:
+        if self._api_token is None:
             return ''
         else:
             return self._api_token
@@ -136,7 +136,7 @@ class State(object):
 
     @property
     def notifications_token(self) -> str:
-        if self._notifications_token == None:
+        if self._notifications_token is None:
             return ''
         else:
             return self._notifications_token
@@ -147,7 +147,7 @@ class State(object):
 
     @property
     def otp_secret(self) -> str:
-        if self._otp_secret == None:
+        if self._otp_secret is None:
             return ''
         else:
             return self._otp_secret
@@ -158,7 +158,7 @@ class State(object):
 
     @property
     def email(self) -> str:
-        if self._email == None:
+        if self._email is None:
             return ''
         else:
             return self._email
@@ -169,7 +169,7 @@ class State(object):
 
     @property
     def password(self) -> str:
-        if self._password == None:
+        if self._password is None:
             return ''
         else:
             return self._password
@@ -180,7 +180,7 @@ class State(object):
 
     @property
     def user_id(self) -> str:
-        if self._user_id == None:
+        if self._user_id is None:
             return ''
         else:
             return self._user_id

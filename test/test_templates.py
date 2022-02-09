@@ -64,7 +64,7 @@ class TemplatesTestCase(unittest.TestCase):
         Section 1 text
 
         [[[section2]]]
-        
+
         Section 2 text
 
         [[[END]]]
@@ -74,9 +74,9 @@ class TemplatesTestCase(unittest.TestCase):
             "section2": "Section 2 text"
         }
         with patch('builtins.open', m, create=True):
-            self.assertEqual(sections, self.templates.get_sections_from_file('/tmp/mission.txt') )
+            ret = self.templates.get_sections_from_file('/tmp/mission.txt')
+            self.assertEqual(sections, ret)
             m.assert_called_with('/tmp/mission.txt', 'r')
-
 
     def test_get_template(self):
         self.templates.get_template_path = MagicMock()
@@ -93,7 +93,8 @@ class TemplatesTestCase(unittest.TestCase):
             mock_exists.return_value = True
             self.templates.get_template(mission)
             self.templates.get_template_path.assert_called_with(mission)
-            self.templates.get_sections_from_file.assert_called_with('/tmp/mission.txt')
+            self.templates.get_sections_from_file.\
+                assert_called_with('/tmp/mission.txt')
 
     def test_do_save_template(self):
         self.templates.get_template_path = MagicMock()
@@ -124,11 +125,13 @@ class TemplatesTestCase(unittest.TestCase):
         with patch('builtins.open', m, create=True):
             with patch.object(pathlib.Path, 'exists') as mock_exists:
                 mock_exists.return_value = False
-                self.assertEqual('/tmp/mission.txt', self.templates.do_save_template(template))
+                self.assertEqual('/tmp/mission.txt',
+                                 self.templates.do_save_template(template))
                 m.assert_called_with('/tmp/mission.txt', 'w')
                 m.return_value.write.assert_called_with(out)
 
     def test_do_convert_name(self):
         """Should convert complex missions names to something simpler"""
-        self.assertEqual("s_ome_random_mission_",
-                         self.templates.do_convert_name("S!oME_RaNdOm___MISSION!")) 
+        one = self.templates.do_convert_name("S!oME_RaNdOm___MISSION!")
+        one_out = "s_ome_random_mission_"
+        self.assertEqual(one_out, one)

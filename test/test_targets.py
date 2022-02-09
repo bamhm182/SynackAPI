@@ -60,7 +60,7 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual("qwerty",
                          self.targets.get_slug_from_codename("qwerty"))
         self.targets.db.filter_targets.assert_called_with(codename="qwerty")
-        
+
     def test_get_slug_from_codename_no_targets(self):
         """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [

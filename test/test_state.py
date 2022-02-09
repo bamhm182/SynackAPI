@@ -9,11 +9,10 @@ import unittest
 import pathlib
 import requests
 
-from unittest.mock import MagicMock
-
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
 import synack  # noqa: E402
+
 
 class StateTestCase(unittest.TestCase):
     def setUp(self):
@@ -22,8 +21,8 @@ class StateTestCase(unittest.TestCase):
     def test_config_dir(self):
         self.assertEqual(pathlib.PosixPath, type(self.state.config_dir))
         self.assertEqual(None, self.state._config_dir)
-        self.assertEqual(pathlib.Path('~/.config/synack').expanduser().resolve(),
-                         self.state.config_dir)
+        default = pathlib.Path('~/.config/synack').expanduser().resolve()
+        self.assertEqual(default, self.state.config_dir)
         self.state.config_dir = "/tmp"
         self.assertEqual(pathlib.PosixPath, type(self.state.config_dir))
         self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
@@ -54,7 +53,7 @@ class StateTestCase(unittest.TestCase):
     def test_session(self):
         self.assertEqual(requests.sessions.Session, type(self.state.session))
         self.assertEqual(requests.sessions.Session, type(self.state._session))
-        
+
     def test_login(self):
         self.assertEqual(bool, type(self.state.login))
         self.assertEqual(None, self.state._login)
@@ -96,7 +95,7 @@ class StateTestCase(unittest.TestCase):
         })
 
     def test_api_token(self):
-        self.assertEqual(str, type(self.state.api_token)) 
+        self.assertEqual(str, type(self.state.api_token))
         self.assertEqual(None, self.state._api_token)
         self.assertEqual('', self.state.api_token)
         self.state.api_token = '12345'
@@ -132,7 +131,7 @@ class StateTestCase(unittest.TestCase):
         self.assertEqual(None, self.state._password)
         self.assertEqual('', self.state.password)
         self.state.password = 'password1234'
-        self.assertEqual('password1234', self.state._password) 
+        self.assertEqual('password1234', self.state._password)
         self.assertEqual('password1234', self.state.password)
 
     def test_user_id(self):
