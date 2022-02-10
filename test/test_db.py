@@ -284,11 +284,76 @@ class DbTestCase(unittest.TestCase):
 
         self.db.get_config.assert_not_called()
 
+    def test_update_organizations(self):
+        """Should update Organizations table if organization.slug provided"""
+        mock = MagicMock()
+        targets = [{
+            "organization": {"slug": "qweqwe"}
+        }]
+        mock.query.return_value.filter_by.return_value.\
+            first.return_value = None
+        self.db.update_organizations(targets, mock)
+        mock.query.assert_called_with(synack.db.models.Organization)
+        mock.query.return_value.filter_by.assert_called_with(slug='qweqwe')
+        mock.query.return_value.filter_by.return_value.first.\
+            assert_called_with()
+        mock.add.assert_called()
+
+    def test_update_organizations_organization_id(self):
+        """Should update Organizations table if organization_id provided"""
+        mock = MagicMock()
+        targets = [{
+            "organization_id": "asdasd"
+        }]
+        mock.query.return_value.filter_by.return_value.\
+            first.return_value = None
+        self.db.update_organizations(targets, mock)
+        mock.query.assert_called_with(synack.db.models.Organization)
+        mock.query.return_value.filter_by.assert_called_with(slug='asdasd')
+        mock.query.return_value.filter_by.return_value.first.\
+            assert_called_with()
+        mock.add.assert_called()
+
+    def test_update_targets(self):
+        """Should update Targets table"""
+        self.db.Session = MagicMock()
+
+        targets = [{
+            "organization": {"slug": "qweqwe"},
+            "category": {"id": 10}
+        }, {
+            "organization_id": "qwewqe",
+            "category": {"id": 10}
+        }]
+
+        self.db.update_targets(targets, something='oranother')
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_update_targets_empty_db(self):
+        """Should update Targets table with new Target"""
+        self.db.Session = MagicMock()
+        query = self.db.Session.return_value.query
+        query.return_value.filter_by.return_value.first.return_value = None
+
+        targets = [{
+            "organization": {"slug": "qweqwe"},
+            "category": {"id": 10}
+        }, {
+            "organization_id": "qwewqe",
+            "category": {"id": 10}
+        }]
+
+        self.db.update_targets(targets, something='oranother')
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
     def test_template_dir(self):
         """Should pull template dir from the database"""
         self.db.get_config = MagicMock()
         self.db.set_config = MagicMock()
         self.db.get_config.return_value = '/tmp'
+        self.db.template_dir
 
         self.assertEqual(pathlib.Path('/tmp'), self.db.template_dir)
         self.assertEqual(pathlib.Path('/tmp'), self.db.state.template_dir)

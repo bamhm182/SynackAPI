@@ -196,18 +196,6 @@ class Db(Plugin):
         }
 
     @property
-    def template_dir(self):
-        if self.state.template_dir is None:
-            return self.get_config('template_dir')
-        else:
-            return self.state.template_dir
-
-    @template_dir.setter
-    def template_dir(self, value):
-        self.state.template_dir = value
-        self.set_config('template_dir', value)
-
-    @property
     def notifications_token(self):
         return self.get_config('notifications_token')
 
