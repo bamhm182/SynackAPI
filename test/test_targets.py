@@ -159,6 +159,23 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual(out, self.targets.get_registered_summary())
         self.targets.api.request.assert_called_with('GET', path)
 
+    def test_get_credentials(self):
+        """Should get credentials for a given target"""
+        target = synack.db.models.Target(organization="qwewqe", slug="asdasd")
+        self.targets.db.filter_targets = MagicMock()
+        self.targets.api = MagicMock()
+        self.targets.db.filter_targets.return_value.first.return_value = target
+        self.targets.db.user_id = 'bobby'
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = "json_return"
+
+        url = 'asset/v1/organizations/qwewqe/owners/listings/asdasd/' +\
+              'users/bobby/credentials'
+
+        self.assertEqual("json_return",
+                         self.targets.get_credentials(codename='SLEEPYSLUG'))
+        self.targets.api.request.assert_called_with('POST', url)
+
     def test_get_unregistered(self):
         """Should get a list unregistered targets"""
         self.targets.db.categories = [

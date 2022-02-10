@@ -83,7 +83,7 @@ class StateTestCase(unittest.TestCase):
         self.assertEqual('http://1.1.1.1:1234', self.state.https_proxy)
         self.assertEqual('http://1.1.1.1:1234', self.state._https_proxy)
 
-    def text_proxies(self):
+    def test_proxies(self):
         self.assertEqual(self.state.proxies, {
             'http': None,
             'https': None

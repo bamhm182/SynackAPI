@@ -3,6 +3,8 @@
 Tests for the plugins/db.py Db class
 """
 
+import alembic.command
+import alembic.config
 import os
 import sys
 import pathlib
@@ -37,6 +39,25 @@ class DbTestCase(unittest.TestCase):
         self.db._fk_pragma_on_connect(mock, None)
         mock.execute.assert_called_with('pragma foreign_keys=ON')
 
+    def test_migrate(self):
+        db_dir = pathlib.Path(__file__).parent.parent / 'src/synack/db'
+        conf_dir = pathlib.Path('~/.config/synack').expanduser().resolve()
+        mock = MagicMock()
+        calls = [
+            unittest.mock.call('script_location', str(db_dir / 'alembic')),
+            unittest.mock.call('version_locations',
+                               str(db_dir / 'alembic/versions')),
+            unittest.mock.call('sqlalchemy.url',
+                               'sqlite:///' + str(conf_dir / 'synackapi.db')),
+        ]
+        with patch.object(alembic.config, 'Config') as mock_config:
+            mock_config.return_value = mock
+            with patch.object(alembic.command, 'upgrade') as mock_upgrade:
+                self.db.migrate()
+                mock_config.return_value.set_main_option.\
+                    assert_has_calls(calls)
+                mock_upgrade.assert_called_with(mock, 'head')
+
     def test_get_config(self):
         self.db.Session = MagicMock()
         config = synack.db.models.Config(password='test')
@@ -48,6 +69,52 @@ class DbTestCase(unittest.TestCase):
         query.assert_called_with(synack.db.models.Config)
         query.return_value.filter_by.assert_called_with(id=1)
         query.return_value.filter_by.return_value.first.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_update_categories(self):
+        self.db.Session = MagicMock()
+        cats = [{
+            "category_id": 10,
+            "category_name": "Some Cool Cat",
+            "practical_assessment": {
+                "passed": True
+            },
+            "written_assessment": {
+                "passed": True
+            }
+        }]
+        query = self.db.Session.return_value.query
+
+        self.db.update_categories(cats)
+
+        query.assert_called_with(synack.db.models.Category)
+        query.return_value.filter_by.assert_called_with(id=10)
+        query.return_value.filter_by.return_value.first.assert_called_with()
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_update_categories_empty_db(self):
+        self.db.Session = MagicMock()
+        cats = [{
+            "category_id": 10,
+            "category_name": "Some Cool Cat",
+            "practical_assessment": {
+                "passed": True
+            },
+            "written_assessment": {
+                "passed": True
+            }
+        }]
+        query = self.db.Session.return_value.query
+        query.return_value.filter_by.return_value.first.return_value = None
+
+        self.db.update_categories(cats)
+
+        query.assert_called_with(synack.db.models.Category)
+        query.return_value.filter_by.assert_called_with(id=10)
+        self.db.Session.return_value.add.assert_called()
+        query.return_value.filter_by.return_value.first.assert_called_with()
+        self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
     def test_get_config_empty_db(self):
