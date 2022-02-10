@@ -117,7 +117,7 @@ class Auth(Plugin):
                                  "''' + self.db.api_token + '''");
         })();
         '''
-        with open(self.db.config_dir / 'login.js', 'w') as fp:
+        with open(self.state.config_dir / 'login.js', 'w') as fp:
             fp.write(script)
 
         return script

@@ -7,12 +7,12 @@ import os
 import sys
 import unittest
 
-from factories import ObjectFactory
 from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
 import synack  # noqa: E402
+from synack.db.models import Category, Target  # noqa: E402
 
 
 class TargetsTestCase(unittest.TestCase):
@@ -46,16 +46,16 @@ class TargetsTestCase(unittest.TestCase):
                 }
             }
         ]
+        cat1 = synack.db.models.Category()
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = assessments
-        cat1 = ObjectFactory
         self.targets.db.categories = [cat1]
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.update_categories.assert_called_with(assessments)
 
     def test_get_slug_from_codename(self):
         """Should return a slug for a given codename"""
-        ret_targets = [ObjectFactory(slug="qwerty")]
+        ret_targets = [Target(slug="qwerty")]
         self.targets.db.filter_targets.return_value = ret_targets
         self.assertEqual("qwerty",
                          self.targets.get_slug_from_codename("qwerty"))
@@ -65,7 +65,7 @@ class TargetsTestCase(unittest.TestCase):
         """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [
             [],
-            [ObjectFactory(slug="qwerty")]
+            [Target(slug="qwerty")]
         ]
         calls = [
             unittest.mock.call(codename="CHONKEYMONKEY"),
@@ -79,7 +79,7 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_get_codename_from_slug(self):
         """Should return a codename for a given slug"""
-        ret_targets = [ObjectFactory(codename="SLOPPYSLUG")]
+        ret_targets = [Target(codename="SLOPPYSLUG")]
         self.targets.db.filter_targets.return_value = ret_targets
         self.assertEqual("SLOPPYSLUG",
                          self.targets.get_codename_from_slug("qwfars"))
@@ -89,7 +89,7 @@ class TargetsTestCase(unittest.TestCase):
         """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [
             [],
-            [ObjectFactory(codename="SLOPPYSLUG")]
+            [Target(codename="SLOPPYSLUG")]
         ]
         calls = [
             unittest.mock.call(slug="qwfars"),
@@ -161,10 +161,10 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_get_credentials(self):
         """Should get credentials for a given target"""
-        target = synack.db.models.Target(organization="qwewqe", slug="asdasd")
+        target = Target(organization="qwewqe", slug="asdasd")
         self.targets.db.filter_targets = MagicMock()
         self.targets.api = MagicMock()
-        self.targets.db.filter_targets.return_value.first.return_value = target
+        self.targets.db.filter_targets.return_value = [target]
         self.targets.db.user_id = 'bobby'
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = "json_return"
@@ -179,9 +179,9 @@ class TargetsTestCase(unittest.TestCase):
     def test_get_unregistered(self):
         """Should get a list unregistered targets"""
         self.targets.db.categories = [
-            ObjectFactory(id=1, practical_passed=True, written_passed=True),
-            ObjectFactory(id=2, practical_passed=True, written_passed=True),
-            ObjectFactory(id=3, practical_passed=False, written_passed=False),
+            Category(id=1, passed_practical=True,  passed_written=True),
+            Category(id=2, passed_practical=True,  passed_written=True),
+            Category(id=3, passed_practical=False, passed_written=False),
         ]
         query = {
             'filter[primary]': 'unregistered',

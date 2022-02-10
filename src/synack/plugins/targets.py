@@ -79,7 +79,7 @@ class Targets(Plugin):
 
     def get_credentials(self, **kwargs):
         """Get Credentials for a target"""
-        target = self.db.filter_targets(kwargs).first()
+        target = self.db.filter_targets(**kwargs)[0]
         if target:
             res = self.api.request('POST',
                                    'asset/v1/organizations/' +
@@ -96,7 +96,7 @@ class Targets(Plugin):
             self.get_assessments()
         categories = []
         for c in self.db.categories:
-            if c.practical_passed and c.written_passed:
+            if c.passed_practical and c.passed_practical:
                 categories.append(c.id)
         query = {
                 'filter[primary]': 'unregistered',

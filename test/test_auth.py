@@ -131,10 +131,10 @@ class AuthTestCase(unittest.TestCase):
     def test_write_login_script(self):
         """Should attempt to create a login script with the api token"""
         self.auth.db.api_token = "cvghytrfdvghj"
-        self.auth.db.config_dir = pathlib.Path("/tmp")
+        self.auth.state.config_dir = pathlib.Path("/tmp")
         m = unittest.mock.mock_open()
         with unittest.mock.patch("builtins.open", m, create=True):
             ret = self.auth.write_login_script()
             self.assertTrue(self.auth.db.api_token in ret)
-        m.assert_called_with(self.auth.db.config_dir / 'login.js', 'w')
+        m.assert_called_with(self.auth.state.config_dir / 'login.js', 'w')
         m.return_value.write.assert_called()
