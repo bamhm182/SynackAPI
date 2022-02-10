@@ -88,7 +88,7 @@ class Targets(Plugin):
                                    f'/users/{self.db.user_id}' +
                                    '/credentials')
             if res.status_code == 200:
-                print(res.json())
+                return res.json()
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""

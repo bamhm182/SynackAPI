@@ -30,12 +30,12 @@ class State(object):
 
     @property
     def config_dir(self) -> pathlib.PosixPath:
-        if not self._config_dir:
-            ret = pathlib.Path('~/.config/synack/').expanduser().resolve()
-        else:
-            ret = self._config_dir
-        ret.mkdir(parents=True, exist_ok=True)
-        return ret
+        if self._config_dir is None:
+            self._config_dir = pathlib.Path('~/.config/synack').\
+                                       expanduser().resolve()
+        if self._config_dir:
+            self._config_dir.mkdir(parents=True, exist_ok=True)
+        return self._config_dir
 
     @config_dir.setter
     def config_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
@@ -45,9 +45,10 @@ class State(object):
 
     @property
     def template_dir(self) -> pathlib.PosixPath:
-        if not self._template_dir:
-            return pathlib.Path('~/Templates').expanduser().resolve()
-        return self._template_dir
+        ret = self._template_dir
+        if ret:
+            ret.mkdir(parents=True, exist_ok=True)
+        return ret
 
     @template_dir.setter
     def template_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
@@ -57,10 +58,7 @@ class State(object):
 
     @property
     def debug(self) -> bool:
-        if self._debug is None:
-            return False
-        else:
-            return self._debug
+        return self._debug
 
     @debug.setter
     def debug(self, value: bool) -> None:
@@ -74,10 +72,7 @@ class State(object):
 
     @property
     def login(self) -> bool:
-        if self._login is None:
-            return True
-        else:
-            return self._login
+        return self._login
 
     @login.setter
     def login(self, value: bool) -> None:
@@ -85,10 +80,7 @@ class State(object):
 
     @property
     def use_proxies(self) -> bool:
-        if self._use_proxies is None:
-            return False
-        else:
-            return self._use_proxies
+        return self._use_proxies
 
     @use_proxies.setter
     def use_proxies(self, value: bool) -> None:
@@ -96,10 +88,7 @@ class State(object):
 
     @property
     def http_proxy(self) -> str:
-        if self._http_proxy is None:
-            return 'http://localhost:8080'
-        else:
-            return self._http_proxy
+        return self._http_proxy
 
     @http_proxy.setter
     def http_proxy(self, value: str) -> None:
@@ -107,10 +96,7 @@ class State(object):
 
     @property
     def https_proxy(self) -> str:
-        if self._https_proxy is None:
-            return 'http://localhost:8080'
-        else:
-            return self._https_proxy
+        return self._https_proxy
 
     @https_proxy.setter
     def https_proxy(self, value: str) -> None:
@@ -124,33 +110,8 @@ class State(object):
         }
 
     @property
-    def api_token(self) -> str:
-        if self._api_token is None:
-            return ''
-        else:
-            return self._api_token
-
-    @api_token.setter
-    def api_token(self, value: str) -> None:
-        self._api_token = value
-
-    @property
-    def notifications_token(self) -> str:
-        if self._notifications_token is None:
-            return ''
-        else:
-            return self._notifications_token
-
-    @notifications_token.setter
-    def notifications_token(self, value: str) -> None:
-        self._notifications_token = value
-
-    @property
     def otp_secret(self) -> str:
-        if self._otp_secret is None:
-            return ''
-        else:
-            return self._otp_secret
+        return self._otp_secret
 
     @otp_secret.setter
     def otp_secret(self, value: str) -> None:
@@ -158,10 +119,7 @@ class State(object):
 
     @property
     def email(self) -> str:
-        if self._email is None:
-            return ''
-        else:
-            return self._email
+        return self._email
 
     @email.setter
     def email(self, value: str) -> None:
@@ -169,10 +127,7 @@ class State(object):
 
     @property
     def password(self) -> str:
-        if self._password is None:
-            return ''
-        else:
-            return self._password
+        return self._password
 
     @password.setter
     def password(self, value: str) -> None:
@@ -180,10 +135,7 @@ class State(object):
 
     @property
     def user_id(self) -> str:
-        if self._user_id is None:
-            return ''
-        else:
-            return self._user_id
+        return self._user_id
 
     @user_id.setter
     def user_id(self, value: str) -> None:

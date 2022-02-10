@@ -32,7 +32,7 @@ def upgrade():
                               server_default=""),
                     sa.Column('otp_secret', sa.VARCHAR(50), server_default=""),
                     sa.Column('password', sa.VARCHAR(150), server_default=""),
-                    sa.Column('user_id', sa.VARCHAR(20), server_defaut=""),
+                    sa.Column('user_id', sa.VARCHAR(20), server_default=""),
                     sa.Column('use_proxies', sa.BOOLEAN, server_default='f'))
 
     op.create_table('categories',

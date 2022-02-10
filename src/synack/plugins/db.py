@@ -20,22 +20,22 @@ from .base import Plugin
 class Db(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sqlite_db = self.config_dir / 'synackapi.db'
+        self.sqlite_db = self.state.config_dir / 'synackapi.db'
         engine = sa.create_engine(f'sqlite:///{str(self.sqlite_db)}')
         sa.event.listen(engine, 'connect', self._fk_pragma_on_connect)
         self.Session = sessionmaker(bind=engine)
-
-        if not self.sqlite_db.is_file():
-            self.migrate()
 
     @staticmethod
     def _fk_pragma_on_connect(dbapi_con, con_record):
         dbapi_con.execute('pragma foreign_keys=ON')
 
     def migrate(self):
-        alembic_ini = Path(__file__).parent.parent / 'db/alembic.ini'
+        db_folder = Path(__file__).parent.parent / 'db'
 
-        config = alembic.config.Config(str(alembic_ini))
+        config = alembic.config.Config()
+        config.set_main_option('script_location', str(db_folder / 'alembic'))
+        config.set_main_option('version_locations',
+                               str(db_folder / 'alembic/versions'))
         config.set_main_option('sqlalchemy.url',
                                f'sqlite:///{str(self.sqlite_db)}')
         alembic.command.upgrade(config, 'head')
@@ -168,26 +168,27 @@ class Db(Plugin):
 
     @property
     def use_proxies(self):
-        if self.state.use_proxies:
-            return self.state.use_proxies
-        else:
+        if self.state.use_proxies is None:
             return self.get_config('use_proxies')
+        else:
+            return self.state.use_proxies
 
     @use_proxies.setter
     def use_proxies(self, value):
+        self.state.use_proxies = value
         self.set_config('use_proxies', value)
 
     @property
     def proxies(self):
-        if self.state.http_proxy:
-            http_proxy = self.state.http_proxy
-        else:
+        if self.state.http_proxy is None:
             http_proxy = self.get_config('http_proxy')
-
-        if self.state.https_proxy:
-            https_proxy = self.state.http_proxy
         else:
-            https_proxy = self.get_config('http_proxy')
+            http_proxy = self.state.http_proxy
+
+        if self.state.https_proxy is None:
+            https_proxy = self.get_config('https_proxy')
+        else:
+            https_proxy = self.state.https_proxy
 
         return {
             'http': http_proxy,
@@ -196,10 +197,14 @@ class Db(Plugin):
 
     @property
     def template_dir(self):
-        return self.get_config('template_dir')
+        if self.state.template_dir is None:
+            return self.get_config('template_dir')
+        else:
+            return self.state.template_dir
 
     @template_dir.setter
     def template_dir(self, value):
+        self.state.template_dir = value
         self.set_config('template_dir', value)
 
     @property
@@ -212,56 +217,58 @@ class Db(Plugin):
 
     @property
     def email(self):
-        ret = self.get_config('email')
-        if not ret:
-            ret = input("Synack Email: ")
-            self.email = ret
-        return ret
+        if self.state.email is None:
+            ret = self.get_config('email')
+            if ret is None:
+                ret = input("Synack Email: ")
+                self.email = ret
+            self.state.email = ret
+            return ret
+        else:
+            return self.state.email
 
     @email.setter
     def email(self, value):
+        self.state.email = value
         self.set_config('email', value)
 
     @property
     def password(self):
-        ret = self.get_config('password')
-        if not ret:
-            ret = input("Synack Password: ")
-            self.password = ret
-        return ret
+        if self.state.password is None:
+            ret = self.get_config('password')
+            if ret is None:
+                ret = input("Synack Password: ")
+                self.password = ret
+            self.state.password = ret
+            return ret
+        else:
+            return self.state.password
 
     @password.setter
     def password(self, value):
+        self.state.password = value
         self.set_config('password', value)
 
     @property
     def otp_secret(self):
-        ret = self.get_config('otp_secret')
-        if not ret:
-            ret = input("Synack OTP Secret: ")
-            self.otp_secret = ret
-        return ret
+        if self.state.otp_secret is None:
+            ret = self.get_config('otp_secret')
+            if ret is None:
+                ret = input("Synack OTP Secret: ")
+                self.otp_secret = ret
+            self.state.otp_secret = ret
+            return ret
+        else:
+            return self.state.otp_secret
 
     @otp_secret.setter
     def otp_secret(self, value):
+        self.state.otp_secret = value
         self.set_config('otp_secret', value)
 
     @property
-    def config_dir(self):
-        if not self.state.config_dir:
-            ret = Path(self.get_config('config_dir')).expanduser().resolve()
-            self.state.config_dir = ret
-        else:
-            ret = self.state.config_dir
-        return ret
-
-    @config_dir.setter
-    def config_dir(self, value):
-        self.set_config('config_dir', value)
-
-    @property
     def template_dir(self):
-        if not self.state.template_dir:
+        if self.state.template_dir is None:
             ret = Path(self.get_config('template_dir')).expanduser().resolve()
             self.state.template_dir = ret
         else:
@@ -281,11 +288,12 @@ class Db(Plugin):
 
     @property
     def debug(self):
-        if self.state.debug is not None:
-            return self.state.debug
-        else:
+        if self.state.debug is None:
             return self.get_config('debug')
+        else:
+            return self.state.debug
 
     @debug.setter
     def debug(self, value):
+        self.state.debug = value
         self.set_config('debug', value)
