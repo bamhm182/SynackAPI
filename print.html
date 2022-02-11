@@ -196,7 +196,7 @@ print(ret)
 <p>This is a simple example of how you could determine if there are missions every 30 seconds, try to claim some if there are.</p>
 <p>We start by using <code>import synack</code> to bring in the SynackAPI package.
 We then use <code>h = synack.Handler()</code> to create the primary object we will be using; the Handler.
-All plugins are a part of the handler, which allows us to use <code>h.missions.get_missions_count()</code> to make a lightweight HEAD request to determine the number of missions. If there are <strong>currently</strong> more missions than we <strong>know</strong> about from our last check, we can assume that some missions were released. We can then use <code>h.missions.get_available_missions()</code> to get a list of available missions, and request them one at a time with <code>h.missions.do_claim_mission(m)</code>. When the number of current missions goes back down to 0, we can assume there are no missions left, and we can reset our known missions to <code>0</code>.</p>
+All plugins are a part of the handler, which allows us to use <code>h.missions.get_count()</code> to make a lightweight HEAD request to determine the number of missions. If there are <strong>currently</strong> more missions than we <strong>know</strong> about from our last check, we can assume that some missions were released. We can then use <code>h.missions.get_available()</code> to get a list of available missions, and request them one at a time with <code>h.missions.set_claimed(m)</code>. When the number of current missions goes back down to 0, we can assume there are no missions left, and we can reset our known missions to <code>0</code>.</p>
 <pre><code class="language-python">#!/usr/bin/env python3
 
 import time
@@ -208,13 +208,13 @@ known_missions = 0
 
 while True:
     time.sleep(30)
-    curr_missions = h.missions.get_missions_count()
+    curr_missions = h.missions.get_count()
     if curr_missions &gt; known_missions:
         known_missions = curr_missions
-        msns = h.missions.get_available_missions()
+        msns = h.missions.get_available()
         for m in missions:
             time.sleep(1)
-            h.missions.do_claim_mission(m)
+            h.missions.set_claimed(m)
     elif curr_missions == 0:
         known_missions = 0
 </code></pre>
@@ -224,10 +224,10 @@ while True:
 <p>If you're unfamiliar with <code>python3 -c</code>, this is how you can execute a small amount of Python from your (bash, zsh, etc.) shell.
 We take that to <code>import synack</code> just as we would in a full script.
 We then have a longer command that creates the handler, then calls the <code>targets.do_register_all()</code> function to get and register all unregistered targets.</p>
-<pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+<pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
 </code></pre>
 <p>This could be thrown into a cronjob (<code>crontab -e</code>) as seen below to register any new targets once an hour:</p>
-<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="main-components"><a class="header" href="#main-components">Main Components</a></h1>
 <p>There are a couple components that are going to be used every single time you use the SynackAPI.
@@ -348,16 +348,24 @@ In the event that one of the State variables is set and is <strong>not</strong> 
 <div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
 <p>Within the SynackAPI, various &quot;Plugins&quot; exist to allow us to easily separate functions based on their purpose.</p>
 <h2 id="function-naming-convension"><a class="header" href="#function-naming-convension">Function Naming Convension</a></h2>
-<p>I am trying to keep to the following naming conventions:</p>
-<ul>
-<li>No redundancy (<code>h.missions.get_approved()</code> good, <code>h.missions.get_approved_missions()</code> bad)</li>
-<li><code>h.plugin.get_*</code> functions intend to get data from the Synack API</li>
-<li><code>h.plugin.do_*</code> functions intend to do something with retrieved data or make changes via the Synack API</li>
-</ul>
+<p>Similar to PowerShell, functions within this package will begin with a verb.
+This is a list of approved verbs and their meaning.</p>
+<table><thead><tr><th>Verb</th><th>Description</th></tr></thead><tbody>
+<tr><td>add</td><td>Insert/Update item(s) in the Database</td></tr>
+<tr><td>build</td><td>Change data/items in some way</td></tr>
+<tr><td>find</td><td>Query the Database</td></tr>
+<tr><td>get</td><td>Retrieve Data from the Synack API or Local Files</td></tr>
+<tr><td>remove</td><td>Delete item(s) from the Database</td></tr>
+<tr><td>set</td><td>Push changes to the Synack API or Local Files</td></tr>
+</tbody></table>
+<p>Additionally, function names should not be redundant.
+In other words, consider the function name <code>missions.get_missions()</code>.
+<code>missions</code> is specified twice, when <code>missions.get()</code> is just as clear.
+<code>missions.get()</code> is the optimal choice.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">Api</a></h1>
 <p>The Api Plugin is used to interact DIRECTLY with the Synack API.
-It is the last stop before our code touches Synack.</p>
-<!-- toc -->
+It is the last stop before our code is sent to the Synack API.</p>
+<p>The functions within this plugin don't follow the standard naming convention.</p>
 <h2 id="apiloginmethod-path-kwargs"><a class="header" href="#apiloginmethod-path-kwargs">api.login(method, path, **kwargs)</a></h2>
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
@@ -420,32 +428,14 @@ This function takes in several arguments to build information that is sent to <c
 </blockquote>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="auth"><a class="header" href="#auth">Auth</a></h1>
-<h2 id="authdo_check_api_token"><a class="header" href="#authdo_check_api_token">auth.do_check_api_token()</a></h2>
-<blockquote>
-<p>Hits the user profile API endpoint to ensure the api_token is still valid</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_check_api_token()
-True
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authdo_gen_otp"><a class="header" href="#authdo_gen_otp">auth.do_gen_otp()</a></h2>
+<p>This plugin deals with authenticating the user to Synack.</p>
+<h2 id="authbuild_otp"><a class="header" href="#authbuild_otp">auth.build_otp()</a></h2>
 <blockquote>
 <p>Use your stored otp_secret to generate a current OTP code</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_gen_otp()
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.build_otp()
 '1234567'
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authdo_write_login_script"><a class="header" href="#authdo_write_login_script">auth.do_write_login_script()</a></h2>
-<blockquote>
-<p>Writes the current api_token to <code>~/.config/synack/login.js</code> JavaScript file to help with staying logged in.</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; auth.do_write_login_script()
 </code></pre>
 </blockquote>
 </blockquote>
@@ -502,7 +492,139 @@ True
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="authset_login_script"><a class="header" href="#authset_login_script">auth.set_login_script()</a></h2>
+<blockquote>
+<p>Writes the current api_token to <code>~/.config/synack/login.js</code> JavaScript file to help with staying logged in.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; auth.set_login_script()
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="db"><a class="header" href="#db">Db</a></h1>
+<p>This plugin deals with interacting with the database.</p>
+<p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
+Some properties are Read-Only, while others can be Set.
+Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
+<table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
+<tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
+<tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
+<tr><td>email</td><td>No</td><td>Yes</td><td>The email used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>No</td><td>Yes</td><td>The http web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>https_proxy</td><td>No</td><td>Yes</td><td>The https web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>notifications_token</td><td>No</td><td>No</td><td>Synack Notifications Token used to authenticate requests</td></tr>
+<tr><td>otp_secret</td><td>No</td><td>Yes</td><td>Synack OTP Secret</td></tr>
+<tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
+<tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
+<tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
+<tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
+<tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
+<tr><td>user_id</td><td>No</td><td>No</td><td>Your Synack User ID used for requests</td></tr>
+</tbody></table>
+<h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
+<blockquote>
+<p>Add Target Categories from the Synack API to the Database
+This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>categories</td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
+<blockquote>
+<p>Add Organizations from the Synack API to the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+<tr><td>session</td><td>sqlalchemy.orm.sessionmaker()</td><td>A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
+<blockquote>
+<p>Adds Target from the Synack API to the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaties returned from the Synack API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the targets to return ones which match a given criteria</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>**kwargs</td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename=&quot;SLEEPYPUPPY&quot;)
+[&lt;class 'synack.db.models.Target'&gt;, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
+<blockquote>
+<p>Returns a configuration from the Database.</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>name</td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
+'reuif...oetuhhj'
+&gt;&gt;&gt; g.db.get_config('user_id')
+'heutih9'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbremove_targetskwargs"><a class="header" href="#dbremove_targetskwargs">db.remove_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Remove targets from the Database based on criteria.
+<strong>If no criteria is provided, all entries are deleted</strong></p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>**kwargs</td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
+<blockquote>
+<p>Permanently sets a configuration in the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>name</td><td>str</td><td>Name of the config to set</td></tr>
+<tr><td>value</td><td>?</td><td>Value to set the config to</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
+&gt;&gt;&gt; h.db.set_config('password', 'password1234')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_migration"><a class="header" href="#dbset_migration">db.set_migration()</a></h2>
+<blockquote>
+<p>Migrates the local database to include the newest changes.
+This may need to be run manually when SynackAPI is updated until I can figure out a better way to have it run automatically.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_migration()
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="debug"><a class="header" href="#debug">Debug</a></h1>
 <h2 id="debuglogtitle-message"><a class="header" href="#debuglogtitle-message">debug.log(title, message)</a></h2>
 <blockquote>

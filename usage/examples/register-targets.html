@@ -143,10 +143,10 @@
 <p>If you're unfamiliar with <code>python3 -c</code>, this is how you can execute a small amount of Python from your (bash, zsh, etc.) shell.
 We take that to <code>import synack</code> just as we would in a full script.
 We then have a longer command that creates the handler, then calls the <code>targets.do_register_all()</code> function to get and register all unregistered targets.</p>
-<pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+<pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
 </code></pre>
 <p>This could be thrown into a cronjob (<code>crontab -e</code>) as seen below to register any new targets once an hour:</p>
-<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
 </code></pre>
 
                     </main>

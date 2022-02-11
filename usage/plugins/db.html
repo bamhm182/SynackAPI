@@ -138,6 +138,129 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="db"><a class="header" href="#db">Db</a></h1>
+<p>This plugin deals with interacting with the database.</p>
+<p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
+Some properties are Read-Only, while others can be Set.
+Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
+<table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
+<tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
+<tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
+<tr><td>email</td><td>No</td><td>Yes</td><td>The email used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>No</td><td>Yes</td><td>The http web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>https_proxy</td><td>No</td><td>Yes</td><td>The https web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>notifications_token</td><td>No</td><td>No</td><td>Synack Notifications Token used to authenticate requests</td></tr>
+<tr><td>otp_secret</td><td>No</td><td>Yes</td><td>Synack OTP Secret</td></tr>
+<tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
+<tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
+<tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
+<tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
+<tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
+<tr><td>user_id</td><td>No</td><td>No</td><td>Your Synack User ID used for requests</td></tr>
+</tbody></table>
+<h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
+<blockquote>
+<p>Add Target Categories from the Synack API to the Database
+This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>categories</td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
+<blockquote>
+<p>Add Organizations from the Synack API to the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+<tr><td>session</td><td>sqlalchemy.orm.sessionmaker()</td><td>A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
+<blockquote>
+<p>Adds Target from the Synack API to the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaties returned from the Synack API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the targets to return ones which match a given criteria</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>**kwargs</td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename=&quot;SLEEPYPUPPY&quot;)
+[&lt;class 'synack.db.models.Target'&gt;, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
+<blockquote>
+<p>Returns a configuration from the Database.</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>name</td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
+'reuif...oetuhhj'
+&gt;&gt;&gt; g.db.get_config('user_id')
+'heutih9'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbremove_targetskwargs"><a class="header" href="#dbremove_targetskwargs">db.remove_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Remove targets from the Database based on criteria.
+<strong>If no criteria is provided, all entries are deleted</strong></p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>**kwargs</td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
+<blockquote>
+<p>Permanently sets a configuration in the Database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>name</td><td>str</td><td>Name of the config to set</td></tr>
+<tr><td>value</td><td>?</td><td>Value to set the config to</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
+&gt;&gt;&gt; h.db.set_config('password', 'password1234')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_migration"><a class="header" href="#dbset_migration">db.set_migration()</a></h2>
+<blockquote>
+<p>Migrates the local database to include the newest changes.
+This may need to be run manually when SynackAPI is updated until I can figure out a better way to have it run automatically.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_migration()
+</code></pre>
+</blockquote>
+</blockquote>
 
                     </main>
 

@@ -140,12 +140,20 @@
                         <h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
 <p>Within the SynackAPI, various &quot;Plugins&quot; exist to allow us to easily separate functions based on their purpose.</p>
 <h2 id="function-naming-convension"><a class="header" href="#function-naming-convension">Function Naming Convension</a></h2>
-<p>I am trying to keep to the following naming conventions:</p>
-<ul>
-<li>No redundancy (<code>h.missions.get_approved()</code> good, <code>h.missions.get_approved_missions()</code> bad)</li>
-<li><code>h.plugin.get_*</code> functions intend to get data from the Synack API</li>
-<li><code>h.plugin.do_*</code> functions intend to do something with retrieved data or make changes via the Synack API</li>
-</ul>
+<p>Similar to PowerShell, functions within this package will begin with a verb.
+This is a list of approved verbs and their meaning.</p>
+<table><thead><tr><th>Verb</th><th>Description</th></tr></thead><tbody>
+<tr><td>add</td><td>Insert/Update item(s) in the Database</td></tr>
+<tr><td>build</td><td>Change data/items in some way</td></tr>
+<tr><td>find</td><td>Query the Database</td></tr>
+<tr><td>get</td><td>Retrieve Data from the Synack API or Local Files</td></tr>
+<tr><td>remove</td><td>Delete item(s) from the Database</td></tr>
+<tr><td>set</td><td>Push changes to the Synack API or Local Files</td></tr>
+</tbody></table>
+<p>Additionally, function names should not be redundant.
+In other words, consider the function name <code>missions.get_missions()</code>.
+<code>missions</code> is specified twice, when <code>missions.get()</code> is just as clear.
+<code>missions.get()</code> is the optimal choice.</p>
 
                     </main>
 
