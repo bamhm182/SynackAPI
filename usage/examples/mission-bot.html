@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/examples/mission-bot.html" class="active">Mission Bot</a></li></ol></li><li class="chapter-item "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/examples/mission-bot.html" class="active">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -138,6 +138,31 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="mission-bot"><a class="header" href="#mission-bot">Mission Bot</a></h1>
+<p>This is a simple example of how you could determine if there are missions every 30 seconds, try to claim some if there are.</p>
+<p>We start by using <code>import synack</code> to bring in the SynackAPI package.
+We then use <code>h = synack.Handler()</code> to create the primary object we will be using; the Handler.
+All plugins are a part of the handler, which allows us to use <code>h.missions.get_missions_count()</code> to make a lightweight HEAD request to determine the number of missions. If there are <strong>currently</strong> more missions than we <strong>know</strong> about from our last check, we can assume that some missions were released. We can then use <code>h.missions.get_available_missions()</code> to get a list of available missions, and request them one at a time with <code>h.missions.do_claim_mission(m)</code>. When the number of current missions goes back down to 0, we can assume there are no missions left, and we can reset our known missions to <code>0</code>.</p>
+<pre><code class="language-python">#!/usr/bin/env python3
+
+import time
+import synack
+
+h = synack.Handler()
+
+known_missions = 0
+
+while True:
+    time.sleep(30)
+    curr_missions = h.missions.get_missions_count()
+    if curr_missions &gt; known_missions:
+        known_missions = curr_missions
+        msns = h.missions.get_available_missions()
+        for m in missions:
+            time.sleep(1)
+            h.missions.do_claim_mission(m)
+    elif curr_missions == 0:
+        known_missions = 0
+</code></pre>
 
                     </main>
 
@@ -146,7 +171,7 @@
                             <a rel="prev" href="../../usage/examples/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../../usage/plugins/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../../usage/examples/register-targets.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -158,7 +183,7 @@
                     <a rel="prev" href="../../usage/examples/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../../usage/plugins/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../../usage/examples/register-targets.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

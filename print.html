@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -139,21 +139,825 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Welcome to the documentation for the SynackAPI Python package!</p>
+<p>This package has been created to give you a place to start interacting with the Synack API.</p>
+<h2 id="disclaimer"><a class="header" href="#disclaimer">Disclaimer</a></h2>
+<p><strong>I am not responsible if you do something that gets you banned!</strong></p>
+<p>It is possible for you to abuse the Synack API.
+Synack will know you have done this and you will be banned or otherwise repremanded.</p>
+<p>The current (10FEB2022) recommendation is that you should abide by the following rules:</p>
+<ul>
+<li>DO NOT poll for missions more than 1x every 30 seconds</li>
+<li>DO NOT generate more than 200 requests in any 5 minute period</li>
+<li>DO NOT be the source of egregious and/or irresponsible traffic</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
+<p>The easiest way to get started with the SynackAPI is to install it via <code>pip</code>.
+For example:</p>
+<pre><code class="language-bash">pip3 install --upgrade SynackAPI
+</code></pre>
+<p>After doing this, you can use one of the <a href="usage/./examples/index.html">Examples</a> to understand the basic usage of the package.</p>
+<p>I am not going to provide you with a ton of awesome scripts that will leverage the SynackAPI package.
+That is on you.</p>
+<p>With that in mind, I would highly recommend you become familiar with the <a href="usage/./plugins/index.html">Plugins</a> provided and apply your own ingenuity to come up with your own scripts.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>These subpages here will provide a couple of very simple examples of how you can use the SynackAPI.
+These are going to help you get started, but are definitely not intended to be the best of the best.
+I highly encourage you to think about ways you could use the SynackAPI to apply your own logic and make something much better for yourself.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mission-bot"><a class="header" href="#mission-bot">Mission Bot</a></h1>
+<p>This is a simple example of how you could determine if there are missions every 30 seconds, try to claim some if there are.</p>
+<p>We start by using <code>import synack</code> to bring in the SynackAPI package.
+We then use <code>h = synack.Handler()</code> to create the primary object we will be using; the Handler.
+All plugins are a part of the handler, which allows us to use <code>h.missions.get_missions_count()</code> to make a lightweight HEAD request to determine the number of missions. If there are <strong>currently</strong> more missions than we <strong>know</strong> about from our last check, we can assume that some missions were released. We can then use <code>h.missions.get_available_missions()</code> to get a list of available missions, and request them one at a time with <code>h.missions.do_claim_mission(m)</code>. When the number of current missions goes back down to 0, we can assume there are no missions left, and we can reset our known missions to <code>0</code>.</p>
+<pre><code class="language-python">#!/usr/bin/env python3
+
+import time
+import synack
+
+h = synack.Handler()
+
+known_missions = 0
+
+while True:
+    time.sleep(30)
+    curr_missions = h.missions.get_missions_count()
+    if curr_missions &gt; known_missions:
+        known_missions = curr_missions
+        msns = h.missions.get_available_missions()
+        for m in missions:
+            time.sleep(1)
+            h.missions.do_claim_mission(m)
+    elif curr_missions == 0:
+        known_missions = 0
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="register-targets"><a class="header" href="#register-targets">Register Targets</a></h1>
+<p>One of the main goals for this project was to be able to create super simple oneliners that I could throw into various places like my i3blocks status bar.</p>
+<p>To show you how this can be done, let's take a look at the following example, which will register all unregistered targets for you.</p>
+<p>If you're unfamiliar with <code>python3 -c</code>, this is how you can execute a small amount of Python from your (bash, zsh, etc.) shell.
+We take that to <code>import synack</code> just as we would in a full script.
+We then have a longer command that creates the handler, then calls the <code>targets.do_register_all()</code> function to get and register all unregistered targets.</p>
+<pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+</code></pre>
+<p>This could be thrown into a cronjob (<code>crontab -e</code>) as seen below to register any new targets once an hour:</p>
+<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.do_register_all()&quot;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="main-components"><a class="header" href="#main-components">Main Components</a></h1>
+<p>There are a couple components that are going to be used every single time you use the SynackAPI.
+Information about them can be found here.</p>
+<ul>
+<li>Handler: This component contains all the plugins and tracks the State</li>
+<li>State: This component contains all of the emphemeral settings and information within a single Handler</li>
+<li>Files: There are a couple files you should be aware of</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="files"><a class="header" href="#files">Files</a></h1>
+<h2 id="synackapidb"><a class="header" href="#synackapidb">synackapi.db</a></h2>
+<p>This is a SQLite Database which exists at <code>~/.config/synack/synackapi.db</code> and stores your permanent settings and caches some data from the Synack API.</p>
+<p>Information such as your email, password, and OTP Secret exist here.
+<strong>Keep it protected!</strong></p>
+<p>Some information is automatically cached so that the number of redundant requests you need.
+For example, if you pull a lot of Target information, there is a good chance that some of the basic information (slug, codename, etc.) will not change.
+Once it's pulled the first time, the SQLite Database will hold some of the information so that you can do things like converting Slugs to Codenames and vice versa without sending a request to Synack's API.</p>
+<p>Another example would be the Synack Access Token, which is what authenticates you and is used to make requests.
+There is no reason to generate a new Access Token every time your Handler is initiated, so when you log in, it is stored in the database.
+When you make a new Handler, it will try to use this token.
+If it's valid, it will jump into the requested function, otherwise, it will complete the login workflow, then move onto the requested function.</p>
+<h2 id="loginjs"><a class="header" href="#loginjs">login.js</a></h2>
+<p>This is a JavaScript file which exists at ~/.config/synack/login.js and aids in keeping you logged in.
+It is intended to be used with the following TamperMonkey script in order to do the following:</p>
+<ol>
+<li>See you are on <code>https://login.synack.com</code></li>
+<li>Wait 60 seconds</li>
+<li>Redirect you to <code>https://platform.synack.com</code></li>
+<li>Inject your current Access Token into Chrome</li>
+</ol>
+<pre><code class="language-javascript">// ==UserScript==
+// @name         Synack
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Go to the platform automatically
+// @author       You
+// @match        https://*.synack.com/*
+// @require      file:///home/&lt;homedir&gt;/.config/synack/login.js
+// @grant        none
+// ==/UserScript==
+
+
+alert('Change the require line to point to the right place and delete this line. Also modify tampermonkey to be able to read local files. This is probably really dumb, so I will not tell you how to do this in an effort to make certain you have thought it through.');
+</code></pre>
+<p>Note: You must change the @require line to the location of the <code>login.js</code> file.
+Additionally, you will want to delete the <code>alert()</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="handler"><a class="header" href="#handler">Handler</a></h1>
+<p>The Handler is responsible for, you guessed it, handling the flow of data and functions within the SynackAPI package.</p>
+<p>Being totally honest, this isn't strictly required, but it definitely makes things easier.</p>
+<p>It is instantiated after <code>import synack</code> as seen in the following example:</p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+
+h = synack.Handler()
+</code></pre>
+<p>From there, you can use any of the Plugins as follows:</p>
+<pre><code>h.missions.get_missions_count()
+h.targets.do_register_all()
+</code></pre>
+<h2 id="setting-one-off-states"><a class="header" href="#setting-one-off-states">Setting One-Off States</a></h2>
+<p>It's important to note that you can easily change some of the State variables by passing them into the Handler.</p>
+<p>For example, if you want to see all requests being made in the current script, you can enable debugging as following:</p>
+<pre><code class="language-python3">h = synack.Handler(debug=True)
+h.targets.do_register_all()
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="state"><a class="header" href="#state">State</a></h1>
+<p>The State object tracks several variables for a single instance of the Handler.</p>
+<p>As seen in the following example, you can create a State variable externally and control it there.
+In the event that you do not pass in a State, one is created automatically.
+You can also continue to manipulate the State in the ways shown below.</p>
+<pre><code>#!/usr/bin/env python3
+
+import synack
+
+state = synack.State()
+state.debug = True
+handler = synack.Handler(state)
+handler.debug.log(&quot;Test&quot;, &quot;This message WILL be seen&quot;)
+handler.state.debug = False
+handler.debug.log(&quot;Test&quot;, &quot;This message will NOT be seen&quot;)
+state = True
+handler.debug.log(&quot;Test&quot;, &quot;This message WILL be seen&quot;)
+
+# ----- OR -----
+
+handler = synack.Handler(debug=True)
+handler.debug.log(&quot;Test&quot;, &quot;This message WILL be seen&quot;)
+handler.state.debug = False
+handler.debug.log(&quot;Test&quot;, &quot;This message will NOT be seen&quot;)
+handler.state.debug = True
+handler.debug.log(&quot;Test&quot;, &quot;This message WILL be seen&quot;)
+</code></pre>
+<h2 id="database-vs-state"><a class="header" href="#database-vs-state">Database vs State</a></h2>
+<p>The observant will notice that there is a lot of overlap between the values stored in the Database and the State.
+This may cause you some confusion as to where data is coming from and how it's being stored and accessed.</p>
+<p>The Database contains <strong>persistant</strong> or <strong>shared</strong> information.
+For example, the api_token, which should be shared by all Handlers or cached Target information that could be quickly referenced.</p>
+<p>The State only persists within <strong>one</strong> instance of the Handler.
+In the event that one of the State variables is set and is <strong>not</strong> constantly at risk of being changed (such as the api_token), the value stored in the State will be provided <strong>instead of</strong> the Database value. This is useful when you want to <strong>override</strong> Database variables in a single Handler. For example, you may wish to enable the <code>debug</code> variable for a single Handler without affecting other Handlers you may have running.</p>
+<h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
+<table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>str</td><td>This is the Synack Access Token used to authenticate requests</td></tr>
+<tr><td>config_dir</td><td>pathlib.Path</td><td>The location of the Database and Login script</td></tr>
+<tr><td>debug</td><td>bool</td><td>Used to show/hide debugging messages</td></tr>
+<tr><td>email</td><td>str</td><td>Your email address used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>str</td><td>A Web Proxy (Burp, etc.) to intercept requests</td></tr>
+<tr><td>https_proxy</td><td>str</td><td>A Web Proxy (Burp, etc.) to intercept requests</td></tr>
+<tr><td>login</td><td>bool</td><td>Used to enable/disable a check of the api_token upon creation of the Handler</td></tr>
+<tr><td>notifications_token</td><td>str</td><td>Token used for authentication when dealing with Synack Notifications</td></tr>
+<tr><td>otp_secret</td><td>str</td><td>OTP Secret held by Authy. NOT an OTP. For more information, read the Usage page</td></tr>
+<tr><td>password</td><td>str</td><td>Your Synack Password</td></tr>
+<tr><td>session</td><td>requests.Session</td><td>Tracks cookies and headers across various functions</td></tr>
+<tr><td>template_dir</td><td>pathlib.Path</td><td>The location of your Mission Templates</td></tr>
+<tr><td>use_proxies</td><td>bool</td><td>Enables/Disables Web Proxy Usage</td></tr>
+<tr><td>user_id</td><td>bool</td><td>Your Synack user id used in many requests</td></tr>
+</tbody></table>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
+<p>Within the SynackAPI, various &quot;Plugins&quot; exist to allow us to easily separate functions based on their purpose.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">Api</a></h1>
+<p>The Api Plugin is used to interact DIRECTLY with the Synack API.
+It is the last stop before our code touches Synack.</p>
+<h2 id="apiloginmethod-path-kwargs"><a class="header" href="#apiloginmethod-path-kwargs">api.login(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
+This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.api.login('POST', 'authenticate', headers=headers, data=data)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="apinotificationsmethod-path-kwargs"><a class="header" href="#apinotificationsmethod-path-kwargs">api.notifications(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="auth"><a class="header" href="#auth">Auth</a></h1>
+<h2 id="authgen_otp"><a class="header" href="#authgen_otp">auth.gen_otp()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authcheck_api_token"><a class="header" href="#authcheck_api_token">auth.check_api_token()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_api_token"><a class="header" href="#authget_api_token">auth.get_api_token()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_csrf"><a class="header" href="#authget_login_csrf">auth.get_login_csrf()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authwrite_login_script"><a class="header" href="#authwrite_login_script">auth.write_login_script()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="db"><a class="header" href="#db">Db</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="debug"><a class="header" href="#debug">Debug</a></h1>
+<h2 id="debuglogtitle-message"><a class="header" href="#debuglogtitle-message">debug.log(title, message)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="missions"><a class="header" href="#missions">Missions</a></h1>
+<h2 id="missionsget_approved_missions"><a class="header" href="#missionsget_approved_missions">missions.get_approved_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_available_missions"><a class="header" href="#missionsget_available_missions">missions.get_available_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_claimed_missions"><a class="header" href="#missionsget_claimed_missions">missions.get_claimed_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_invisible_missions"><a class="header" href="#missionsget_invisible_missions">missions.get_invisible_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_in_review_missions"><a class="header" href="#missionsget_in_review_missions">missions.get_in_review_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_missions_count"><a class="header" href="#missionsget_missions_count">missions.get_missions_count()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_missions_summary"><a class="header" href="#missionsget_missions_summary">missions.get_missions_summary()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_missions"><a class="header" href="#missionsget_missions">missions.get_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsdo_claim_mission"><a class="header" href="#missionsdo_claim_mission">missions.do_claim_mission()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsdo_release_mission"><a class="header" href="#missionsdo_release_mission">missions.do_release_mission()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsdo_interact_mission"><a class="header" href="#missionsdo_interact_mission">missions.do_interact_mission()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsdo_upload_evidences"><a class="header" href="#missionsdo_upload_evidences">missions.do_upload_evidences()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_evidences"><a class="header" href="#missionsget_evidences">missions.get_evidences()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsdo_sort_missions"><a class="header" href="#missionsdo_sort_missions">missions.do_sort_missions()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="notifications"><a class="header" href="#notifications">Notifications</a></h1>
+<h2 id="notificationsget_notifications"><a class="header" href="#notificationsget_notifications">notifications.get_notifications()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="notificationsget_unread_count"><a class="header" href="#notificationsget_unread_count">notifications.get_unread_count()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="targets"><a class="header" href="#targets">Targets</a></h1>
+<h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_codename_from_slug"><a class="header" href="#targetsget_codename_from_slug">targets.get_codename_from_slug()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_slug_from_codename"><a class="header" href="#targetsget_slug_from_codename">targets.get_slug_from_codename()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_current_target"><a class="header" href="#targetsget_current_target">targets.get_current_target()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_credentials"><a class="header" href="#targetsget_credentials">targets.get_credentials()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsdo_register_all"><a class="header" href="#targetsdo_register_all">targets.do_register_all()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-1"><a class="header" href="#targets-1">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-2"><a class="header" href="#targets-2">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-3"><a class="header" href="#targets-3">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-4"><a class="header" href="#targets-4">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-5"><a class="header" href="#targets-5">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targets-6"><a class="header" href="#targets-6">targets.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="templates"><a class="header" href="#templates">Templates</a></h1>
+<h2 id="templatesget_template_path"><a class="header" href="#templatesget_template_path">templates.get_template_path()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesget_sections_from_file"><a class="header" href="#templatesget_sections_from_file">templates.get_sections_from_file()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesget_template"><a class="header" href="#templatesget_template">templates.get_template()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesdo_save_template"><a class="header" href="#templatesdo_save_template">templates.do_save_template()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesdo_convert_name"><a class="header" href="#templatesdo_convert_name">templates.do_convert_name()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templates-1"><a class="header" href="#templates-1">templates.()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transactions"><a class="header" href="#transactions">Transactions</a></h1>
+<h2 id="transactionsget_balance"><a class="header" href="#transactionsget_balance">transactions.get_balance()</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="users"><a class="header" href="#users">Users</a></h1>
+<h2 id="usersget_profileuser_id"><a class="header" href="#usersget_profileuser_id">users.get_profile(user_id)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>1</code></td><td>one</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="support"><a class="header" href="#support">Support</a></h1>
+<p>I have spent countless hours pouring over this project in order to best help you have an easy, reliable way to interact with the Synack API.</p>
+<p>If this has helped you, please consider helping me out in one of the following ways.</p>
+<h2 id="patreon"><a class="header" href="#patreon">Patreon</a></h2>
+<p>You can find my Patreon at the following link:</p>
+<p><a href="https://www.patreon.com/bytepen">BytePen Studios Patreon</a></p>
+<h2 id="contribution"><a class="header" href="#contribution">Contribution</a></h2>
+<p>If you'd like to see extra features be added to this package, please consider contributing code.</p>
+<p>With that said, please take the following items into consideration:</p>
+<ul>
+<li>We will be using Test Driven Development with Unit Testing in order to ensure the stability of the SynackAPI package.
+<ul>
+<li>Run <code>coverage run -m unittest discover test</code> from within the primary directory, then run <code>coverage report</code> before submitting a PR. Ensure that all tests are passing and the test coverage reports 100%.</li>
+</ul>
+</li>
+<li>We will be conforming to pep8, which is the Python Style Guide.
+<ul>
+<li>Run <code>flake8 src test live-tests</code> from within the primary directory before submitting a PR. Ensure there are no complaints returned.</li>
+</ul>
+</li>
+<li>We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.</li>
+</ul>
+<p>There is also the <code>./check.sh</code> script in the primary directory that will run everything I would like you to check before submitting a PR.</p>
+<p>If you have any questions on how you can contribute, please reach out via the SRT Slack.</p>
 
                     </main>
 

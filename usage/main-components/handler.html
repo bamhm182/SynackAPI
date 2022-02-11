@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Targets - SynackAPI</title>
+        <title>Handler - SynackAPI</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/targets.html" class="active">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item expanded "><a href="../../usage/main-components/handler.html" class="active">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -137,184 +137,35 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="targets"><a class="header" href="#targets">Targets</a></h1>
-<h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+                        <h1 id="handler"><a class="header" href="#handler">Handler</a></h1>
+<p>The Handler is responsible for, you guessed it, handling the flow of data and functions within the SynackAPI package.</p>
+<p>Being totally honest, this isn't strictly required, but it definitely makes things easier.</p>
+<p>It is instantiated after <code>import synack</code> as seen in the following example:</p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+
+h = synack.Handler()
 </code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_codename_from_slug"><a class="header" href="#targetsget_codename_from_slug">targets.get_codename_from_slug()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<p>From there, you can use any of the Plugins as follows:</p>
+<pre><code>h.missions.get_missions_count()
+h.targets.do_register_all()
 </code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_slug_from_codename"><a class="header" href="#targetsget_slug_from_codename">targets.get_slug_from_codename()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<h2 id="setting-one-off-states"><a class="header" href="#setting-one-off-states">Setting One-Off States</a></h2>
+<p>It's important to note that you can easily change some of the State variables by passing them into the Handler.</p>
+<p>For example, if you want to see all requests being made in the current script, you can enable debugging as following:</p>
+<pre><code class="language-python3">h = synack.Handler(debug=True)
+h.targets.do_register_all()
 </code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_current_target"><a class="header" href="#targetsget_current_target">targets.get_current_target()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_credentials"><a class="header" href="#targetsget_credentials">targets.get_credentials()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsdo_register_all"><a class="header" href="#targetsdo_register_all">targets.do_register_all()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-1"><a class="header" href="#targets-1">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-2"><a class="header" href="#targets-2">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-3"><a class="header" href="#targets-3">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-4"><a class="header" href="#targets-4">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-5"><a class="header" href="#targets-5">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-6"><a class="header" href="#targets-6">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../usage/plugins/notifications.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../usage/main-components/files.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                            <a rel="next" href="../../usage/plugins/templates.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../../usage/main-components/state.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -323,10 +174,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../usage/plugins/notifications.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../usage/main-components/files.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                    <a rel="next" href="../../usage/plugins/templates.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../../usage/main-components/state.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
