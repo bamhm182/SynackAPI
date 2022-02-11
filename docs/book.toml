@@ -1,0 +1,22 @@
+[book]
+authors = ["bamhm182"]
+language = "en"
+multilingual = false
+src = "src"
+title = "SynackAPI"
+
+[output.html]
+default-theme = "ayu"
+no-section-label = true
+git-repository-url = "https://www.github.com/bamhm182/SynackAPI"
+git-repository-icon = "fa-github"
+
+[output.html.fold]
+enable = true
+level = 0
+
+[output.html.playpen]
+editable = true
+copy-js = true
+line-numbers = true
+
