@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/auth.html" class="active">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/auth.html" class="active">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -138,99 +138,85 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="auth"><a class="header" href="#auth">Auth</a></h1>
-<h2 id="authgen_otp"><a class="header" href="#authgen_otp">auth.gen_otp()</a></h2>
+<h2 id="authdo_check_api_token"><a class="header" href="#authdo_check_api_token">auth.do_check_api_token()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Hits the user profile API endpoint to ensure the api_token is still valid</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_check_api_token()
+True
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authcheck_api_token"><a class="header" href="#authcheck_api_token">auth.check_api_token()</a></h2>
+<h2 id="authdo_gen_otp"><a class="header" href="#authdo_gen_otp">auth.do_gen_otp()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Use your stored otp_secret to generate a current OTP code</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_gen_otp()
+'1234567'
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
+<h2 id="authdo_write_login_script"><a class="header" href="#authdo_write_login_script">auth.do_write_login_script()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Writes the current api_token to <code>~/.config/synack/login.js</code> JavaScript file to help with staying logged in.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; auth.do_write_login_script()
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="authget_api_token"><a class="header" href="#authget_api_token">auth.get_api_token()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Walks through the whole authentication workflow to get a new api_token</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_api_token()
+'489hr98hf...eh59'
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="authget_login_csrf"><a class="header" href="#authget_login_csrf">auth.get_login_csrf()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Pulls a CSRF Token from the Login page</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_login_csrf()
+'45h998h4g5...45wh89g9wh'
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authwrite_login_script"><a class="header" href="#authwrite_login_script">auth.write_login_script()</a></h2>
+<h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get a Login Grant Token by providing an OTP Code</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
+&gt;&gt;&gt; lpt = h.auth.get_login_progress_token(csrf)
+&gt;&gt;&gt; h.auth.get_login_grant_token(csrf, lpt)
+'58t7i...rh87g58'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
+<blockquote>
+<p>Get the Login Progress Token by authenticating with email and password</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
+&gt;&gt;&gt; h.auth.get_login_progress_token(csrf)
+'239rge7...8tehtyg'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
+<blockquote>
+<p>Walks through the whole process of getting a notifications token</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_notifications_token()
+'958htiu...h98f5ht'
 </code></pre>
 </blockquote>
 </blockquote>

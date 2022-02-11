@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -164,6 +164,34 @@ That is on you.</p>
 <p>These subpages here will provide a couple of very simple examples of how you can use the SynackAPI.
 These are going to help you get started, but are definitely not intended to be the best of the best.
 I highly encourage you to think about ways you could use the SynackAPI to apply your own logic and make something much better for yourself.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="check-invisible-missions"><a class="header" href="#check-invisible-missions">Check Invisible Missions</a></h1>
+<p>This was originally part of the main package, but it's pretty noisy, so I removed it so people wouldn't accidentally run it.</p>
+<p>Sometimes a condition will arise in which the sidebar states there are missions, but there are not.
+These missions are associated with a specific target.
+If this happens, we can use this script to easily determine which target has the mission so you can submit a ticket.</p>
+<p>This is going to pull a list of all targets you're registered to and cache it in the Database with <code>h.targets.get_registered_summary()</code>.
+It then iterates through them and asks for a mission count with a HEAD request for every single target individually (<code>h.missions.get_count()</code>.
+If a target reports it has missions, it then tries to pull a full list of its missions with <code>h.missions.get_list()</code>.
+If there are no missions, it adds the codename to a list, which is printed out at the end.</p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+import time
+
+h = synack.Handler()
+
+ret = []
+
+h.targets.get_registered_summary()
+for t in h.db.targets:
+    time.sleep(1)
+    count = h.missions.get_count(&quot;PUBLISHED&quot;, t.slug)
+    if count &gt; 0:
+        missions = h.missions.get_list(&quot;PUBLISHED&quot;, 1, 1, count, t.slug)
+        if len(missions) == 0:
+            ret.append(t.codename)
+print(ret)
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mission-bot"><a class="header" href="#mission-bot">Mission Bot</a></h1>
 <p>This is a simple example of how you could determine if there are missions every 30 seconds, try to claim some if there are.</p>
 <p>We start by using <code>import synack</code> to bring in the SynackAPI package.
@@ -319,142 +347,158 @@ In the event that one of the State variables is set and is <strong>not</strong> 
 </tbody></table>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
 <p>Within the SynackAPI, various &quot;Plugins&quot; exist to allow us to easily separate functions based on their purpose.</p>
+<h2 id="function-naming-convension"><a class="header" href="#function-naming-convension">Function Naming Convension</a></h2>
+<p>I am trying to keep to the following naming conventions:</p>
+<ul>
+<li>No redundancy (<code>h.missions.get_approved()</code> good, <code>h.missions.get_approved_missions()</code> bad)</li>
+<li><code>h.plugin.get_*</code> functions intend to get data from the Synack API</li>
+<li><code>h.plugin.do_*</code> functions intend to do something with retrieved data or make changes via the Synack API</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">Api</a></h1>
 <p>The Api Plugin is used to interact DIRECTLY with the Synack API.
 It is the last stop before our code touches Synack.</p>
+<!-- toc -->
 <h2 id="apiloginmethod-path-kwargs"><a class="header" href="#apiloginmethod-path-kwargs">api.login(method, path, **kwargs)</a></h2>
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>method</code></td><td>HTTP Method (GET, POST, etc.)</td></tr>
-<tr><td><code>path</code></td><td>The full or partial URL to use with the Login API</td></tr>
-<tr><td><code>**kwargs</code></td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.api.login('POST', 'authenticate', headers=headers, data=data)
+<pre><code class="language-python3">&gt;&gt;&gt; headers = {
+...     &quot;X-CSRF-Token&quot;: &quot;123&quot;
+... }
+&gt;&gt;&gt; data = {
+...     &quot;email&quot;: &quot;some@guy.com&quot;,
+...     &quot;password&quot;: &quot;password1234&quot;
+... }
+&gt;&gt;&gt; h.api.login('POST', 'authenticate', headers=headers, data=data)
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="apinotificationsmethod-path-kwargs"><a class="header" href="#apinotificationsmethod-path-kwargs">api.notifications(method, path, **kwargs)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>This function is used to set up requests sent to <code>https://notifications.synack.com/api/v2/*</code>.<br />
+This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.api.notifications('GET', 'notifications?meta=1')
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>This function is used to set up requests sent to the primary API at <code>https://platform.synack.com/api/*</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>kwargs['headers']</code></td><td>dict</td><td>Headers that should be applied to only the current request</td></tr>
+<tr><td><code>kwargs['query']</code></td><td>dict</td><td>Query parameters that should be added onto the URL</td></tr>
+<tr><td><code>kwargs['data']</code></td><td>dict</td><td>Data parameters that should be used in the Body</td></tr>
+<tr><td></td><td></td><td></td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; query = {
+...     &quot;status&quot;: &quot;PUBLISHED&quot;,
+...     &quot;viewed&quot;: &quot;false&quot;
+... }
+&gt;&gt;&gt; h.api.request('HEAD', 'tasks/v1/tasks', query=query)
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="auth"><a class="header" href="#auth">Auth</a></h1>
-<h2 id="authgen_otp"><a class="header" href="#authgen_otp">auth.gen_otp()</a></h2>
+<h2 id="authdo_check_api_token"><a class="header" href="#authdo_check_api_token">auth.do_check_api_token()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Hits the user profile API endpoint to ensure the api_token is still valid</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_check_api_token()
+True
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authcheck_api_token"><a class="header" href="#authcheck_api_token">auth.check_api_token()</a></h2>
+<h2 id="authdo_gen_otp"><a class="header" href="#authdo_gen_otp">auth.do_gen_otp()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Use your stored otp_secret to generate a current OTP code</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.do_gen_otp()
+'1234567'
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
+<h2 id="authdo_write_login_script"><a class="header" href="#authdo_write_login_script">auth.do_write_login_script()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Writes the current api_token to <code>~/.config/synack/login.js</code> JavaScript file to help with staying logged in.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; auth.do_write_login_script()
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="authget_api_token"><a class="header" href="#authget_api_token">auth.get_api_token()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Walks through the whole authentication workflow to get a new api_token</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_api_token()
+'489hr98hf...eh59'
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="authget_login_csrf"><a class="header" href="#authget_login_csrf">auth.get_login_csrf()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Pulls a CSRF Token from the Login page</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_login_csrf()
+'45h998h4g5...45wh89g9wh'
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="authwrite_login_script"><a class="header" href="#authwrite_login_script">auth.write_login_script()</a></h2>
+<h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get a Login Grant Token by providing an OTP Code</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
+&gt;&gt;&gt; lpt = h.auth.get_login_progress_token(csrf)
+&gt;&gt;&gt; h.auth.get_login_grant_token(csrf, lpt)
+'58t7i...rh87g58'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
+<blockquote>
+<p>Get the Login Progress Token by authenticating with email and password</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
+&gt;&gt;&gt; h.auth.get_login_progress_token(csrf)
+'239rge7...8tehtyg'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
+<blockquote>
+<p>Walks through the whole process of getting a notifications token</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_notifications_token()
+'958htiu...h98f5ht'
 </code></pre>
 </blockquote>
 </blockquote>
@@ -911,13 +955,11 @@ This function takes in several arguments to build information that is sent to <c
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transactions"><a class="header" href="#transactions">Transactions</a></h1>
 <h2 id="transactionsget_balance"><a class="header" href="#transactionsget_balance">transactions.get_balance()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Returns information about your current account balance and pending payouts.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.transactions.get_balance()
+{&quot;total_balance&quot;: &quot;30.0&quot;, &quot;pending_payout&quot;: &quot;0.0&quot;}
 </code></pre>
 </blockquote>
 </blockquote>
@@ -925,12 +967,13 @@ This function takes in several arguments to build information that is sent to <c
 <h2 id="usersget_profileuser_id"><a class="header" href="#usersget_profileuser_id">users.get_profile(user_id)</a></h2>
 <blockquote>
 <p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>str</td><td>The user id to pull back data for<br>(Default: &quot;me&quot;)</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.user.get_profile()
+{&quot;user_id&quot;: &quot;qwerty&quot;, ...}
 </code></pre>
 </blockquote>
 </blockquote>

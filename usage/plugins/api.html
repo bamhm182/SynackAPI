@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/plugins/api.html" class="active">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../usage/plugins/api.html" class="active">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -140,42 +140,65 @@
                         <h1 id="api"><a class="header" href="#api">Api</a></h1>
 <p>The Api Plugin is used to interact DIRECTLY with the Synack API.
 It is the last stop before our code touches Synack.</p>
+<!-- toc -->
 <h2 id="apiloginmethod-path-kwargs"><a class="header" href="#apiloginmethod-path-kwargs">api.login(method, path, **kwargs)</a></h2>
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>method</code></td><td>HTTP Method (GET, POST, etc.)</td></tr>
-<tr><td><code>path</code></td><td>The full or partial URL to use with the Login API</td></tr>
-<tr><td><code>**kwargs</code></td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.api.login('POST', 'authenticate', headers=headers, data=data)
+<pre><code class="language-python3">&gt;&gt;&gt; headers = {
+...     &quot;X-CSRF-Token&quot;: &quot;123&quot;
+... }
+&gt;&gt;&gt; data = {
+...     &quot;email&quot;: &quot;some@guy.com&quot;,
+...     &quot;password&quot;: &quot;password1234&quot;
+... }
+&gt;&gt;&gt; h.api.login('POST', 'authenticate', headers=headers, data=data)
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="apinotificationsmethod-path-kwargs"><a class="header" href="#apinotificationsmethod-path-kwargs">api.notifications(method, path, **kwargs)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>This function is used to set up requests sent to <code>https://notifications.synack.com/api/v2/*</code>.<br />
+This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.api.notifications('GET', 'notifications?meta=1')
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>This function is used to set up requests sent to the primary API at <code>https://platform.synack.com/api/*</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>kwargs['headers']</code></td><td>dict</td><td>Headers that should be applied to only the current request</td></tr>
+<tr><td><code>kwargs['query']</code></td><td>dict</td><td>Query parameters that should be added onto the URL</td></tr>
+<tr><td><code>kwargs['data']</code></td><td>dict</td><td>Data parameters that should be used in the Body</td></tr>
+<tr><td></td><td></td><td></td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; query = {
+...     &quot;status&quot;: &quot;PUBLISHED&quot;,
+...     &quot;viewed&quot;: &quot;false&quot;
+... }
+&gt;&gt;&gt; h.api.request('HEAD', 'tasks/v1/tasks', query=query)
+&lt;class 'requests.models.Response'&gt;
 </code></pre>
 </blockquote>
 </blockquote>
