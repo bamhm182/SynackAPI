@@ -112,7 +112,7 @@ class Auth(Plugin):
             if (loc.href.startsWith("https://login.synack.com/")) {
               loc.replace("https://platform.synack.com");
             }
-          },5000);
+          },60000);
           sessionStorage.setItem("shared-session-com.synack.accessToken",
                                  "''' + self.db.api_token + '''");
         })();

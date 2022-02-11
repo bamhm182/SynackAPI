@@ -11,11 +11,9 @@ from typing import Union
 
 class State(object):
     def __init__(self):
-        self._api_token = None
         self._config_dir = None
         self._debug = None
         self._email = None
-        self._headers = None
         self._http_proxy = None
         self._https_proxy = None
         self._login = None
