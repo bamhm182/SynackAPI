@@ -24,26 +24,16 @@ class AuthTestCase(unittest.TestCase):
         self.auth.db = MagicMock()
         self.auth.users = MagicMock()
 
-    def test_do_gen_otp(self):
-        """Should generates an OTP Token"""
+    def test_build_otp(self):
+        """Should generate a OTP"""
         pyotp.TOTP = MagicMock()
         self.auth.db.otp_secret = "123"
-        self.auth.do_gen_otp()
+        self.auth.build_otp()
         self.assertEqual(7, pyotp.TOTP.return_value.digits)
         self.assertEqual(10, pyotp.TOTP.return_value.interval)
         self.assertEqual('synack', pyotp.TOTP.return_value.issuer)
         pyotp.TOTP.assert_called_with('123')
         pyotp.TOTP.return_value.now.assert_called_with()
-
-    def test_do_check_api_token(self):
-        """Should make a request to get_profile"""
-        self.auth.api.session.headers = dict()
-        self.auth.users = MagicMock()
-        self.auth.users.get_profile.return_value = {
-            'user_id': 'sumwon'
-        }
-        self.assertEqual(True, self.auth.do_check_api_token())
-        self.auth.users.get_profile.assert_called_with()
 
     def test_get_login_progress_token(self):
         """Should get the progress token from valid creds"""
@@ -69,7 +59,7 @@ class AuthTestCase(unittest.TestCase):
 
     def test_get_login_grant_token(self):
         """Should get the grant token from valid authy TOTP"""
-        self.auth.do_gen_otp = MagicMock(return_value="12345")
+        self.auth.build_otp = MagicMock(return_value="12345")
         self.auth.api.login.return_value.status_code = 200
         self.auth.api.login.return_value.json.return_value = {
             "grant_token": "qwfars"
@@ -90,9 +80,11 @@ class AuthTestCase(unittest.TestCase):
                                                data=data)
 
     def test_get_api_token(self):
-        """Should get the api token"""
+        """Should complete the login workflow when check fails"""
         self.auth.db.api_token = ""
-        self.auth.do_write_login_script = MagicMock()
+        self.auth.set_login_script = MagicMock()
+        self.auth.users.get_profile = MagicMock()
+        self.auth.users.get_profile.return_value = None
         self.auth.get_login_csrf = MagicMock(return_value="csrf_fwlnm")
         self.auth.get_login_progress_token = MagicMock()
         self.auth.get_login_progress_token.return_value = "pt_rsaemnt"
@@ -103,10 +95,18 @@ class AuthTestCase(unittest.TestCase):
         self.auth.api.request.return_value.json.return_value = ret_json
         self.assertEqual("api_lwfaume", self.auth.get_api_token())
         self.auth.get_login_csrf.assert_called_with()
-        self.auth.do_write_login_script.assert_called_with()
+        self.auth.set_login_script.assert_called_with()
         self.auth.get_login_progress_token.assert_called_with("csrf_fwlnm")
         self.auth.get_login_grant_token.assert_called_with("csrf_fwlnm",
                                                            "pt_rsaemnt")
+
+    def test_get_api_token_login_success(self):
+        """Should return the database token when check succeeds"""
+        self.auth.db.api_token = "qweqweqwe"
+        self.auth.set_login_script = MagicMock()
+        self.auth.users.get_profile = MagicMock()
+        self.auth.users.get_profile.return_value = {"user_id": "john"}
+        self.assertEqual("qweqweqwe", self.auth.get_api_token())
 
     def test_get_notifications_token(self):
         """Should get the notifications token"""
@@ -128,13 +128,13 @@ class AuthTestCase(unittest.TestCase):
         self.auth.api.request.assert_called_with("GET",
                                                  "https://login.synack.com")
 
-    def test_do_write_login_script(self):
+    def test_set_login_script(self):
         """Should attempt to create a login script with the api token"""
         self.auth.db.api_token = "cvghytrfdvghj"
         self.auth.state.config_dir = pathlib.Path("/tmp")
         m = unittest.mock.mock_open()
         with unittest.mock.patch("builtins.open", m, create=True):
-            ret = self.auth.do_write_login_script()
+            ret = self.auth.set_login_script()
             self.assertTrue(self.auth.db.api_token in ret)
         m.assert_called_with(self.auth.state.config_dir / 'login.js', 'w')
         m.return_value.write.assert_called()

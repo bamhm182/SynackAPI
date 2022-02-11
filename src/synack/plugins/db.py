@@ -29,37 +29,7 @@ class Db(Plugin):
     def _fk_pragma_on_connect(dbapi_con, con_record):
         dbapi_con.execute('pragma foreign_keys=ON')
 
-    def migrate(self):
-        db_folder = Path(__file__).parent.parent / 'db'
-
-        config = alembic.config.Config()
-        config.set_main_option('script_location', str(db_folder / 'alembic'))
-        config.set_main_option('version_locations',
-                               str(db_folder / 'alembic/versions'))
-        config.set_main_option('sqlalchemy.url',
-                               f'sqlite:///{str(self.sqlite_db)}')
-        alembic.command.upgrade(config, 'head')
-
-    def get_config(self, name=None):
-        session = self.Session()
-        config = session.query(Config).filter_by(id=1).first()
-        if not config:
-            config = Config()
-            session.add(config)
-        session.close()
-        return getattr(config, name) if name else config
-
-    def set_config(self, name, value):
-        session = self.Session()
-        config = session.query(Config).filter_by(id=1).first()
-        if not config:
-            config = Config()
-            session.add(config)
-        setattr(config, name, value)
-        session.commit()
-        session.close()
-
-    def update_categories(self, categories):
+    def add_categories(self, categories):
         session = self.Session()
         q = session.query(Category)
         for c in categories:
@@ -73,7 +43,7 @@ class Db(Plugin):
         session.commit()
         session.close()
 
-    def update_organizations(self, targets, session):
+    def add_organizations(self, targets, session):
         q = session.query(Organization)
         for t in targets:
             if t.get('organization'):
@@ -85,9 +55,9 @@ class Db(Plugin):
                 db_o = Organization(slug=slug)
                 session.add(db_o)
 
-    def update_targets(self, targets, **kwargs):
+    def add_targets(self, targets):
         session = self.Session()
-        self.update_organizations(targets, session)
+        self.add_organizations(targets, session)
         q = session.query(Target)
         for t in targets:
             if t.get('organization'):
@@ -109,74 +79,58 @@ class Db(Plugin):
             db_t.is_registered = t.get('isRegistered')
             db_t.is_updated = t.get('isUpdated')
             db_t.last_submitted = t.get('lastSubmitted')
-            for k in kwargs.keys():
-                setattr(db_t, k, kwargs[k])
         session.commit()
         session.close()
 
-    def wipe_targets(self):
-        session = self.Session()
-        session.query(Target).delete()
-        session.commit()
-        session.close()
-
-    def filter_targets(self, **kwargs):
+    def find_targets(self, **kwargs):
         session = self.Session()
         targets = session.query(Target).filter_by(**kwargs).all()
         session.expunge_all()
         session.close()
         return targets
 
-    @property
-    def targets(self):
+    def get_config(self, name=None):
         session = self.Session()
-        targets = session.query(Target).all()
+        config = session.query(Config).filter_by(id=1).first()
+        if not config:
+            config = Config()
+            session.add(config)
         session.close()
-        return targets
+        return getattr(config, name) if name else config
+
+    def remove_targets(self, **kwargs):
+        session = self.Session()
+        session.query(Target).filter_by(**kwargs).delete()
+        session.commit()
+        session.close()
+
+    def set_config(self, name, value):
+        session = self.Session()
+        config = session.query(Config).filter_by(id=1).first()
+        if not config:
+            config = Config()
+            session.add(config)
+        setattr(config, name, value)
+        session.commit()
+        session.close()
+
+    def set_migration(self):
+        db_folder = Path(__file__).parent.parent / 'db'
+
+        config = alembic.config.Config()
+        config.set_main_option('script_location', str(db_folder / 'alembic'))
+        config.set_main_option('version_locations',
+                               str(db_folder / 'alembic/versions'))
+        config.set_main_option('sqlalchemy.url',
+                               f'sqlite:///{str(self.sqlite_db)}')
+        alembic.command.upgrade(config, 'head')
 
     @property
-    def user_id(self):
-        return self.get_config('user_id')
-
-    @user_id.setter
-    def user_id(self, value):
-        self.set_config('user_id', value)
-
-    @property
-    def api_token(self):
-        return self.get_config('api_token')
-
-    @api_token.setter
-    def api_token(self, value):
-        self.set_config('api_token', value)
-
-    @property
-    def http_proxy(self):
-        return self.get_config('http_proxy')
-
-    @http_proxy.setter
-    def http_proxy(self, value):
-        self.set_config('http_proxy', value)
-
-    @property
-    def https_proxy(self):
-        return self.get_config('https_proxy')
-
-    @https_proxy.setter
-    def https_proxy(self, value):
-        self.set_config('https_proxy', value)
-
-    @property
-    def use_proxies(self):
-        if self.state.use_proxies is None:
-            return self.get_config('use_proxies')
-        else:
-            return self.state.use_proxies
-
-    @use_proxies.setter
-    def use_proxies(self, value):
-        self.state.use_proxies = value
-        self.set_config('use_proxies', value)
+    def categories(self):
+        session = self.Session()
+        categories = session.query(Category).all()
+        session.close()
+        return categories
 
     @property
     def proxies(self):
@@ -196,12 +150,31 @@ class Db(Plugin):
         }
 
     @property
-    def notifications_token(self):
-        return self.get_config('notifications_token')
+    def targets(self):
+        session = self.Session()
+        targets = session.query(Target).all()
+        session.close()
+        return targets
 
-    @notifications_token.setter
-    def notifications_token(self, value):
-        self.set_config('notifications_token', value)
+    @property
+    def api_token(self):
+        return self.get_config('api_token')
+
+    @api_token.setter
+    def api_token(self, value):
+        self.set_config('api_token', value)
+
+    @property
+    def debug(self):
+        if self.state.debug is None:
+            return self.get_config('debug')
+        else:
+            return self.state.debug
+
+    @debug.setter
+    def debug(self, value):
+        self.state.debug = value
+        self.set_config('debug', value)
 
     @property
     def email(self):
@@ -221,21 +194,28 @@ class Db(Plugin):
         self.set_config('email', value)
 
     @property
-    def password(self):
-        if self.state.password is None:
-            ret = self.get_config('password')
-            if ret is None:
-                ret = input("Synack Password: ")
-                self.password = ret
-            self.state.password = ret
-            return ret
-        else:
-            return self.state.password
+    def http_proxy(self):
+        return self.get_config('http_proxy')
 
-    @password.setter
-    def password(self, value):
-        self.state.password = value
-        self.set_config('password', value)
+    @http_proxy.setter
+    def http_proxy(self, value):
+        self.set_config('http_proxy', value)
+
+    @property
+    def https_proxy(self):
+        return self.get_config('https_proxy')
+
+    @https_proxy.setter
+    def https_proxy(self, value):
+        self.set_config('https_proxy', value)
+
+    @property
+    def notifications_token(self):
+        return self.get_config('notifications_token')
+
+    @notifications_token.setter
+    def notifications_token(self, value):
+        self.set_config('notifications_token', value)
 
     @property
     def otp_secret(self):
@@ -255,6 +235,23 @@ class Db(Plugin):
         self.set_config('otp_secret', value)
 
     @property
+    def password(self):
+        if self.state.password is None:
+            ret = self.get_config('password')
+            if ret is None:
+                ret = input("Synack Password: ")
+                self.password = ret
+            self.state.password = ret
+            return ret
+        else:
+            return self.state.password
+
+    @password.setter
+    def password(self, value):
+        self.state.password = value
+        self.set_config('password', value)
+
+    @property
     def template_dir(self):
         if self.state.template_dir is None:
             ret = Path(self.get_config('template_dir')).expanduser().resolve()
@@ -268,20 +265,21 @@ class Db(Plugin):
         self.set_config('template_dir', value)
 
     @property
-    def categories(self):
-        session = self.Session()
-        categories = session.query(Category).all()
-        session.close()
-        return categories
+    def use_proxies(self):
+        if self.state.use_proxies is None:
+            return self.get_config('use_proxies')
+        else:
+            return self.state.use_proxies
+
+    @use_proxies.setter
+    def use_proxies(self, value):
+        self.state.use_proxies = value
+        self.set_config('use_proxies', value)
 
     @property
-    def debug(self):
-        if self.state.debug is None:
-            return self.get_config('debug')
-        else:
-            return self.state.debug
+    def user_id(self):
+        return self.get_config('user_id')
 
-    @debug.setter
-    def debug(self, value):
-        self.state.debug = value
-        self.set_config('debug', value)
+    @user_id.setter
+    def user_id(self, value):
+        self.set_config('user_id', value)

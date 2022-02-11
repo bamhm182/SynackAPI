@@ -39,7 +39,7 @@ class DbTestCase(unittest.TestCase):
         self.db._fk_pragma_on_connect(mock, None)
         mock.execute.assert_called_with('pragma foreign_keys=ON')
 
-    def test_migrate(self):
+    def test_set_migration(self):
         db_dir = pathlib.Path(__file__).parent.parent / 'src/synack/db'
         conf_dir = pathlib.Path('~/.config/synack').expanduser().resolve()
         mock = MagicMock()
@@ -53,7 +53,7 @@ class DbTestCase(unittest.TestCase):
         with patch.object(alembic.config, 'Config') as mock_config:
             mock_config.return_value = mock
             with patch.object(alembic.command, 'upgrade') as mock_upgrade:
-                self.db.migrate()
+                self.db.set_migration()
                 mock_config.return_value.set_main_option.\
                     assert_has_calls(calls)
                 mock_upgrade.assert_called_with(mock, 'head')
@@ -71,7 +71,7 @@ class DbTestCase(unittest.TestCase):
         query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_update_categories(self):
+    def test_add_categories(self):
         self.db.Session = MagicMock()
         cats = [{
             "category_id": 10,
@@ -85,7 +85,7 @@ class DbTestCase(unittest.TestCase):
         }]
         query = self.db.Session.return_value.query
 
-        self.db.update_categories(cats)
+        self.db.add_categories(cats)
 
         query.assert_called_with(synack.db.models.Category)
         query.return_value.filter_by.assert_called_with(id=10)
@@ -93,7 +93,7 @@ class DbTestCase(unittest.TestCase):
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_update_categories_empty_db(self):
+    def test_add_categories_empty_db(self):
         self.db.Session = MagicMock()
         cats = [{
             "category_id": 10,
@@ -108,7 +108,7 @@ class DbTestCase(unittest.TestCase):
         query = self.db.Session.return_value.query
         query.return_value.filter_by.return_value.first.return_value = None
 
-        self.db.update_categories(cats)
+        self.db.add_categories(cats)
 
         query.assert_called_with(synack.db.models.Category)
         query.return_value.filter_by.assert_called_with(id=10)
@@ -156,22 +156,34 @@ class DbTestCase(unittest.TestCase):
         query.assert_called_with(synack.db.models.Config)
         self.db.Session.return_value.add.assert_called()
 
-    def test_wipe_targets(self):
+    def test_remove_targets(self):
         self.db.Session = MagicMock()
-        self.db.wipe_targets()
+        self.db.remove_targets()
         query = self.db.Session.return_value.query
         self.db.Session.assert_called_with()
         query.assert_called_with(synack.db.models.Target)
-        query.return_value.delete.assert_called_with()
+        query.return_value.filter_by.assert_called_with()
+        query.return_value.filter_by.return_value.delete.assert_called_with()
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_filter_targets(self):
+    def test_remove_targets_specific(self):
+        self.db.Session = MagicMock()
+        self.db.remove_targets(codename="BADCAT")
+        query = self.db.Session.return_value.query
+        self.db.Session.assert_called_with()
+        query.assert_called_with(synack.db.models.Target)
+        query.return_value.filter_by.assert_called_with(codename="BADCAT")
+        query.return_value.filter_by.return_value.delete.assert_called_with()
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_find_targets(self):
         self.db.Session = MagicMock()
         query = self.db.Session.return_value.query
         query.return_value.filter_by.return_value.all.return_value = 'ret'
 
-        self.assertEqual('ret', self.db.filter_targets(codename='SLOPPYFISH'))
+        self.assertEqual('ret', self.db.find_targets(codename='SLOPPYFISH'))
 
         self.db.Session.assert_called_with()
         query.assert_called_with(synack.db.models.Target)
@@ -284,7 +296,7 @@ class DbTestCase(unittest.TestCase):
 
         self.db.get_config.assert_not_called()
 
-    def test_update_organizations(self):
+    def test_add_organizations(self):
         """Should update Organizations table if organization.slug provided"""
         mock = MagicMock()
         targets = [{
@@ -292,14 +304,14 @@ class DbTestCase(unittest.TestCase):
         }]
         mock.query.return_value.filter_by.return_value.\
             first.return_value = None
-        self.db.update_organizations(targets, mock)
+        self.db.add_organizations(targets, mock)
         mock.query.assert_called_with(synack.db.models.Organization)
         mock.query.return_value.filter_by.assert_called_with(slug='qweqwe')
         mock.query.return_value.filter_by.return_value.first.\
             assert_called_with()
         mock.add.assert_called()
 
-    def test_update_organizations_organization_id(self):
+    def test_add_organizations_organization_id(self):
         """Should update Organizations table if organization_id provided"""
         mock = MagicMock()
         targets = [{
@@ -307,14 +319,14 @@ class DbTestCase(unittest.TestCase):
         }]
         mock.query.return_value.filter_by.return_value.\
             first.return_value = None
-        self.db.update_organizations(targets, mock)
+        self.db.add_organizations(targets, mock)
         mock.query.assert_called_with(synack.db.models.Organization)
         mock.query.return_value.filter_by.assert_called_with(slug='asdasd')
         mock.query.return_value.filter_by.return_value.first.\
             assert_called_with()
         mock.add.assert_called()
 
-    def test_update_targets(self):
+    def test_add_targets(self):
         """Should update Targets table"""
         self.db.Session = MagicMock()
 
@@ -326,11 +338,11 @@ class DbTestCase(unittest.TestCase):
             "category": {"id": 10}
         }]
 
-        self.db.update_targets(targets, something='oranother')
+        self.db.add_targets(targets)
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_update_targets_empty_db(self):
+    def test_add_targets_empty_db(self):
         """Should update Targets table with new Target"""
         self.db.Session = MagicMock()
         query = self.db.Session.return_value.query
@@ -344,7 +356,7 @@ class DbTestCase(unittest.TestCase):
             "category": {"id": 10}
         }]
 
-        self.db.update_targets(targets, something='oranother')
+        self.db.add_targets(targets)
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 

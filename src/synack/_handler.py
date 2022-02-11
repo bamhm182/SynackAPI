@@ -22,5 +22,5 @@ class Handler:
         self.login()
 
     def login(self):
-        if self.state.login and not self.auth.do_check_api_token():
+        if self.state.login:
             self.auth.get_api_token()

@@ -14,29 +14,7 @@ class Targets(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def do_register_all(self):
-        """Register all unregistered targets"""
-        unreg = self.get_unregistered()
-        data = '{"ResearcherListing":{"terms":1}}'
-        ret = []
-        for t in unreg:
-            res = self.api.request('POST',
-                                   f'targets/{t["slug"]}/signup',
-                                   data=data)
-            if res.status_code == 200:
-                ret.append(t)
-        if len(unreg) >= 15:
-            ret.extend(self.do_register_all())
-        return ret
-
-    def get_assessments(self):
-        """Check which assessments have been completed"""
-        res = self.api.request('GET', 'assessments')
-        if res.status_code == 200:
-            self.db.update_categories(res.json())
-            return self.db.categories
-
-    def get_codename_from_slug(self, slug):
+    def build_codename_from_slug(self, slug):
         """Return a codename for a target given its slug
 
         Arguments:
@@ -51,6 +29,24 @@ class Targets(Plugin):
             codename = targets[0].codename
         return codename
 
+    def build_slug_from_codename(self, codename):
+        """Return a slug for a target given its codename"""
+        slug = None
+        targets = self.db.filter_targets(codename=codename)
+        if not targets:
+            self.get_registered_summary()
+            targets = self.db.filter_targets(codename=codename)
+        if targets:
+            slug = targets[0].slug
+        return slug
+
+    def get_assessments(self):
+        """Check which assessments have been completed"""
+        res = self.api.request('GET', 'assessments')
+        if res.status_code == 200:
+            self.db.add_categories(res.json())
+            return self.db.categories
+
     def get_credentials(self, **kwargs):
         """Get Credentials for a target"""
         target = self.db.filter_targets(**kwargs)[0]
@@ -64,7 +60,7 @@ class Targets(Plugin):
             if res.status_code == 200:
                 return res.json()
 
-    def get_current(self):
+    def get_connected(self):
         """Return information about the currenly selected target"""
         res = self.api.request('GET', 'launchpoint')
         if res.status_code == 200:
@@ -77,7 +73,7 @@ class Targets(Plugin):
                 status = "Connected"
             ret = {
                 "slug": slug,
-                "codename": self.get_codename_from_slug(slug),
+                "codename": self.build_codename_from_slug(slug),
                 "status": status
             }
             return ret
@@ -87,22 +83,11 @@ class Targets(Plugin):
         res = self.api.request('GET', 'targets/registered_summary')
         ret = []
         if res.status_code == 200:
-            self.db.update_targets(res.json())
+            self.db.add_targets(res.json())
             ret = dict()
             for t in res.json():
                 ret[t['id']] = t
         return ret
-
-    def get_slug_from_codename(self, codename):
-        """Return a slug for a target given its codename"""
-        slug = None
-        targets = self.db.filter_targets(codename=codename)
-        if not targets:
-            self.get_registered_summary()
-            targets = self.db.filter_targets(codename=codename)
-        else:
-            slug = targets[0].slug
-        return slug
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
@@ -121,7 +106,23 @@ class Targets(Plugin):
         res = self.api.request('GET', 'targets', query=query)
         ret = []
         if res.status_code == 200:
-            self.db.update_targets(res.json(), is_registered=True)
+            self.db.add_targets(res.json(), is_registered=True)
             for t in res.json():
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
+        return ret
+
+    def set_registered(self, targets=None):
+        """Register all unregistered targets"""
+        if targets is None:
+            targets = self.get_unregistered()
+        data = '{"ResearcherListing":{"terms":1}}'
+        ret = []
+        for t in targets:
+            res = self.api.request('POST',
+                                   f'targets/{t["slug"]}/signup',
+                                   data=data)
+            if res.status_code == 200:
+                ret.append(t)
+        if len(targets) >= 15:
+            ret.extend(self.set_registered())
         return ret

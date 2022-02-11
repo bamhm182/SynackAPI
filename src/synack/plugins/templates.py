@@ -17,18 +17,25 @@ class Templates(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def do_build_filepath(self, mission):
+    def build_filepath(self, mission):
         f = self.db.template_dir
-        f = f / self.do_convert_name(mission['taskType'])
+        f = f / self.build_safe_name(mission['taskType'])
         if mission.get('asset'):
-            f = f / self.do_convert_name(mission['asset'])
+            f = f / self.build_safe_name(mission['asset'])
         else:
-            f = f / self.do_convert_name(mission['assetTypes'][0])
+            f = f / self.build_safe_name(mission['assetTypes'][0])
         f.mkdir(parents=True, exist_ok=True)
-        f = f / self.do_convert_name(mission['title'])
+        f = f / self.build_safe_name(mission['title'])
         return str(f) + '.txt'
 
-    def do_build_sections(self, path):
+    @staticmethod
+    def build_safe_name(name):
+        """Simplify a name to use for a file path"""
+        name = name.lower()
+        name = re.sub('[^a-z]', '_', name)
+        return re.sub('_+', '_', name)
+
+    def build_sections(self, path):
         ret = dict()
         reg = r"\[\[\[(.+?)(?=\]\]\])\]\]\](.+?)(?=\[\[\[)"
         with open(path, 'r') as fp:
@@ -38,25 +45,19 @@ class Templates(Plugin):
                 ret[s[0].strip()] = s[1].strip()
         return ret
 
-    @staticmethod
-    def do_convert_name(name):
-        """Simplify a name to use for a file path"""
-        name = name.lower()
-        name = re.sub('[^a-z]', '_', name)
-        return re.sub('_+', '_', name)
-
-    def do_retrieve_local(self, mission):
-        path = self.do_build_filepath(mission)
+    def get_file(self, mission):
+        """Get a template file from disk and return its sections"""
+        path = self.build_filepath(mission)
         if Path(path).exists():
-            return self.do_build_sections(path)
+            return self.build_sections(path)
 
-    def do_save_local(self, template):
+    def set_file(self, template):
         """Save a template json to disk
 
         Arguments:
         template -- A template object from missions.get_evidences
         """
-        path = self.do_build_filepath(template)
+        path = self.build_filepath(template)
         if template["version"] == "2" and not Path(path).exists():
             out = "\n".join([
                 "[[[structuredResponse]]]\n",

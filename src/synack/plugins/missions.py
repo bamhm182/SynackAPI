@@ -19,54 +19,7 @@ class Missions(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def do_claim(self, mission):
-        """Try to claim a single mission
-
-        Arguments:
-        mission -- A single mission
-        """
-        return self.do_interact(mission, "CLAIM")
-
-    def do_interact(self, mission, action):
-        """Interact with single mission
-
-        Arguments:
-        mission -- A single mission
-        """
-        data = {
-            "type": action
-        }
-        orgId = mission["organizationUid"]
-        listingId = mission["listingUid"]
-        campaignId = mission["campaignUid"]
-        taskId = mission["id"]
-        payout = str(mission["payout"]["amount"])
-        title = mission["title"]
-
-        res = self.api.request('POST',
-                               'tasks/v1' +
-                               '/organizations/' + orgId +
-                               '/listings/' + listingId +
-                               '/campaigns/' + campaignId +
-                               '/tasks/' + taskId +
-                               '/transitions',
-                               data=data)
-        return {
-            "target": listingId,
-            "title": title,
-            "payout": payout,
-            "claimed": True if res.status_code == 201 else False
-        }
-
-    def do_release(self, mission):
-        """Try to release a single mission
-
-        Arguments:
-        missions -- A single mission
-        """
-        return self.do_interact(mission, "DISCLAIM")
-
-    def do_sort(self, missions, sort="payout-high"):
+    def build_order(self, missions, sort="payout-high"):
         """Sort a list of missions by what's desired first
 
         Arguments:
@@ -89,7 +42,7 @@ class Missions(Plugin):
             missions.reverse()
         return missions
 
-    def do_summarize(self, missions):
+    def build_summary(self, missions):
         """Return a basic summary from a list of missions
 
         Arguments:
@@ -113,45 +66,52 @@ class Missions(Plugin):
             ret['value'] = ret['value'] + m['payout']['amount']
         return ret
 
-    def do_upload_evidences(self, mission):
-        """Upload a template to a mission
+    def get(self, status="PUBLISHED",
+            max_pages=1, page=1, per_page=20, listing_uids=None):
+        """Get a list of missions given a status
 
         Arguments:
-        mission -- A single mission
+        status -- String matching the type of missions
+                  (PUBLISHED, CLAIMED, FOR_REVIEW, APPROVED)
+        max_pages -- Maximum number of pages to query
+        page -- Starting page
+        per_page -- Missions to return per page
+                    Make sure this number is logical
+                    (Bad: per_page=5000, per_page=1&max_pages=10)
+        listing_uids -- A specific listing ID to check for missions
         """
-        template = self.templates.get_template(mission)
-        if template:
-            curr = self.get_evidences(mission)
-            safe = True
-            for f in ['introduction', 'testing_methodology',
-                      'conclusion']:
-                if len(curr.get(f)) >= 20:
-                    safe = False
-                    break
-            if safe:
-                res = self.api.request('PATCH',
-                                       'tasks/v2/tasks/' +
-                                       mission['id'] +
-                                       '/evidences',
-                                       data=template)
-                if res.status_code == 200:
-                    ret = res.json()
-                    ret["title"] = mission["title"]
-                    ret["codename"] = mission["listingCodename"]
-                    return ret
-
+        query = {
+                'status': status,
+                'perPage': per_page,
+                'page': page,
+                'viewed': "true"
+        }
+        if listing_uids:
+            query["listingUids"] = listing_uids
+        res = self.api.request('GET',
+                               'tasks/v2/tasks',
+                               query=query)
+        if res.status_code == 200:
+            ret = res.json()
+            if len(ret) == per_page and page < max_pages:
+                new = self.get(status,
+                               max_pages,
+                               page+1,
+                               per_page)
+                ret.extend(new)
+            return ret
 
     def get_approved(self):
         """Get a list of missions currently approved"""
-        return self.get_list("APPROVED")
+        return self.get("APPROVED")
 
     def get_available(self):
         """Get a list of missions currently available"""
-        return self.get_list("PUBLISHED")
+        return self.get("PUBLISHED")
 
     def get_claimed(self):
         """Get a list of all missions you currently have"""
-        return self.get_list("CLAIMED")
+        return self.get("CLAIMED")
 
     def get_count(self, status="PUBLISHED", listing_uids=None):
         """Get the number of missions currently available
@@ -193,41 +153,78 @@ class Missions(Plugin):
 
     def get_in_review(self):
         """Get a list of missions currently in review"""
-        return self.get_list("FOR_REVIEW")
+        return self.get("FOR_REVIEW")
 
-    def get_list(self, status="PUBLISHED",
-                 max_pages=1, page=1, per_page=20, listing_uids=None):
-        """Get a list of missions given a status
+    def set_claimed(self, mission):
+        """Try to claim a single mission
 
         Arguments:
-        status -- String matching the type of missions
-                  (PUBLISHED, CLAIMED, FOR_REVIEW, APPROVED)
-        max_pages -- Maximum number of pages to query
-        page -- Starting page
-        per_page -- Missions to return per page
-                    Make sure this number is logical
-                    (Bad: per_page=5000, per_page=1&max_pages=10)
-        listing_uids -- A specific listing ID to check for missions
+        mission -- A single mission
         """
-        query = {
-                'status': status,
-                'perPage': per_page,
-                'page': page,
-                'viewed': "true"
+        return self.set_status(mission, "CLAIM")
+
+    def set_disclaimed(self, mission):
+        """Try to release a single mission
+
+        Arguments:
+        missions -- A single mission
+        """
+        return self.set_status(mission, "DISCLAIM")
+
+    def set_evidences(self, mission):
+        """Upload a template to a mission
+
+        Arguments:
+        mission -- A single mission
+        """
+        template = self.templates.get_template(mission)
+        if template:
+            curr = self.get_evidences(mission)
+            safe = True
+            for f in ['introduction', 'testing_methodology',
+                      'conclusion']:
+                if len(curr.get(f)) >= 20:
+                    safe = False
+                    break
+            if safe:
+                res = self.api.request('PATCH',
+                                       'tasks/v2/tasks/' +
+                                       mission['id'] +
+                                       '/evidences',
+                                       data=template)
+                if res.status_code == 200:
+                    ret = res.json()
+                    ret["title"] = mission["title"]
+                    ret["codename"] = mission["listingCodename"]
+                    return ret
+
+    def set_status(self, mission, action):
+        """Interact with single mission
+
+        Arguments:
+        mission -- A single mission
+        """
+        data = {
+            "type": action
         }
-        if listing_uids:
-            query["listingUids"] = listing_uids
-        res = self.api.request('GET',
-                               'tasks/v2/tasks',
-                               query=query)
-        if res.status_code == 200:
-            ret = res.json()
-            if len(ret) == per_page and page < max_pages:
-                new = self.get_list(status,
-                                    max_pages,
-                                    page+1,
-                                    per_page)
-                ret.extend(new)
-            return ret
+        orgId = mission["organizationUid"]
+        listingId = mission["listingUid"]
+        campaignId = mission["campaignUid"]
+        taskId = mission["id"]
+        payout = str(mission["payout"]["amount"])
+        title = mission["title"]
 
-
+        res = self.api.request('POST',
+                               'tasks/v1' +
+                               '/organizations/' + orgId +
+                               '/listings/' + listingId +
+                               '/campaigns/' + campaignId +
+                               '/tasks/' + taskId +
+                               '/transitions',
+                               data=data)
+        return {
+            "target": listingId,
+            "title": title,
+            "payout": payout,
+            "claimed": True if res.status_code == 201 else False
+        }

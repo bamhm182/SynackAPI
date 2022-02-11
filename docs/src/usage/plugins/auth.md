@@ -1,32 +1,15 @@
 # Auth
 
-## auth.do_check_api_token()
+This plugin deals with authenticating the user to Synack.
 
-> Hits the user profile API endpoint to ensure the api_token is still valid
->
->> Examples
->> ```python3
->> >>> h.auth.do_check_api_token()
->> True
->> ```
-
-## auth.do_gen_otp()
+## auth.build_otp()
 
 > Use your stored otp_secret to generate a current OTP code
 >
 >> Examples
 >> ```python3
->> >>> h.auth.do_gen_otp()
+>> >>> h.auth.build_otp()
 >> '1234567'
->> ```
-
-## auth.do_write_login_script()
-
-> Writes the current api_token to `~/.config/synack/login.js` JavaScript file to help with staying logged in.
->
->> Examples
->> ```python3
->> >>> auth.do_write_login_script()
 >> ```
 
 ## auth.get_api_token()
@@ -82,3 +65,11 @@
 >> '958htiu...h98f5ht'
 >> ```
 
+## auth.set_login_script()
+
+> Writes the current api_token to `~/.config/synack/login.js` JavaScript file to help with staying logged in.
+>
+>> Examples
+>> ```python3
+>> >>> auth.set_login_script()
+>> ```

@@ -1,9 +1,9 @@
 # Api
 
 The Api Plugin is used to interact DIRECTLY with the Synack API.
-It is the last stop before our code touches Synack.
+It is the last stop before our code is sent to the Synack API.
 
-<!-- toc -->
+The functions within this plugin don't follow the standard naming convention.
 
 ## api.login(method, path, **kwargs)
 

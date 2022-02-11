@@ -9,11 +9,11 @@ We take that to `import synack` just as we would in a full script.
 We then have a longer command that creates the handler, then calls the `targets.do_register_all()` function to get and register all unregistered targets.
 
 ```bash
-python3 -c "import synack; synack.Handler().targets.do_register_all()"
+python3 -c "import synack; synack.Handler().targets.set_registered()"
 ```
 
 This could be thrown into a cronjob (`crontab -e`) as seen below to register any new targets once an hour:
 
 ```sh
-0 * * * * python3 -c "import synack; synack.Handler().targets.do_register_all()"
+0 * * * * python3 -c "import synack; synack.Handler().targets.set_registered()"
 ```

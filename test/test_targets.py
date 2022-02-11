@@ -51,17 +51,17 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.return_value.json.return_value = assessments
         self.targets.db.categories = [cat1]
         self.assertEqual([cat1], self.targets.get_assessments())
-        self.targets.db.update_categories.assert_called_with(assessments)
+        self.targets.db.add_categories.assert_called_with(assessments)
 
-    def test_get_slug_from_codename(self):
+    def test_build_slug_from_codename(self):
         """Should return a slug for a given codename"""
         ret_targets = [Target(slug="qwerty")]
         self.targets.db.filter_targets.return_value = ret_targets
         self.assertEqual("qwerty",
-                         self.targets.get_slug_from_codename("qwerty"))
+                         self.targets.build_slug_from_codename("qwerty"))
         self.targets.db.filter_targets.assert_called_with(codename="qwerty")
 
-    def test_get_slug_from_codename_no_targets(self):
+    def test_build_slug_from_codename_no_targets(self):
         """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [
             [],
@@ -72,20 +72,21 @@ class TargetsTestCase(unittest.TestCase):
             unittest.mock.call(codename="CHONKEYMONKEY")
         ]
         self.targets.get_registered_summary = MagicMock()
-        self.assertEqual("qwerty",
-                         self.targets.get_slug_from_codename("CHONKEYMONKEY"))
+
+        slug = self.targets.build_slug_from_codename("CHONKEYMONKEY")
+        self.assertEqual("qwerty", slug)
         self.targets.db.filter_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
-    def test_get_codename_from_slug(self):
+    def test_build_codename_from_slug(self):
         """Should return a codename for a given slug"""
         ret_targets = [Target(codename="SLOPPYSLUG")]
         self.targets.db.filter_targets.return_value = ret_targets
         self.assertEqual("SLOPPYSLUG",
-                         self.targets.get_codename_from_slug("qwfars"))
+                         self.targets.build_codename_from_slug("qwfars"))
         self.targets.db.filter_targets.assert_called_with(slug="qwfars")
 
-    def test_get_codename_from_slug_no_targets(self):
+    def test_build_codename_from_slug_no_targets(self):
         """Should update the targets if empty"""
         self.targets.db.filter_targets.side_effect = [
             [],
@@ -97,11 +98,11 @@ class TargetsTestCase(unittest.TestCase):
         ]
         self.targets.get_registered_summary = MagicMock()
         self.assertEqual("SLOPPYSLUG",
-                         self.targets.get_codename_from_slug("qwfars"))
+                         self.targets.build_codename_from_slug("qwfars"))
         self.targets.db.filter_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
-    def test_get_current(self):
+    def test_get_connected(self):
         """Should make a request to get the currently selected target"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
@@ -109,16 +110,16 @@ class TargetsTestCase(unittest.TestCase):
             "slug": "qwfars",
             "status": "connected"
         }
-        self.targets.get_codename_from_slug = MagicMock()
-        self.targets.get_codename_from_slug.return_value = "SLOPPYSLUG"
+        self.targets.build_codename_from_slug = MagicMock()
+        self.targets.build_codename_from_slug.return_value = "SLOPPYSLUG"
         out = {
             "slug": "qwfars",
             "codename": "SLOPPYSLUG",
             "status": "Connected"
         }
-        self.assertEqual(out, self.targets.get_current())
+        self.assertEqual(out, self.targets.get_connected())
 
-    def test_get_current_pending(self):
+    def test_get_connected_pending(self):
         """Should return the pending target if one is pending"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
@@ -126,14 +127,14 @@ class TargetsTestCase(unittest.TestCase):
             "slug": "",
             "status": ""
         }
-        self.targets.get_codename_from_slug = MagicMock()
-        self.targets.get_codename_from_slug.return_value = "SLOPPYSLUG"
+        self.targets.build_codename_from_slug = MagicMock()
+        self.targets.build_codename_from_slug.return_value = "SLOPPYSLUG"
         out = {
             "slug": "qwfars",
             "codename": "SLOPPYSLUG",
             "status": "Connecting"
         }
-        self.assertEqual(out, self.targets.get_current())
+        self.assertEqual(out, self.targets.get_connected())
 
     def test_get_registered_summary(self):
         """Should make a request to get basic info about registered targets"""
@@ -221,7 +222,7 @@ class TargetsTestCase(unittest.TestCase):
                                                     "targets",
                                                     query=query)
 
-    def test_do_register_all(self):
+    def test_set_registered(self):
         """Should register each unregistered target"""
         self.targets.get_unregistered = MagicMock()
         unreg = [
@@ -244,10 +245,10 @@ class TargetsTestCase(unittest.TestCase):
         ]
         self.targets.get_unregistered.return_value = unreg
         self.targets.api.request.return_value.status_code = 200
-        self.assertEqual(unreg, self.targets.do_register_all())
+        self.assertEqual(unreg, self.targets.set_registered())
         self.targets.api.request.assert_has_calls(calls)
 
-    def test_do_register_all_many(self):
+    def test_set_registered_many(self):
         """Should call itself again if it has determined the page was full"""
         self.targets.get_unregistered = MagicMock()
         t = {
@@ -259,4 +260,4 @@ class TargetsTestCase(unittest.TestCase):
             unreg.append(t)
         self.targets.get_unregistered.side_effect = [unreg, [t, t]]
         self.targets.api.request.return_value.status_code = 200
-        self.assertEqual(17, len(self.targets.do_register_all()))
+        self.assertEqual(17, len(self.targets.set_registered()))
