@@ -20,3 +20,6 @@ editable = true
 copy-js = true
 line-numbers = true
 
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]

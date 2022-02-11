@@ -14,7 +14,7 @@ class Notifications(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def get_notifications(self):
+    def get_list(self):
         """Get a list of recent notifications"""
         res = self.api.notifications('GET',
                                      'notifications?meta=1')

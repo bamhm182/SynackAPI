@@ -101,7 +101,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.filter_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
-    def test_get_current_target(self):
+    def test_get_current(self):
         """Should make a request to get the currently selected target"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
@@ -116,9 +116,9 @@ class TargetsTestCase(unittest.TestCase):
             "codename": "SLOPPYSLUG",
             "status": "Connected"
         }
-        self.assertEqual(out, self.targets.get_current_target())
+        self.assertEqual(out, self.targets.get_current())
 
-    def test_get_current_target_pending(self):
+    def test_get_current_pending(self):
         """Should return the pending target if one is pending"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
@@ -133,7 +133,7 @@ class TargetsTestCase(unittest.TestCase):
             "codename": "SLOPPYSLUG",
             "status": "Connecting"
         }
-        self.assertEqual(out, self.targets.get_current_target())
+        self.assertEqual(out, self.targets.get_current())
 
     def test_get_registered_summary(self):
         """Should make a request to get basic info about registered targets"""

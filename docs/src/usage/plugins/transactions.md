@@ -2,13 +2,10 @@
 
 ## transactions.get_balance()
 
-> DESCRIPTION
->
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> Returns information about your current account balance and pending payouts.
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.transactions.get_balance()
+>> {"total_balance": "30.0", "pending_payout": "0.0"}
 >> ```

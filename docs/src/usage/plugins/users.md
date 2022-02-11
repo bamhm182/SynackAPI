@@ -4,11 +4,12 @@
 
 > DESCRIPTION
 >
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `user_id` | str | The user id to pull back data for<br>(Default: "me")
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.user.get_profile()
+>> {"user_id": "qwerty", ...}
 >> ```

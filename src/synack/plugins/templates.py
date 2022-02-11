@@ -17,7 +17,7 @@ class Templates(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def get_template_path(self, mission):
+    def do_build_filepath(self, mission):
         f = self.db.template_dir
         f = f / self.do_convert_name(mission['taskType'])
         if mission.get('asset'):
@@ -28,7 +28,7 @@ class Templates(Plugin):
         f = f / self.do_convert_name(mission['title'])
         return str(f) + '.txt'
 
-    def get_sections_from_file(self, path):
+    def do_build_sections(self, path):
         ret = dict()
         reg = r"\[\[\[(.+?)(?=\]\]\])\]\]\](.+?)(?=\[\[\[)"
         with open(path, 'r') as fp:
@@ -38,18 +38,25 @@ class Templates(Plugin):
                 ret[s[0].strip()] = s[1].strip()
         return ret
 
-    def get_template(self, mission):
-        path = self.get_template_path(mission)
-        if Path(path).exists():
-            return self.get_sections_from_file(path)
+    @staticmethod
+    def do_convert_name(name):
+        """Simplify a name to use for a file path"""
+        name = name.lower()
+        name = re.sub('[^a-z]', '_', name)
+        return re.sub('_+', '_', name)
 
-    def do_save_template(self, template):
+    def do_retrieve_local(self, mission):
+        path = self.do_build_filepath(mission)
+        if Path(path).exists():
+            return self.do_build_sections(path)
+
+    def do_save_local(self, template):
         """Save a template json to disk
 
         Arguments:
         template -- A template object from missions.get_evidences
         """
-        path = self.get_template_path(template)
+        path = self.do_build_filepath(template)
         if template["version"] == "2" and not Path(path).exists():
             out = "\n".join([
                 "[[[structuredResponse]]]\n",
@@ -68,10 +75,3 @@ class Templates(Plugin):
             with open(path, 'w') as fp:
                 fp.write(out)
             return path
-
-    @staticmethod
-    def do_convert_name(name):
-        """Simplify a name to use for a file path"""
-        name = name.lower()
-        name = re.sub('[^a-z]', '_', name)
-        return re.sub('_+', '_', name)

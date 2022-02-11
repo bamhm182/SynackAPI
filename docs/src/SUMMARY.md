@@ -3,6 +3,7 @@
 - [Introduction](./index.md)
 - [Usage](./usage/index.md)
   - [Examples](./usage/examples/index.md)
+    - [Check Invisible Missions](./usage/examples/check-invisible-missions.md)
     - [Mission Bot](./usage/examples/mission-bot.md)
     - [Register Targets](./usage/examples/register-targets.md)
   - [Main Components](./usage/main-components/index.md)

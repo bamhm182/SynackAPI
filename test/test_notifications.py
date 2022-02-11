@@ -21,13 +21,13 @@ class NotificationsTestCase(unittest.TestCase):
         self.notifications.api = MagicMock()
         self.notifications.db = MagicMock()
 
-    def test_get_notifications(self):
+    def test_get_list(self):
         """Should get a list of notifications"""
         self.notifications.api.notifications.return_value.status_code = 200
         self.notifications.api.notifications.\
             return_value.json.return_value = {"one": "1"}
         path = "notifications?meta=1"
-        self.assertEqual({"one": "1"}, self.notifications.get_notifications())
+        self.assertEqual({"one": "1"}, self.notifications.get_list())
         self.notifications.api.notifications.assert_called_with("GET", path)
 
     def test_get_unread_count(self):

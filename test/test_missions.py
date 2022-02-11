@@ -10,7 +10,6 @@ import sys
 import unittest
 
 from unittest.mock import MagicMock
-from factories import ObjectFactory
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
@@ -26,57 +25,57 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.targets = MagicMock()
         self.missions.templates = MagicMock()
 
-    def test_get_available_missions(self):
+    def test_get_available(self):
         """Should request PUBLISHED missions"""
-        self.missions.get_missions = MagicMock()
-        self.missions.get_missions.return_value = ['one', 'two']
+        self.missions.get_list = MagicMock()
+        self.missions.get_list.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'],
-                         self.missions.get_available_missions())
-        self.missions.get_missions.assert_called_with("PUBLISHED")
+                         self.missions.get_available())
+        self.missions.get_list.assert_called_with("PUBLISHED")
 
-    def test_get_approved_missions(self):
+    def test_get_approved(self):
         """Should request APPROVED missions"""
-        self.missions.get_missions = MagicMock()
-        self.missions.get_missions.return_value = ['one', 'two']
-        self.assertEqual(['one', 'two'], self.missions.get_approved_missions())
-        self.missions.get_missions.assert_called_with("APPROVED")
+        self.missions.get_list = MagicMock()
+        self.missions.get_list.return_value = ['one', 'two']
+        self.assertEqual(['one', 'two'], self.missions.get_approved())
+        self.missions.get_list.assert_called_with("APPROVED")
 
-    def test_get_claimed_missions(self):
+    def test_get_claimed(self):
         """Should request CLAIMED missions"""
-        self.missions.get_missions = MagicMock()
-        self.missions.get_missions.return_value = ['one', 'two']
-        self.assertEqual(['one', 'two'], self.missions.get_claimed_missions())
-        self.missions.get_missions.assert_called_with("CLAIMED")
+        self.missions.get_list = MagicMock()
+        self.missions.get_list.return_value = ['one', 'two']
+        self.assertEqual(['one', 'two'], self.missions.get_claimed())
+        self.missions.get_list.assert_called_with("CLAIMED")
 
-    def test_get_invisible_missions(self):
+    def test_get_invisible(self):
         """Should try to get invisible missions"""
         self.missions.db.targets = [
-            ObjectFactory(slug="34uhweow", codename="SOMEGUY"),
-            ObjectFactory(slug="8935h3r4", codename="SOMEGAL")
+            synack.db.models.Target(slug="34uhweow", codename="SOMEGUY"),
+            synack.db.models.Target(slug="8935h3r4", codename="SOMEGAL")
         ]
         self.missions.targets.get_registered_summary = MagicMock()
         count_calls = [
             unittest.mock.call("PUBLISHED", "34uhweow"),
             unittest.mock.call("PUBLISHED", "8935h3r4")
         ]
-        self.missions.get_missions_count = MagicMock()
-        self.missions.get_missions_count.side_effect = [1, 1]
+        self.missions.get_count = MagicMock()
+        self.missions.get_count.side_effect = [1, 1]
 
-        self.missions.get_missions = MagicMock()
-        self.missions.get_missions.side_effect = [[], ["real_mission"]]
+        self.missions.get_list = MagicMock()
+        self.missions.get_list.side_effect = [[], ["real_mission"]]
 
-        self.assertEqual(["SOMEGUY"], self.missions.get_invisible_missions())
-        self.missions.get_missions_count.has_calls(count_calls)
+        self.assertEqual(["SOMEGUY"], self.missions.get_invisible())
+        self.missions.get_count.has_calls(count_calls)
 
-    def test_get_in_review_missions(self):
+    def test_get_in_review(self):
         """Should request FOR_REVIEW missions"""
-        self.missions.get_missions = MagicMock()
-        self.missions.get_missions.return_value = ['one', 'two']
+        self.missions.get_list = MagicMock()
+        self.missions.get_list.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'],
-                         self.missions.get_in_review_missions())
-        self.missions.get_missions.assert_called_with("FOR_REVIEW")
+                         self.missions.get_in_review())
+        self.missions.get_list.assert_called_with("FOR_REVIEW")
 
-    def test_get_missions_count(self):
+    def test_get_count(self):
         """Should get the current number of published missions"""
         self.missions.api.request.return_value.status_code = 204
         self.missions.api.request.return_value.headers = {
@@ -86,12 +85,12 @@ class MissionsTestCase(unittest.TestCase):
             "status": "PUBLISHED",
             "viewed": "false"
         }
-        self.assertEqual(5, self.missions.get_missions_count())
+        self.assertEqual(5, self.missions.get_count())
         self.missions.api.request.assert_called_with("HEAD",
                                                      "tasks/v1/tasks",
                                                      query=query)
 
-    def test_get_missions_count_status_uid(self):
+    def test_get_count_status_uid(self):
         """Should get the current number of STATUS missions on TARGET"""
         self.missions.api.request.return_value.status_code = 204
         self.missions.api.request.return_value.headers = {
@@ -103,12 +102,12 @@ class MissionsTestCase(unittest.TestCase):
             "listingUid": "u4fh8"
         }
         self.assertEqual(10,
-                         self.missions.get_missions_count("CLAIMED", "u4fh8"))
+                         self.missions.get_count("CLAIMED", "u4fh8"))
         self.missions.api.request.assert_called_with("HEAD",
                                                      "tasks/v1/tasks",
                                                      query=query)
 
-    def test_get_missions_summary(self):
+    def test_do_summarize(self):
         """Should summarize a list of missions"""
         ret = {
             "count": 2,
@@ -135,9 +134,9 @@ class MissionsTestCase(unittest.TestCase):
             }
         ]
 
-        self.assertEqual(ret, self.missions.get_missions_summary(m))
+        self.assertEqual(ret, self.missions.do_summarize(m))
 
-    def test_get_missions_defaults(self):
+    def test_get_list_defaults(self):
         """Should get a list of published missions"""
         query = {
             "status": "PUBLISHED",
@@ -151,12 +150,12 @@ class MissionsTestCase(unittest.TestCase):
         ]
         self.missions.api.request.return_value.status_code = 200
         self.missions.api.request.return_value.json.return_value = ret
-        self.assertEqual(ret, self.missions.get_missions())
+        self.assertEqual(ret, self.missions.get_list())
         self.missions.api.request.assert_called_with("GET",
                                                      "tasks/v2/tasks",
                                                      query=query)
 
-    def test_get_missions_mixup(self):
+    def test_get_list_mixup(self):
         """Should get a list of specific missions"""
         query = {
             "status": "CLAIMED",
@@ -172,13 +171,13 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.api.request.return_value.status_code = 200
         self.missions.api.request.return_value.json.return_value = ret
         self.assertEqual(ret,
-                         self.missions.get_missions("CLAIMED", 1, 2, 5,
-                                                    "49fh48g7"))
+                         self.missions.get_list("CLAIMED", 1, 2, 5,
+                                                "49fh48g7"))
         self.missions.api.request.assert_called_with("GET",
                                                      "tasks/v2/tasks",
                                                      query=query)
 
-    def test_get_missions_multi_page(self):
+    def test_get_list_multi_page(self):
         """Should get a list missions across multiple pages"""
         q1 = {
             "status": "CLAIMED",
@@ -199,12 +198,12 @@ class MissionsTestCase(unittest.TestCase):
                                query=q1)
         ]
         self.assertEqual(["mission_one", "mission_two"],
-                         self.missions.get_missions(max_pages=2,
-                                                    per_page=1))
+                         self.missions.get_list(max_pages=2,
+                                                per_page=1))
         self.missions.api.request.has_calls(calls)
         self.assertEqual(2, self.missions.api.request.call_count)
 
-    def test_do_interact_mission(self):
+    def test_do_interact(self):
         """Should interact with a mission"""
         m = {
             "organizationUid": "24re7yuf",
@@ -221,7 +220,7 @@ class MissionsTestCase(unittest.TestCase):
             "claimed": True
         }
         self.missions.api.request.return_value.status_code = 201
-        self.assertEqual(ret, self.missions.do_interact_mission(m, "CLAIM"))
+        self.assertEqual(ret, self.missions.do_interact(m, "CLAIM"))
         data = {"type": "CLAIM"}
         calls = [
             unittest.mock.call('POST',
@@ -243,7 +242,7 @@ class MissionsTestCase(unittest.TestCase):
         ]
         self.missions.api.request.has_calls(calls)
 
-    def test_do_sort_missions(self):
+    def test_do_sort(self):
         """Should sort by payout high (default)"""
         m = [
             {"payout": {"amount": 10}},
@@ -260,9 +259,9 @@ class MissionsTestCase(unittest.TestCase):
             {"payout": {"amount": 10}},
         ]
 
-        self.assertEqual(ret, self.missions.do_sort_missions(m))
+        self.assertEqual(ret, self.missions.do_sort(m))
 
-    def test_do_sort_missions_payout_low(self):
+    def test_do_sort_payout_low(self):
         """Should sort by payout low"""
         m = [
             {"payout": {"amount": 10}},
@@ -279,9 +278,9 @@ class MissionsTestCase(unittest.TestCase):
             {"payout": {"amount": 50}},
         ]
 
-        self.assertEqual(ret, self.missions.do_sort_missions(m, "payout-low"))
+        self.assertEqual(ret, self.missions.do_sort(m, "payout-low"))
 
-    def test_do_sort_missions_shuffle(self):
+    def test_do_sort_shuffle(self):
         """Should sort by payout low"""
         m = [
             {"payout": {"amount": 10}},
@@ -291,10 +290,10 @@ class MissionsTestCase(unittest.TestCase):
             {"payout": {"amount": 50}},
         ]
         random.shuffle = MagicMock()
-        self.missions.do_sort_missions(m, "shuffle")
+        self.missions.do_sort(m, "shuffle")
         random.shuffle.assert_called_with(m)
 
-    def test_do_sort_missions_reverse(self):
+    def test_do_sort_reverse(self):
         """Should sort by payout low"""
         m = [
             {"payout": {"amount": 10}},
@@ -311,22 +310,22 @@ class MissionsTestCase(unittest.TestCase):
             {"payout": {"amount": 10}},
         ]
 
-        self.assertEqual(ret, self.missions.do_sort_missions(m, "reverse"))
+        self.assertEqual(ret, self.missions.do_sort(m, "reverse"))
 
-    def test_do_claim_mission(self):
-        """Should send a CLAIM to do_interact_mission"""
-        self.missions.do_interact_mission = MagicMock()
-        self.missions.do_interact_mission.return_value = ["ret"]
-        self.assertEqual(["ret"], self.missions.do_claim_mission(["yup"]))
-        self.missions.do_interact_mission.assert_called_with(["yup"], "CLAIM")
+    def test_do_claim(self):
+        """Should send a CLAIM to do_interact"""
+        self.missions.do_interact = MagicMock()
+        self.missions.do_interact.return_value = ["ret"]
+        self.assertEqual(["ret"], self.missions.do_claim(["yup"]))
+        self.missions.do_interact.assert_called_with(["yup"], "CLAIM")
 
-    def test_do_release_mission(self):
-        """Should send a DISCLAIM to do_interact_mission"""
-        self.missions.do_interact_mission = MagicMock()
-        self.missions.do_interact_mission.return_value = ["ret"]
-        self.assertEqual(["ret"], self.missions.do_release_mission(["nope"]))
-        self.missions.do_interact_mission.assert_called_with(["nope"],
-                                                             "DISCLAIM")
+    def test_do_release(self):
+        """Should send a DISCLAIM to do_interact"""
+        self.missions.do_interact = MagicMock()
+        self.missions.do_interact.return_value = ["ret"]
+        self.assertEqual(["ret"], self.missions.do_release(["nope"]))
+        self.missions.do_interact.assert_called_with(["nope"],
+                                                     "DISCLAIM")
 
     def test_do_upload_evidences_safe(self):
         """Should replace current text with template if < 20 characters"""
