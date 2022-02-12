@@ -338,7 +338,7 @@ class DbTestCase(unittest.TestCase):
             "category": {"id": 10}
         }]
 
-        self.db.add_targets(targets)
+        self.db.add_targets(targets, is_registered=True)
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 

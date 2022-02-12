@@ -55,7 +55,7 @@ class Db(Plugin):
                 db_o = Organization(slug=slug)
                 session.add(db_o)
 
-    def add_targets(self, targets):
+    def add_targets(self, targets, **kwargs):
         session = self.Session()
         self.add_organizations(targets, session)
         q = session.query(Target)
@@ -79,6 +79,8 @@ class Db(Plugin):
             db_t.is_registered = t.get('isRegistered')
             db_t.is_updated = t.get('isUpdated')
             db_t.last_submitted = t.get('lastSubmitted')
+            for k in kwargs.keys():
+                setattr(db_t, k, kwargs[k])
         session.commit()
         session.close()
 
