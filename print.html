@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="support/index.html">Support</a></li><li class="chapter-item "><a href="tests/index.html">Tests</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="patches.html">Patches</a></li><li class="chapter-item "><a href="support/index.html">Support</a></li><li class="chapter-item "><a href="tests/index.html">Tests</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -151,6 +151,58 @@ Synack will know you have done this and you will be banned or otherwise repreman
 <li>DO NOT generate more than 200 requests in any 5 minute period</li>
 <li>DO NOT be the source of egregious and/or irresponsible traffic</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="patches"><a class="header" href="#patches">Patches</a></h1>
+<p>This is a terrbile way to handle this, but it technically works.
+v0.1 saw a HUGE refactor and I broke some things.
+While I am working out the kinks, you can run these commands to 'patch' your version.</p>
+<p>Once I get everything fixed, I will release v0.1.2.</p>
+<h2 id="v011"><a class="header" href="#v011">v0.1.1</a></h2>
+<pre><code>sed -i 's/filter_targets/find_targets/g' ~/.local/lib/python3.10/site-packages/synack/plugins/targets.py
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="support"><a class="header" href="#support">Support</a></h1>
+<p>I have spent countless hours pouring over this project in order to best help you have an easy, reliable way to interact with the Synack API.</p>
+<p>If this has helped you, please consider helping me out in one of the following ways.</p>
+<h2 id="patreon"><a class="header" href="#patreon">Patreon</a></h2>
+<p>You can find my Patreon at the following link:</p>
+<p><a href="https://www.patreon.com/bytepen">BytePen Studios Patreon</a></p>
+<h2 id="contribution"><a class="header" href="#contribution">Contribution</a></h2>
+<p>If you'd like to see extra features be added to this package, please consider contributing code.</p>
+<p>With that said, please take the following items into consideration:</p>
+<ul>
+<li>We will be using Test Driven Development with Unit Testing in order to ensure the stability of the SynackAPI package.
+<ul>
+<li>Run <code>coverage run -m unittest discover test</code> from within the primary directory, then run <code>coverage report</code> before submitting a PR. Ensure that all tests are passing and the test coverage reports 100%.</li>
+</ul>
+</li>
+<li>We will be conforming to pep8, which is the Python Style Guide.
+<ul>
+<li>Run <code>flake8 src test live-tests</code> from within the primary directory before submitting a PR. Ensure there are no complaints returned.</li>
+</ul>
+</li>
+<li>We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.</li>
+</ul>
+<p>There is also the <code>./check.sh</code> script in the primary directory that will run everything I would like you to check before submitting a PR.</p>
+<p>If you have any questions on how you can contribute, please reach out via the SRT Slack.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tests"><a class="header" href="#tests">Tests</a></h1>
+<p>Honestly, this section is not for most people.
+It explains how to run the tests to ensure that the code is working or to help in writing new functionality for SynackAPI.</p>
+<h2 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h2>
+<p>These tests are run by me repeatedly while developing the package, and every time that I push to the repository.
+They are then run again every time that I tell my GitHub workflow to go release a new version.
+If things fail, a new version is not released.</p>
+<p>That said, you can run them using the <code>checks.sh</code> script in the main folder.</p>
+<h2 id="live-tests"><a class="header" href="#live-tests">Live Tests</a></h2>
+<p>These tests are run manually and sparingly.
+They ensure that Synack has not changed any of their API endpoints in ways we are not expecting.
+If these tests fail, it is very possible that I will need to go in and change some functionality of the SynackAPI so they continue to work as expected.</p>
+<p>If you run these, they SHOULD be relatively quiet, but keep in mind that they also might not.
+In other words, make sure you have not been heavily using the Synack API when you run these.</p>
+<p>These tests can be run via something like the following for a single test:</p>
+<pre><code>coverage run -m unittest live-tests.test_missions.MissionsTestCase
+</code></pre>
+<p>You can also run the following for all live tests:</p>
+<pre><code>coverage run -m unittest discover live-tests
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
 <p>The easiest way to get started with the SynackAPI is to install it via <code>pip</code>.
 For example:</p>
@@ -1204,50 +1256,6 @@ eventhough it sounds like a lot, it isn't bad.</p>
 </code></pre>
 </blockquote>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="support"><a class="header" href="#support">Support</a></h1>
-<p>I have spent countless hours pouring over this project in order to best help you have an easy, reliable way to interact with the Synack API.</p>
-<p>If this has helped you, please consider helping me out in one of the following ways.</p>
-<h2 id="patreon"><a class="header" href="#patreon">Patreon</a></h2>
-<p>You can find my Patreon at the following link:</p>
-<p><a href="https://www.patreon.com/bytepen">BytePen Studios Patreon</a></p>
-<h2 id="contribution"><a class="header" href="#contribution">Contribution</a></h2>
-<p>If you'd like to see extra features be added to this package, please consider contributing code.</p>
-<p>With that said, please take the following items into consideration:</p>
-<ul>
-<li>We will be using Test Driven Development with Unit Testing in order to ensure the stability of the SynackAPI package.
-<ul>
-<li>Run <code>coverage run -m unittest discover test</code> from within the primary directory, then run <code>coverage report</code> before submitting a PR. Ensure that all tests are passing and the test coverage reports 100%.</li>
-</ul>
-</li>
-<li>We will be conforming to pep8, which is the Python Style Guide.
-<ul>
-<li>Run <code>flake8 src test live-tests</code> from within the primary directory before submitting a PR. Ensure there are no complaints returned.</li>
-</ul>
-</li>
-<li>We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.</li>
-</ul>
-<p>There is also the <code>./check.sh</code> script in the primary directory that will run everything I would like you to check before submitting a PR.</p>
-<p>If you have any questions on how you can contribute, please reach out via the SRT Slack.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="tests"><a class="header" href="#tests">Tests</a></h1>
-<p>Honestly, this section is not for most people.
-It explains how to run the tests to ensure that the code is working or to help in writing new functionality for SynackAPI.</p>
-<h2 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h2>
-<p>These tests are run by me repeatedly while developing the package, and every time that I push to the repository.
-They are then run again every time that I tell my GitHub workflow to go release a new version.
-If things fail, a new version is not released.</p>
-<p>That said, you can run them using the <code>checks.sh</code> script in the main folder.</p>
-<h2 id="live-tests"><a class="header" href="#live-tests">Live Tests</a></h2>
-<p>These tests are run manually and sparingly.
-They ensure that Synack has not changed any of their API endpoints in ways we are not expecting.
-If these tests fail, it is very possible that I will need to go in and change some functionality of the SynackAPI so they continue to work as expected.</p>
-<p>If you run these, they SHOULD be relatively quiet, but keep in mind that they also might not.
-In other words, make sure you have not been heavily using the Synack API when you run these.</p>
-<p>These tests can be run via something like the following for a single test:</p>
-<pre><code>coverage run -m unittest live-tests.test_missions.MissionsTestCase
-</code></pre>
-<p>You can also run the following for all live tests:</p>
-<pre><code>coverage run -m unittest discover live-tests
-</code></pre>
 
                     </main>
 
