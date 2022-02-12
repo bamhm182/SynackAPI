@@ -146,8 +146,12 @@ We then have a longer command that creates the handler, then calls the <code>tar
 <pre><code class="language-bash">python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
 </code></pre>
 <p>This could be thrown into a cronjob (<code>crontab -e</code>) as seen below to register any new targets once an hour:</p>
-<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler().targets.set_registered()&quot;
+<pre><code class="language-sh">0 * * * * python3 -c &quot;import synack; synack.Handler(login=True).targets.set_registered()&quot;
 </code></pre>
+<p>Do note that the <code>login</code> State variable is set to True here.
+This means that every time this function is called, it will confirm you are logged in and if not, it will log you in.
+This is not default behavior because it makes between 1 and 5 requests each time Handler is initiated.
+That said, you likely want to make sure you are having the SynackAPI log in often on one or two scripts.</p>
 
                     </main>
 

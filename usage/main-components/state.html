@@ -164,6 +164,11 @@ handler.debug.log(&quot;Test&quot;, &quot;This message will NOT be seen&quot;)
 handler.state.debug = True
 handler.debug.log(&quot;Test&quot;, &quot;This message WILL be seen&quot;)
 </code></pre>
+<p>Out of all of the State variables, <code>login</code> is the most important to understand.
+If this is set to true, whenever your Handler is created, it will make sure you are logged in.
+If you have a bunch of scripts based on SynackAPI, it is probably a good idea to have <code>login</code> set to False, which is the default, for the majority of scripts.
+Then you can have a couple scripts which are run periodically with <code>login</code> set to True so it becomes responsible for making sure that everything is logged in.</p>
+<p>As an example of a good function to set <code>login</code> to True, check out the <a href="../examples/register-targets.html">Register Targets</a> Example.</p>
 <h2 id="database-vs-state"><a class="header" href="#database-vs-state">Database vs State</a></h2>
 <p>The observant will notice that there is a lot of overlap between the values stored in the Database and the State.
 This may cause you some confusion as to where data is coming from and how it's being stored and accessed.</p>
