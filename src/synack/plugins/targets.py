@@ -3,41 +3,66 @@
 Functions related to handling and checking targets
 """
 
+from .base import Plugin
 
-class Targets:
-    def __init__(self, handler):
-        self.handler = handler
 
-    def get_assessments(self):
-        """Check which assessments have been completed"""
-        res = self.handler.api.request('GET', 'assessments')
-        if res.status_code == 200:
-            ret = []
-            for a in res.json():
-                wpass = a['written_assessment']['passed']
-                ppass = a['practical_assessment']['passed']
-                if wpass and ppass:
-                    ret.append({
-                        'name': a['category_name'],
-                        'id': a['category_id']
-                    })
-            self.handler.db.assessments = ret
-            return ret
+class Targets(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Api', 'Db']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
 
-    def get_codename_from_slug(self, slug):
+    def build_codename_from_slug(self, slug):
         """Return a codename for a target given its slug
 
         Arguments:
         slug -- Slug of desired target
         """
-        target = self.handler.db.known_targets.get(slug)
-        if not target:
-            target = self.get_registered_summary().get(slug)
-        return target.get("codename")
+        codename = None
+        targets = self.db.filter_targets(slug=slug)
+        if not targets:
+            self.get_registered_summary()
+            targets = self.db.filter_targets(slug=slug)
+        if targets:
+            codename = targets[0].codename
+        return codename
 
-    def get_current_target(self):
+    def build_slug_from_codename(self, codename):
+        """Return a slug for a target given its codename"""
+        slug = None
+        targets = self.db.filter_targets(codename=codename)
+        if not targets:
+            self.get_registered_summary()
+            targets = self.db.filter_targets(codename=codename)
+        if targets:
+            slug = targets[0].slug
+        return slug
+
+    def get_assessments(self):
+        """Check which assessments have been completed"""
+        res = self.api.request('GET', 'assessments')
+        if res.status_code == 200:
+            self.db.add_categories(res.json())
+            return self.db.categories
+
+    def get_credentials(self, **kwargs):
+        """Get Credentials for a target"""
+        target = self.db.filter_targets(**kwargs)[0]
+        if target:
+            res = self.api.request('POST',
+                                   'asset/v1/organizations/' +
+                                   target.organization +
+                                   f'/owners/listings/{target.slug}' +
+                                   f'/users/{self.db.user_id}' +
+                                   '/credentials')
+            if res.status_code == 200:
+                return res.json()
+
+    def get_connected(self):
         """Return information about the currenly selected target"""
-        res = self.handler.api.request('GET', 'launchpoint')
+        res = self.api.request('GET', 'launchpoint')
         if res.status_code == 200:
             j = res.json()
             if j['pending_slug'] != '-1':
@@ -48,51 +73,56 @@ class Targets:
                 status = "Connected"
             ret = {
                 "slug": slug,
-                "codename": self.get_codename_from_slug(slug),
+                "codename": self.build_codename_from_slug(slug),
                 "status": status
             }
             return ret
 
     def get_registered_summary(self):
         """Get information on your registered targets"""
-        res = self.handler.api.request('GET', 'targets/registered_summary')
+        res = self.api.request('GET', 'targets/registered_summary')
         ret = []
         if res.status_code == 200:
+            self.db.add_targets(res.json())
             ret = dict()
             for t in res.json():
                 ret[t['id']] = t
-            self.handler.db.known_targets = ret
         return ret
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
-        if not self.handler.db.assessments:
+        if not self.db.categories:
             self.get_assessments()
-        categories = [a['id'] for a in self.handler.db.assessments]
+        categories = []
+        for c in self.db.categories:
+            if c.passed_practical and c.passed_practical:
+                categories.append(c.id)
         query = {
                 'filter[primary]': 'unregistered',
                 'filter[secondary]': 'all',
                 'filter[industry]': 'all',
                 'filter[category][]': categories
         }
-        res = self.handler.api.request('GET', 'targets', query=query)
+        res = self.api.request('GET', 'targets', query=query)
         ret = []
         if res.status_code == 200:
+            self.db.add_targets(res.json(), is_registered=True)
             for t in res.json():
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
         return ret
 
-    def do_register_all(self):
+    def set_registered(self, targets=None):
         """Register all unregistered targets"""
-        unreg = self.get_unregistered()
+        if targets is None:
+            targets = self.get_unregistered()
         data = '{"ResearcherListing":{"terms":1}}'
         ret = []
-        for t in unreg:
-            res = self.handler.api.request('POST',
-                                           f'targets/{t["slug"]}/signup',
-                                           data=data)
+        for t in targets:
+            res = self.api.request('POST',
+                                   f'targets/{t["slug"]}/signup',
+                                   data=data)
             if res.status_code == 200:
                 ret.append(t)
-        if len(unreg) >= 15:
-            ret.extend(self.do_register_all())
+        if len(targets) >= 15:
+            ret.extend(self.set_registered())
         return ret

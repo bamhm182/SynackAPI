@@ -4,25 +4,19 @@ Functions to handle interacting with the Synack APIs
 """
 
 import warnings
-import requests
+
+from .base import Plugin
 
 
-class Api:
-    def __init__(self, handler):
-        self.handler = handler
-        self.session = None
+class Api(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Debug', 'Db']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
 
-        self.build_session()
-
-    def build_session(self):
-        self.session = requests.Session()
-        if self.handler.db.api_token:
-            self.session.headers.update({
-                'Authorization': f'Bearer {self.handler.db.api_token}',
-            })
-
-    def login(self, method, path,
-              headers=None, data=None, query=None):
+    def login(self, method, path, **kwargs):
         """Modify API Request for Login
 
         Arguments:
@@ -39,11 +33,10 @@ class Api:
         else:
             base = 'https://login.synack.com/api/'
         url = f'{base}{path}'
-        res = self.request(method, url, headers, data, query)
+        res = self.request(method, url, **kwargs)
         return res
 
-    def notifications(self, method, path,
-                      headers=None, data=None, query=None):
+    def notifications(self, method, path, **kwargs):
         """Modify API Request for Notifications
 
         Arguments:
@@ -61,20 +54,17 @@ class Api:
             base = 'https://notifications.synack.com/api/v2/'
         url = f'{base}{path}'
 
-        if not self.handler.db.notifications_token:
-            self.handler.auth.get_notifications_token()
+        if not kwargs.get('headers'):
+            kwargs['headers'] = dict()
+        auth = "Bearer " + self.db.notifications_token
+        kwargs['headers']['Authorization'] = auth
 
-        if not headers:
-            headers = dict()
-        auth = "Bearer " + self.handler.db.notifications_token
-        headers['Authorization'] = auth
-
-        res = self.request(method, url, headers, data, query)
+        res = self.request(method, url, **kwargs)
         if res.status_code == 422:
-            self.handler.db.notifications_token = ""
+            self.db.notifications_token = ""
         return res
 
-    def request(self, method, path, headers=None, data=None, query=None):
+    def request(self, method, path, **kwargs):
         """Send API Request
 
         Arguments:
@@ -92,40 +82,53 @@ class Api:
             base = 'https://platform.synack.com/api/'
         url = f'{base}{path}'
 
-        if self.handler.db.use_proxies:
+        if self.db.use_proxies:
             warnings.filterwarnings("ignore")
             verify = False
-            proxies = self.handler.db.proxies
+            proxies = self.db.proxies
         else:
             verify = True
             proxies = None
 
-        if method.upper() == 'GET':
-            res = self.session.get(url,
-                                   headers=headers,
-                                   proxies=proxies,
-                                   params=query,
-                                   verify=verify)
-        elif method.upper() == 'HEAD':
-            res = self.session.head(url,
-                                    headers=headers,
-                                    proxies=proxies,
-                                    params=query,
-                                    verify=verify)
-        elif method.upper() == 'PATCH':
-            res = self.session.patch(url,
-                                     json=data,
-                                     headers=headers,
-                                     proxies=proxies,
-                                     verify=verify)
-        elif method.upper() == 'POST':
-            res = self.session.post(url,
-                                    json=data,
-                                    headers=headers,
-                                    proxies=proxies,
-                                    verify=verify)
+        headers = {
+            'Authorization': f'Bearer {self.db.api_token}',
+            'user_id': self.db.user_id
+        }
+        if kwargs.get('headers'):
+            headers.update(kwargs.get('headers', {}))
+        query = kwargs.get('query')
+        data = kwargs.get('data')
 
-        self.handler.debug.log("Network Request",
-                               f"{res.status_code} -- {url} -- {res.content}")
+        if method.upper() == 'GET':
+            res = self.state.session.get(url,
+                                         headers=headers,
+                                         proxies=proxies,
+                                         params=query,
+                                         verify=verify)
+        elif method.upper() == 'HEAD':
+            res = self.state.session.head(url,
+                                          headers=headers,
+                                          proxies=proxies,
+                                          params=query,
+                                          verify=verify)
+        elif method.upper() == 'PATCH':
+            res = self.state.session.patch(url,
+                                           json=data,
+                                           headers=headers,
+                                           proxies=proxies,
+                                           verify=verify)
+        elif method.upper() == 'POST':
+            res = self.state.session.post(url,
+                                          json=data,
+                                          headers=headers,
+                                          proxies=proxies,
+                                          verify=verify)
+
+        self.debug.log("Network Request",
+                       f"{res.status_code} -- {method.upper()} -- {url}" +
+                       f"\n\tHeaders: {headers}" +
+                       f"\n\tQuery: {query}" +
+                       f"\n\tData: {data}" +
+                       f"\n\tContent: {res.content}")
 
         return res

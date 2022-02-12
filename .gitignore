@@ -154,3 +154,6 @@ cython_debug/
 .sessiontoken
 .synacktoken
 .notificationtoken
+
+# mdbook
+book/

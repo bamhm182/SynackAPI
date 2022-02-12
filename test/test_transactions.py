@@ -1,6 +1,6 @@
-"""test_Transactions.py
+"""test_transactions.py
 
-Tests for the _Transactions.py Transactions Class
+Tests for the Transactions Plugin
 """
 
 import json
@@ -8,16 +8,19 @@ import os
 import sys
 import unittest
 
+
+from unittest.mock import MagicMock
+
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
-from src import synack
-from unittest.mock import MagicMock
+import synack  # noqa: E402
 
 
 class TransactionsTestCase(unittest.TestCase):
     def setUp(self):
-        synack.Handler = MagicMock()
-        self.transactions = synack.Transactions(synack.Handler())
+        self.state = synack._state.State()
+        self.transactions = synack.plugins.Transactions(self.state)
+        self.transactions.api = MagicMock()
 
     def test_get_balance(self):
         """Should get the balance of your synack account"""
@@ -25,8 +28,9 @@ class TransactionsTestCase(unittest.TestCase):
             "total_balance": "10.0",
             "pending_payout": "0.0"
         }'''
-        self.transactions.handler.api.request.return_value.headers = {'x-balance':bal}
-        self.transactions.handler.api.request.return_value.status_code = 200
+        self.transactions.api.request.return_value.headers = {'x-balance': bal}
+        self.transactions.api.request.return_value.status_code = 200
         ret = self.transactions.get_balance()
         self.assertEqual(ret, json.loads(bal))
-        self.transactions.handler.api.request.assert_called_with('HEAD', 'transactions')
+        self.transactions.api.request.assert_called_with('HEAD',
+                                                         'transactions')

@@ -18,8 +18,11 @@ setuptools.setup(
         "Operating System :: OS Independent"
     ],
     python_requires=">=3.6",
-    packages=['synack', 'synack.plugins'],
-    package_dir={'':'src'},
+    packages=['synack', 'synack.plugins', 'synack.db'],
+    package_data={
+        'synack.db': ['alembic.ini', 'alembic/*', 'alembic/**/*', 'models/*'],
+    },
+    package_dir={'': 'src'},
     install_requires=[
         "netaddr==0.8.0",
         "pathlib2==2.3.5",
@@ -27,6 +30,8 @@ setuptools.setup(
         "pyaml==21.8.3",
         "pyotp==2.6.0",
         "requests==2.25.1",
+        "SQLAlchemy==1.4.31",
+        "alembic==1.7.5",
         "urllib3==1.26.3",
     ]
 )

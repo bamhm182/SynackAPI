@@ -6,63 +6,29 @@ Functions related to handling and checking authentication.
 import pyotp
 import re
 
+from .base import Plugin
 
-class Auth:
-    def __init__(self, handler):
-        self.handler = handler
 
-    def gen_otp(self):
-        """Generate and return a TOTP code."""
-        secret = self.handler.db.otp_secret
-        totp = pyotp.TOTP(secret)
+class Auth(Plugin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for plugin in ['Api', 'Db', 'Users']:
+            setattr(self,
+                    plugin.lower(),
+                    self.registry.get(plugin)(self.state))
+
+    def build_otp(self):
+        """Generate and return a OTP."""
+        totp = pyotp.TOTP(self.db.otp_secret)
         totp.digits = 7
         totp.interval = 10
         totp.issuer = 'synack'
         return totp.now()
 
-    def check_api_token(self):
-        """Check to see if the api token exists and is valid."""
-        user = self.handler.users.get_profile()
-        if user:
-            self.handler.api.session.headers.update({
-                'user_id': user.get('user_id')
-            })
-        return True if user else False
-
-    def get_login_progress_token(self, csrf):
-        """Get progress token from email and password login"""
-        headers = {
-            'X-Csrf-Token': csrf
-        }
-        data = {
-            'email': self.handler.db.email,
-            'password': self.handler.db.password
-        }
-        res = self.handler.api.login('POST',
-                                     'authenticate',
-                                     headers=headers,
-                                     data=data)
-        if res.status_code == 200:
-            return res.json().get("progress_token")
-
-    def get_login_grant_token(self, csrf, progress_token):
-        """Get grant token from authy totp verification"""
-        headers = {
-            'X-Csrf-Token': csrf
-        }
-        data = {
-            "authy_token": self.gen_otp(),
-            "progress_token": progress_token
-        }
-        res = self.handler.api.login('POST',
-                                     'authenticate',
-                                     headers=headers,
-                                     data=data)
-        if res.status_code == 200:
-            return res.json().get("grant_token")
-
     def get_api_token(self):
         """Log in to get a new API token."""
+        if self.users.get_profile():
+            return self.db.api_token
         csrf = self.get_login_csrf()
         progress_token = None
         grant_token = None
@@ -78,44 +44,76 @@ class Auth:
             query = {
                 "grant_token": grant_token
             }
-            res = self.handler.api.request('GET',
-                                           url + 'token',
-                                           headers=headers,
-                                           query=query)
+            res = self.api.request('GET',
+                                   url + 'token',
+                                   headers=headers,
+                                   query=query)
             if res.status_code == 200:
                 j = res.json()
-                self.handler.db.api_token = j.get('access_token')
+                self.db.api_token = j.get('access_token')
+                self.set_login_script()
                 return j.get('access_token')
-
-    def get_notifications_token(self):
-        """Request a new Notification Token"""
-        res = self.handler.api.request('GET', 'users/notifications_token')
-        if res.status_code == 200:
-            j = res.json()
-            self.handler.db.notifications_token = j['token']
-            return j['token']
 
     def get_login_csrf(self):
         """Get the CSRF Token from the login page"""
-        res = self.handler.api.request('GET', 'https://login.synack.com')
+        res = self.api.request('GET', 'https://login.synack.com')
         m = re.search('<meta name="csrf-token" content="([^"]*)"',
                       res.text)
         return m.group(1)
 
-    def write_login_script(self):
-        script = '''
-        (function() {
-          setTimeout(()=>{
-            const loc = window.location;
-            if (loc.href.startsWith("https://login.synack.com/")) {
-              loc.replace("https://platform.synack.com");
-            }
-          },5000);
-          sessionStorage.setItem("shared-session-com.synack.accessToken",
-                                 "''' + self.handler.db.api_token + '''");
-        })();
-        '''
-        with open(self.handler.db.config_dir / 'login.js', 'w') as fp:
+    def get_login_grant_token(self, csrf, progress_token):
+        """Get grant token from authy totp verification"""
+        headers = {
+            'X-Csrf-Token': csrf
+        }
+        data = {
+            "authy_token": self.build_otp(),
+            "progress_token": progress_token
+        }
+        res = self.api.login('POST',
+                             'authenticate',
+                             headers=headers,
+                             data=data)
+        if res.status_code == 200:
+            return res.json().get("grant_token")
+
+    def get_login_progress_token(self, csrf):
+        """Get progress token from email and password login"""
+        headers = {
+            'X-CSRF-Token': csrf
+        }
+        data = {
+            'email': self.db.email,
+            'password': self.db.password
+        }
+        res = self.api.login('POST',
+                             'authenticate',
+                             headers=headers,
+                             data=data)
+        if res.status_code == 200:
+            return res.json().get("progress_token")
+
+    def get_notifications_token(self):
+        """Request a new Notifications Token"""
+        res = self.api.request('GET', 'users/notifications_token')
+        if res.status_code == 200:
+            j = res.json()
+            self.db.notifications_token = j['token']
+            return j['token']
+
+    def set_login_script(self):
+        script = "(function() {" +\
+            "setTimeout(()=>{" +\
+            "const loc = window.location;" +\
+            "if (loc.href.startsWith('https://login.synack.com/')) {" +\
+            "loc.replace('https://platform.synack.com');" +\
+            "}" +\
+            "},60000);" +\
+            "sessionStorage.setItem(" +\
+            "'shared-session-com.synack.accessToken'," +\
+            self.db.api_token +\
+            ");})();"
+        with open(self.state.config_dir / 'login.js', 'w') as fp:
             fp.write(script)
 
         return script
