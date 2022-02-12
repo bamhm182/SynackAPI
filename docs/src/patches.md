@@ -9,5 +9,5 @@ Once I get everything fixed, I will release v0.1.2.
 ## v0.1.1
 
 ```
-sed -i 's/filter_targets/find_targets/g' ~/.local/lib/python3.10/site-packages/synack/plugins/targets.py
+sed -i 's/filter_targets/find_targets/g' ~/.local/lib/python*/site-packages/synack/plugins/targets.py
 ```
