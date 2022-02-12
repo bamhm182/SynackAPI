@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/targets.html" class="active">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/targets.html" class="active">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li><li class="chapter-item "><a href="../../tests/index.html">Tests</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -138,171 +138,108 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="targets"><a class="header" href="#targets">Targets</a></h1>
+<h2 id="targetsbuild_codename_from_slugslug"><a class="header" href="#targetsbuild_codename_from_slugslug">targets.build_codename_from_slug(slug)</a></h2>
+<blockquote>
+<p>Returns a Target's codename given its slug.</p>
+<p>This hits the local database, then hits the Synack API if it can't find it.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_codename_from_slug('uwfpmfpgjlum')
+'DAPPERDINGO'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
+<blockquote>
+<p>Returns a Target's slug given its codename.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
+'uwfpmfpgjlum'
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Pull back a list of assessments and whether you have passed them.</p>
+<p>This function caches your status in the Database and will affect certain queries like <code>targets.get_unregistered()</code>, which will only pull back targets in categories you have passed.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
+[{&quot;id&quot;: 1, ...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_codename_from_slug"><a class="header" href="#targetsget_codename_from_slug">targets.get_codename_from_slug()</a></h2>
+<h2 id="targetsget_credentialskwargs"><a class="header" href="#targetsget_credentialskwargs">targets.get_credentials(**kwargs)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Pulls back the credentials for a Target</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Some attribute that will be used to identify a Target</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_credentials(slug='ljufpbgylu')
+[{&quot;credentials&quot;: [{...},...],...}]
+&gt;&gt;&gt; h.targets.get_credentials(codename='CHILLINCHILLA')
+[{&quot;credentials&quot;: [{...},...],...}]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_slug_from_codename"><a class="header" href="#targetsget_slug_from_codename">targets.get_slug_from_codename()</a></h2>
+<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Return minimal information about your currently connected Target</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_current_target"><a class="header" href="#targetsget_current_target">targets.get_current_target()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.get_connected()
+{&quot;slug&quot;: &quot;ulmpupflgm&quot;, &quot;codename&quot;: &quot;GOOFYGOPHER&quot;, &quot;status&quot;: &quot;Connected&quot;}
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>The Registered Summary is a short list of information about every target you have registered.
+The endpoint used by this function is hit every time you refresh a page on the platform, so
+eventhough it sounds like a lot, it isn't bad.</p>
+<p>Information from this function is cached in the Database</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_credentials"><a class="header" href="#targetsget_credentials">targets.get_credentials()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered_summary()
+{&quot;pflupm&quot;: {&quot;id&quot;: &quot;pflupm&quot;,...},...}
 </code></pre>
 </blockquote>
 </blockquote>
 <h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Gets a list of unregistered Targets from the Synack API.</p>
+<p>Only Targets in Categories you have passed will be returned.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
+[{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsdo_register_all"><a class="header" href="#targetsdo_register_all">targets.do_register_all()</a></h2>
+<h2 id="targetsset_registeredtargets"><a class="header" href="#targetsset_registeredtargets">targets.set_registered(targets)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Registers unregistered Targets.</p>
+<p>If no <code>targets</code> are provided, <code>targets.get_unregistered()</code> is used so that all unregistered targets are registered.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>targets</code></td><td>list(dict)</td><td>A list of targets returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-1"><a class="header" href="#targets-1">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-2"><a class="header" href="#targets-2">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-3"><a class="header" href="#targets-3">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-4"><a class="header" href="#targets-4">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-5"><a class="header" href="#targets-5">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targets-6"><a class="header" href="#targets-6">targets.()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.targets.get_unregistered()
+&gt;&gt;&gt; h.targets.set_unregistered([msns[0]])
+[{&quot;id&quot;: &quot;jlgbmjpbgm&quot;,...}]
+&gt;&gt;&gt;
+&gt;&gt;&gt; h.targets.set_unregistered()
+[{&quot;id&quot;: &quot;pwjlgmf&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>

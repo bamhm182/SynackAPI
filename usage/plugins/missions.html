@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/missions.html" class="active">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="../../usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/missions.html" class="active">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li><li class="chapter-item "><a href="../../tests/index.html">Tests</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -138,171 +138,173 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="missions"><a class="header" href="#missions">Missions</a></h1>
-<h2 id="missionsget_approved_missions"><a class="header" href="#missionsget_approved_missions">missions.get_approved_missions()</a></h2>
+<h2 id="missionsbuild_ordermissions-sort"><a class="header" href="#missionsbuild_ordermissions-sort">missions.build_order(missions, sort)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Takes in a list of missions and returns them sorted in a particular way</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions pulled from the SynackAPI</td></tr>
+<tr><td><code>sort</code></td><td>srt</td><td>The way the missions should be sorted</br>(Default: &quot;payout-high&quot;)</br>(Options: &quot;payout-high&quot;, &quot;payout-low&quot;, &quot;shuffle&quot;, &quot;reverse&quot;)</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = [{&quot;title&quot;: &quot;Some mission&quot;,...}, {&quot;title&quot;: &quot;Another mission&quot;,...}]
+&gt;&gt;&gt; h.missions.build_order(msns, &quot;reverse&quot;)
+[{&quot;title&quot;: &quot;Another mission&quot;,...}, {&quot;title&quot;: &quot;Some mission&quot;,...}]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_available_missions"><a class="header" href="#missionsget_available_missions">missions.get_available_missions()</a></h2>
+<h2 id="missionsbuild_summarymissions"><a class="header" href="#missionsbuild_summarymissions">missions.build_summary(missions)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Takes a list of missions and summarizes them</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.build_summary(h.missions.get_claimed())
+{&quot;count&quot;: 5, &quot;value&quot;: 250, &quot;time&quot;: 86158}
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_claimed_missions"><a class="header" href="#missionsget_claimed_missions">missions.get_claimed_missions()</a></h2>
+<h2 id="missionsgetstatus-max_pages-page-per_page-listing_uids"><a class="header" href="#missionsgetstatus-max_pages-page-per_page-listing_uids">missions.get(status, max_pages, page, per_page, listing_uids)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Get a list of missions from the Synack API</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
+<tr><td><code>max_pages</code></td><td>int</td><td>The maximum number of pages to grab</br>(Default: 1)</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>The page you wish to start on</br>(Default: 1)</td></tr>
+<tr><td><code>per_page</code></td><td>int</td><td>The number of missions you wish to return per page</br>(Default: 20)</td></tr>
+<tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query for missions</br>(Default: None)</td></tr>
 </tbody></table>
+<p>The default <code>per_page</code> on the Synack API is 20.
+I recommend leaving it there unless you also plan to try and get multiple pages of missions if there are more than 20.
+Don't set this number TOO high, or you may be requesting a lot of data, which may actually be detremental to the speed of your bot and the Synack API.
+Also consider that if there are multiple pages, you may just be better off still requesting 20 missions, but starting with the second page.</p>
+<p>In other words, when using this function, please consider what you are asking the computers to do.</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get()
+[{&quot;status&quot;: &quot;PUBLISHED&quot;, &quot;title&quot;: &quot;Some Mission&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_invisible_missions"><a class="header" href="#missionsget_invisible_missions">missions.get_invisible_missions()</a></h2>
+<h2 id="missionsget_approved"><a class="header" href="#missionsget_approved">missions.get_approved()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get one page (Up to 20 missions) from the missions you have previously had approved</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_approved()
+[{&quot;status&quot;: &quot;APPROVED&quot;, &quot;title&quot;: &quot;Some Mission&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_in_review_missions"><a class="header" href="#missionsget_in_review_missions">missions.get_in_review_missions()</a></h2>
+<h2 id="missionsget_available"><a class="header" href="#missionsget_available">missions.get_available()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get one page (Up to 20 missions) from the missions currently available for claiming</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_available()
+[{&quot;status&quot;: &quot;PUBLISHED&quot;, &quot;title&quot;: &quot;Some Mission&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_missions_count"><a class="header" href="#missionsget_missions_count">missions.get_missions_count()</a></h2>
+<h2 id="missionsget_claimed"><a class="header" href="#missionsget_claimed">missions.get_claimed()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get one page (Up to 20 missions) from the missions you currently have</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_claimed()
+[{&quot;status&quot;: &quot;CLAIMED&quot;, &quot;title&quot;: &quot;Some Mission&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_missions_summary"><a class="header" href="#missionsget_missions_summary">missions.get_missions_summary()</a></h2>
+<h2 id="missionsget_countstatus-listing_uids"><a class="header" href="#missionsget_countstatus-listing_uids">missions.get_count(status, listing_uids)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Get the number of missions</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
+<tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query</br>(Default: None)</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_count()
+10
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsget_missions"><a class="header" href="#missionsget_missions">missions.get_missions()</a></h2>
+<h2 id="missionsget_evidencesmission"><a class="header" href="#missionsget_evidencesmission">missions.get_evidences(mission)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Download the text part of a mission</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>Mission dict pulled from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
+&gt;&gt;&gt; h.missions.get_evidences(msns[0])
+{&quot;title&quot;: &quot;Some Mission&quot;, &quot;asset&quot;: &quot;Web&quot;, &quot;type&quot;: &quot;MISSION&quot;,
+    &quot;structuredResponese&quot;: &quot;no&quot;, &quot;introduction&quot;: &quot;This is the intro&quot;,
+    &quot;testing_methodology&quot;: &quot;This is the testing methodology section&quot;,
+    &quot;conclusion&quot;: &quot;This is the conclusion section&quot;}
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsdo_claim_mission"><a class="header" href="#missionsdo_claim_mission">missions.do_claim_mission()</a></h2>
+<h2 id="missionsget_in_review"><a class="header" href="#missionsget_in_review">missions.get_in_review()</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
+<p>Get a list of missions (Up to 20) which are currently being reviewed</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_in_review()
+[{&quot;status&quot;: &quot;FOR_REVIEW&quot;, &quot;title&quot;: &quot;Some Mission&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsdo_release_mission"><a class="header" href="#missionsdo_release_mission">missions.do_release_mission()</a></h2>
+<h2 id="missionsset_claimedmission"><a class="header" href="#missionsset_claimedmission">missions.set_claimed(mission)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Try and claim one mission</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
+&gt;&gt;&gt; h.set_claimed(msns[0])
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'CLAIMED', 'success': True}
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsdo_interact_mission"><a class="header" href="#missionsdo_interact_mission">missions.do_interact_mission()</a></h2>
+<h2 id="missionsset_disclaimedmission"><a class="header" href="#missionsset_disclaimedmission">missions.set_disclaimed(mission)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Release one mission you currently have</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.missions.set_disclaimed(msns[0])
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'DISCLAIMED', 'success': True}
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="missionsdo_upload_evidences"><a class="header" href="#missionsdo_upload_evidences">missions.do_upload_evidences()</a></h2>
+<h2 id="missionsset_evidencesmission"><a class="header" href="#missionsset_evidencesmission">missions.set_evidences(mission)</a></h2>
 <blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
+<p>Set the evidences (text body) of a mission.</p>
+<p>Note that there are protections in place to ensure you don't accidentally nuke a report you are writing.
+These protections currently include confirming that the current fields of the mission have 20 or less characters.
+If you have a lot of text in a mission and wish to replace it with a template, replace all of the text with a single character and try again.</p>
+<p>Also note that the templates are pulled from your local file templates.
+Check out the <a href="../examples/mission-templates.html">Mission Templates</a> page for more information.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="missionsget_evidences"><a class="header" href="#missionsget_evidences">missions.get_evidences()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="missionsdo_sort_missions"><a class="header" href="#missionsdo_sort_missions">missions.do_sort_missions()</a></h2>
-<blockquote>
-<p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>1</code></td><td>one</td></tr>
-</tbody></table>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">h.
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.missions.set_evidences(msns[0])
+{'evidenceId': 'uuid4...', 'title': 'Some Mission', 'codename': 'SLEEPYPUPPY'}
 </code></pre>
 </blockquote>
 </blockquote>

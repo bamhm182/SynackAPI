@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/db.html" class="active">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../../usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="../../usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="../../usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="../../usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="../../usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="../../usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="../../usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item expanded "><a href="../../usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="../../usage/plugins/auth.html">Auth</a></li><li class="chapter-item expanded "><a href="../../usage/plugins/db.html" class="active">Db</a></li><li class="chapter-item "><a href="../../usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="../../usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="../../usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="../../usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="../../usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="../../usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="../../usage/plugins/users.html">Users</a></li></ol></li></ol></li><li class="chapter-item "><a href="../../support/index.html">Support</a></li><li class="chapter-item "><a href="../../tests/index.html">Tests</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -163,7 +163,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 <p>Add Target Categories from the Synack API to the Database
 This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>categories</td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
+<tr><td><code>categories</code></td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
@@ -175,8 +175,8 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Add Organizations from the Synack API to the Database</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>targets</td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
-<tr><td>session</td><td>sqlalchemy.orm.sessionmaker()</td><td>A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session</td></tr>
+<tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
@@ -200,7 +200,7 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Filters through all the targets to return ones which match a given criteria</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>**kwargs</td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
@@ -213,7 +213,7 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Returns a configuration from the Database.</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>name</td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
+<tr><td><code>name</code></td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
@@ -229,7 +229,7 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <p>Remove targets from the Database based on criteria.
 <strong>If no criteria is provided, all entries are deleted</strong></p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>**kwargs</td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
@@ -241,8 +241,8 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Permanently sets a configuration in the Database</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td>name</td><td>str</td><td>Name of the config to set</td></tr>
-<tr><td>value</td><td>?</td><td>Value to set the config to</td></tr>
+<tr><td><code>name</code></td><td>str</td><td>Name of the config to set</td></tr>
+<tr><td><code>value</code></td><td>?</td><td>Value to set the config to</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
