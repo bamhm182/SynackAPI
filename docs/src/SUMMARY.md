@@ -5,6 +5,7 @@
   - [Examples](./usage/examples/index.md)
     - [Check Invisible Missions](./usage/examples/check-invisible-missions.md)
     - [Mission Bot](./usage/examples/mission-bot.md)
+    - [Mission Templates](./usage/examples/mission-templates.md)
     - [Register Targets](./usage/examples/register-targets.md)
   - [Main Components](./usage/main-components/index.md)
     - [Files](./usage/main-components/files.md)
@@ -22,3 +23,4 @@
     - [Transactions](./usage/plugins/transactions.md)
     - [Users](./usage/plugins/users.md)
 - [Support](./support/index.md)
+- [Tests](./tests/index.md)

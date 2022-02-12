@@ -36,6 +36,11 @@ This plugin deals with authenticating the user to Synack.
 
 > Get a Login Grant Token by providing an OTP Code
 >
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `csrf` | str | A CSRF Token used while logging in
+> | `progress_token` | str | A token returned after submitting a valid username and password
+>
 >> Examples
 >> ```python3
 >> >>> csrf = h.auth.get_login_csrf()
@@ -47,6 +52,10 @@ This plugin deals with authenticating the user to Synack.
 ## auth.get_login_progress_token(csrf)
 
 > Get the Login Progress Token by authenticating with email and password
+>
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `csrf` | str | A CSRF Token used while logging in
 >
 >> Examples
 >> ```python3

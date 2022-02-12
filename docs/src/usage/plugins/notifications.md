@@ -1,27 +1,21 @@
 # Notifications
 
-## notifications.get_notifications()
+## notifications.get()
 
-> DESCRIPTION
->
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> Return a list of notifications
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.notifications.get()
+>> [{"action": "outage_starts", "subject": "SLAPHAPPYMONKEY",...}...]
 >> ```
 
 ## notifications.get_unread_count()
 
-> DESCRIPTION
->
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> Get the number of unread notifications.
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.notifications.get_unread_count()
+>> 7
 >> ```

@@ -197,7 +197,8 @@ class MissionsTestCase(unittest.TestCase):
             "target": "4wr7egtu",
             "title": "Some Mission",
             "payout": "10",
-            "claimed": True
+            "status": "CLAIM",
+            "success": True
         }
         self.missions.api.request.return_value.status_code = 201
         self.assertEqual(ret, self.missions.set_status(m, "CLAIM"))

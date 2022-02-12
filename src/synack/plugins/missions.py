@@ -138,12 +138,12 @@ class Missions(Plugin):
         Arguments:
         mission -- A single mission
         """
-        res = self.api.request('GET',
-                               'tasks/v2/tasks/' +
-                               mission['id'] +
-                               '/evidences')
-        if res.status_code == 200:
-            ret = res.json()
+        evidences = self.api.request('GET',
+                                     'tasks/v2/tasks/' +
+                                     mission['id'] +
+                                     '/evidences')
+        if evidences.status_code == 200:
+            ret = evidences.json()
             ret["title"] = mission["title"]
             ret["asset"] = mission["assetTypes"][0]
             ret["type"] = mission["taskType"]
@@ -198,14 +198,14 @@ class Missions(Plugin):
                     ret["codename"] = mission["listingCodename"]
                     return ret
 
-    def set_status(self, mission, action):
+    def set_status(self, mission, status):
         """Interact with single mission
 
         Arguments:
         mission -- A single mission
         """
         data = {
-            "type": action
+            "type": status
         }
         orgId = mission["organizationUid"]
         listingId = mission["listingUid"]
@@ -226,5 +226,6 @@ class Missions(Plugin):
             "target": listingId,
             "title": title,
             "payout": payout,
-            "claimed": True if res.status_code == 201 else False
+            "status": status,
+            "success": True if res.status_code == 201 else False
         }

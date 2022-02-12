@@ -51,26 +51,26 @@ class Templates(Plugin):
         if Path(path).exists():
             return self.build_sections(path)
 
-    def set_file(self, template):
+    def set_file(self, evidences):
         """Save a template json to disk
 
         Arguments:
         template -- A template object from missions.get_evidences
         """
-        path = self.build_filepath(template)
-        if template["version"] == "2" and not Path(path).exists():
+        path = self.build_filepath(evidences)
+        if evidences["version"] == "2" and not Path(path).exists():
             out = "\n".join([
                 "[[[structuredResponse]]]\n",
-                template["structuredResponse"],
+                evidences["structuredResponse"],
                 "\n[[[introduction]]]\n",
                 "THIS IS A DOWNLOADED TEMPLATE!",
                 "ENSURE THERE IS NO SENSITIVE INFORMATION,",
                 "THEN DELETE THIS WARNING!\n",
-                template["introduction"],
+                evidences["introduction"],
                 "\n[[[testing_methodology]]]\n",
-                template["testing_methodology"],
+                evidences["testing_methodology"],
                 "\n[[[conclusion]]]\n",
-                template["conclusion"],
+                evidences["conclusion"],
                 "\n[[[END]]]"
             ])
             with open(path, 'w') as fp:

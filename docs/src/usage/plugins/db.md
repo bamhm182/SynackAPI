@@ -30,7 +30,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | categories | list | A list of Category dictionaries returned from the Synack API
+> | `categories` | list | A list of Category dictionaries returned from the Synack API
 >
 >> Examples
 >> ```python3
@@ -43,8 +43,8 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | targets | list | A list of Target dictionaries returned from the Synack API
-> | session | sqlalchemy.orm.sessionmaker() | A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session
+> | `targets` | list | A list of Target dictionaries returned from the Synack API
+> | `session` | sqlalchemy.orm.sessionmaker() | A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session
 >
 >> Examples
 >> ```python3
@@ -70,7 +70,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | **kwargs | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
+> | `kwargs` | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
 >
 >> Examples
 >> ```python3
@@ -84,7 +84,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | name | str | The desired config to pull. If none provided, the entire config object will return.
+> | `name` | str | The desired config to pull. If none provided, the entire config object will return.
 >
 >> Examples
 >> ```python3
@@ -101,7 +101,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | **kwargs | kwargs | Criteria by which to find Targets for deletion (codename, slug, etc.)
+> | `kwargs` | kwargs | Criteria by which to find Targets for deletion (codename, slug, etc.)
 >
 >> Examples
 >> ```python3
@@ -114,8 +114,8 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | name | str | Name of the config to set
-> | value | ? | Value to set the config to
+> | `name` | str | Name of the config to set
+> | `value` | ? | Value to set the config to
 >
 >> Examples
 >> ```python3

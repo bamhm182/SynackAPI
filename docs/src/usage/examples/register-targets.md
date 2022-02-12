@@ -6,7 +6,7 @@ To show you how this can be done, let's take a look at the following example, wh
 
 If you're unfamiliar with `python3 -c`, this is how you can execute a small amount of Python from your (bash, zsh, etc.) shell.
 We take that to `import synack` just as we would in a full script.
-We then have a longer command that creates the handler, then calls the `targets.do_register_all()` function to get and register all unregistered targets.
+We then have a longer command that creates the handler, then calls the `targets.set_registered()` function to get and register all unregistered targets.
 
 ```bash
 python3 -c "import synack; synack.Handler().targets.set_registered()"

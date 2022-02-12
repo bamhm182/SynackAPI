@@ -1,79 +1,93 @@
 # Templates
 
-## templates.get_template_path()
+## templates.build_filepath(mission)
 
-> DESCRIPTION
+> Builds a safe filepath for the template to exist at
 >
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `mission` | dict | A mission dict returned from the Synack API
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> msn = {
+>> ...     "taskType": "SV2M",
+>> ...     "assetTypes": ["host"],
+>> ...     "title": "More Realistic Name: CVE-1970-1"
+>> ... }
+>> >>> h.templates.build_filepath(msn)
+>> '/home/user/Templates/sv2m/host/more_realistic_name_cve_1970_1.txt'
+>> >>> msn = {
+>> ...     "taskType": "MISSION",
+>> ...     "assetTypes": ["web"],
+>> ...     "title": "SoME  HoRR!bl3 M!$$!0N"
+>> ... }
+>> >>> h.templates.build_filepath(msn)
+>> '/home/user/Templates/mission/web/some_horr_bl3_m_0n.txt'
 >> ```
 
-## templates.get_sections_from_file()
+## templates.build_safe_name(name)
 
-> DESCRIPTION
+> Takes a name and converts it into something that is definitely safe for a filepath 
 >
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `name` | str | Some string to convert into a standardized string that if definitely safe to use as a filepath
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.build_safe_name('R@ND0M     G@RB@G3!!!!!')
+>> 'r_nd0m_g_rb_ge_'
 >> ```
 
-## templates.get_template()
+## templates.build_sections(path)
 
-> DESCRIPTION
+> Take the text from a local template file and prepare it to be sent to the Synack API
 >
 > | Arguments | Description
 > | --- | ---
-> | `1` | one
+> | `path` | pathlib.PosixPath | Path to the template file that should be uploaded
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> h.templates.build_sections(Path('/home/user/Templates/mission/web/mission.txt'))
+>> {
+>>    "introduction": "This is the intro",
+>>    "testing_methodology": "This is how I tested",
+>>    "conclusion": "This is the conclusion",
+>>    "structuredResponse": "no"
+>> }
 >> ```
 
-## templates.do_save_template()
+## templates.get_file(mission)
 
-> DESCRIPTION
+> Pulls in a local template file to upload to a given mission
 >
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `mission` | dict | A mission dict from the Synack API
 >
 >> Examples
 >> ```python3
->> h.
+>> >>> msns = h.missions.get_claimed()
+>> >>> h.templates.get_file(msns[0])
+>> {"introduction": "This is the intro",...}
 >> ```
 
-## templates.do_convert_name()
+## templates.set_file(evidences)
 
-> DESCRIPTION
+> Writes evidences pulled from `missions.get_evidences()` to a local template file
 >
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
+> Note that if the file already exists, it will not be overwritten
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `evidences` | dict | Evidences from `missions.get_evidences()`
 >
 >> Examples
 >> ```python3
->> h.
->> ```
-
-## templates.()
-
-> DESCRIPTION
->
-> | Arguments | Description
-> | --- | ---
-> | `1` | one
->
->> Examples
->> ```python3
->> h.
+>> >>> msns = h.missions.get_approved()
+>> >>> evidences = h.missions.get_evidences(msns[0])
+>> >>> h.templates.set_file(evidences)
+>> '/home/user/Templates/mission/web/some_new_mission.txt'
 >> ```
