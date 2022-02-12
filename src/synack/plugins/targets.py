@@ -21,10 +21,10 @@ class Targets(Plugin):
         slug -- Slug of desired target
         """
         codename = None
-        targets = self.db.filter_targets(slug=slug)
+        targets = self.db.find_targets(slug=slug)
         if not targets:
             self.get_registered_summary()
-            targets = self.db.filter_targets(slug=slug)
+            targets = self.db.find_targets(slug=slug)
         if targets:
             codename = targets[0].codename
         return codename
@@ -32,10 +32,10 @@ class Targets(Plugin):
     def build_slug_from_codename(self, codename):
         """Return a slug for a target given its codename"""
         slug = None
-        targets = self.db.filter_targets(codename=codename)
+        targets = self.db.find_targets(codename=codename)
         if not targets:
             self.get_registered_summary()
-            targets = self.db.filter_targets(codename=codename)
+            targets = self.db.find_targets(codename=codename)
         if targets:
             slug = targets[0].slug
         return slug
@@ -49,7 +49,7 @@ class Targets(Plugin):
 
     def get_credentials(self, **kwargs):
         """Get Credentials for a target"""
-        target = self.db.filter_targets(**kwargs)[0]
+        target = self.db.find_targets(**kwargs)[0]
         if target:
             res = self.api.request('POST',
                                    'asset/v1/organizations/' +

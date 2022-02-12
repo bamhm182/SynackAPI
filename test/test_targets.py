@@ -56,14 +56,14 @@ class TargetsTestCase(unittest.TestCase):
     def test_build_slug_from_codename(self):
         """Should return a slug for a given codename"""
         ret_targets = [Target(slug="qwerty")]
-        self.targets.db.filter_targets.return_value = ret_targets
+        self.targets.db.find_targets.return_value = ret_targets
         self.assertEqual("qwerty",
                          self.targets.build_slug_from_codename("qwerty"))
-        self.targets.db.filter_targets.assert_called_with(codename="qwerty")
+        self.targets.db.find_targets.assert_called_with(codename="qwerty")
 
     def test_build_slug_from_codename_no_targets(self):
         """Should update the targets if empty"""
-        self.targets.db.filter_targets.side_effect = [
+        self.targets.db.find_targets.side_effect = [
             [],
             [Target(slug="qwerty")]
         ]
@@ -75,20 +75,20 @@ class TargetsTestCase(unittest.TestCase):
 
         slug = self.targets.build_slug_from_codename("CHONKEYMONKEY")
         self.assertEqual("qwerty", slug)
-        self.targets.db.filter_targets.assert_has_calls(calls)
+        self.targets.db.find_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
     def test_build_codename_from_slug(self):
         """Should return a codename for a given slug"""
         ret_targets = [Target(codename="SLOPPYSLUG")]
-        self.targets.db.filter_targets.return_value = ret_targets
+        self.targets.db.find_targets.return_value = ret_targets
         self.assertEqual("SLOPPYSLUG",
                          self.targets.build_codename_from_slug("qwfars"))
-        self.targets.db.filter_targets.assert_called_with(slug="qwfars")
+        self.targets.db.find_targets.assert_called_with(slug="qwfars")
 
     def test_build_codename_from_slug_no_targets(self):
         """Should update the targets if empty"""
-        self.targets.db.filter_targets.side_effect = [
+        self.targets.db.find_targets.side_effect = [
             [],
             [Target(codename="SLOPPYSLUG")]
         ]
@@ -99,7 +99,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.get_registered_summary = MagicMock()
         self.assertEqual("SLOPPYSLUG",
                          self.targets.build_codename_from_slug("qwfars"))
-        self.targets.db.filter_targets.assert_has_calls(calls)
+        self.targets.db.find_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
     def test_get_connected(self):
@@ -163,9 +163,9 @@ class TargetsTestCase(unittest.TestCase):
     def test_get_credentials(self):
         """Should get credentials for a given target"""
         target = Target(organization="qwewqe", slug="asdasd")
-        self.targets.db.filter_targets = MagicMock()
+        self.targets.db.find_targets = MagicMock()
         self.targets.api = MagicMock()
-        self.targets.db.filter_targets.return_value = [target]
+        self.targets.db.find_targets.return_value = [target]
         self.targets.db.user_id = 'bobby'
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = "json_return"
