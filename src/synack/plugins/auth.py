@@ -108,11 +108,11 @@ class Auth(Plugin):
             "if (loc.href.startsWith('https://login.synack.com/')) {" +\
             "loc.replace('https://platform.synack.com');" +\
             "}" +\
-            "},60000);" +\
+            "},15000);" +\
             "sessionStorage.setItem(" +\
-            "'shared-session-com.synack.accessToken'," +\
+            "'shared-session-com.synack.accessToken','" +\
             self.db.api_token +\
-            ");})();"
+            "');})();"
         with open(self.state.config_dir / 'login.js', 'w') as fp:
             fp.write(script)
 

@@ -329,8 +329,8 @@ class MissionsTestCase(unittest.TestCase):
             "validResponses": [{}, {"value": "uieth8rgyub"}],
             "listingCodename": "SLAPPYMONKEY"
         }
-        self.missions.templates.get_template = MagicMock()
-        self.missions.templates.get_template.return_value = template
+        self.missions.templates.get_file = MagicMock()
+        self.missions.templates.get_file.return_value = template
         self.missions.get_evidences = MagicMock()
         self.missions.get_evidences.return_value = curr
         self.missions.api.request = MagicMock()
@@ -384,7 +384,7 @@ class MissionsTestCase(unittest.TestCase):
         ret = {
             "title": m["title"],
             "asset": "web",
-            "type": "MISSION",
+            "taskType": "MISSION",
             "structuredResponse": "uieth8rgyub"
         }
         self.missions.api.request = MagicMock()

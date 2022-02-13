@@ -1,7 +1,6 @@
 # Summary
 
 - [Introduction](./index.md)
-- [Patches](./patches.md)
 - [Support](./support/index.md)
 - [Tests](./tests/index.md)
 - [Usage](./usage/index.md)

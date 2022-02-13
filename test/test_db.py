@@ -412,7 +412,6 @@ class DbTestCase(unittest.TestCase):
         self.db.get_config.return_value = "1@2.com"
 
         self.assertEqual("1@2.com", self.db.email)
-        self.assertEqual("1@2.com", self.db.state.email)
 
     def test_email_state(self):
         """Should pull email from the state"""
@@ -443,7 +442,6 @@ class DbTestCase(unittest.TestCase):
         self.db.get_config.return_value = "password1234"
 
         self.assertEqual("password1234", self.db.password)
-        self.assertEqual("password1234", self.db.state.password)
 
     def test_password_state(self):
         """Should pull password from the state"""
