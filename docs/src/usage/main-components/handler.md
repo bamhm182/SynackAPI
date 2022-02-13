@@ -17,10 +17,9 @@ h = synack.Handler()
 From there, you can use any of the Plugins as follows:
 
 ```
-h.missions.get_missions_count()
-h.targets.do_register_all()
+h.missions.get_count()
+h.targets.set_registered()
 ```
-
 
 ## Setting One-Off States
 

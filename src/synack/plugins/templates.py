@@ -32,7 +32,7 @@ class Templates(Plugin):
     def build_safe_name(name):
         """Simplify a name to use for a file path"""
         name = name.lower()
-        name = re.sub('[^a-z]', '_', name)
+        name = re.sub('[^a-z0-9]', '_', name)
         return re.sub('_+', '_', name)
 
     def build_sections(self, path):

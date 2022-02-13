@@ -146,7 +146,7 @@ class Missions(Plugin):
             ret = evidences.json()
             ret["title"] = mission["title"]
             ret["asset"] = mission["assetTypes"][0]
-            ret["type"] = mission["taskType"]
+            ret["taskType"] = mission["taskType"]
             ret["structuredResponse"] = mission["validResponses"][1]["value"]
 
             return ret
@@ -171,21 +171,23 @@ class Missions(Plugin):
         """
         return self.set_status(mission, "DISCLAIM")
 
-    def set_evidences(self, mission):
+    def set_evidences(self, mission, template=None):
         """Upload a template to a mission
 
         Arguments:
         mission -- A single mission
         """
-        template = self.templates.get_template(mission)
+        if template is None:
+            template = self.templates.get_file(mission)
         if template:
             curr = self.get_evidences(mission)
             safe = True
-            for f in ['introduction', 'testing_methodology',
-                      'conclusion']:
-                if len(curr.get(f)) >= 20:
-                    safe = False
-                    break
+            if curr:
+                for f in ['introduction', 'testing_methodology',
+                          'conclusion']:
+                    if len(curr.get(f)) >= 20:
+                        safe = False
+                        break
             if safe:
                 res = self.api.request('PATCH',
                                        'tasks/v2/tasks/' +

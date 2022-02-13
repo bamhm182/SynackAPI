@@ -33,7 +33,7 @@ for m in msns:
     template = h.missions.get_file(m)
     if template:
         template = replace_placeholders(template)
-        h.missions.set_evidences(template)
+        h.missions.set_evidences(m, template)
 
 ```
 

@@ -1,6 +1,8 @@
 # Summary
 
 - [Introduction](./index.md)
+- [Support](./support/index.md)
+- [Tests](./tests/index.md)
 - [Usage](./usage/index.md)
   - [Examples](./usage/examples/index.md)
     - [Check Invisible Missions](./usage/examples/check-invisible-missions.md)
@@ -22,5 +24,3 @@
     - [Templates](./usage/plugins/templates.md)
     - [Transactions](./usage/plugins/transactions.md)
     - [Users](./usage/plugins/users.md)
-- [Support](./support/index.md)
-- [Tests](./tests/index.md)

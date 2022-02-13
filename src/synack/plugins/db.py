@@ -21,6 +21,9 @@ class Db(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.sqlite_db = self.state.config_dir / 'synackapi.db'
+
+        self.set_migration()
+
         engine = sa.create_engine(f'sqlite:///{str(self.sqlite_db)}')
         sa.event.listen(engine, 'connect', self._fk_pragma_on_connect)
         self.Session = sessionmaker(bind=engine)
@@ -182,10 +185,9 @@ class Db(Plugin):
     def email(self):
         if self.state.email is None:
             ret = self.get_config('email')
-            if ret is None:
+            if not ret:
                 ret = input("Synack Email: ")
                 self.email = ret
-            self.state.email = ret
             return ret
         else:
             return self.state.email
@@ -223,7 +225,7 @@ class Db(Plugin):
     def otp_secret(self):
         if self.state.otp_secret is None:
             ret = self.get_config('otp_secret')
-            if ret is None:
+            if not ret:
                 ret = input("Synack OTP Secret: ")
                 self.otp_secret = ret
             self.state.otp_secret = ret
@@ -240,10 +242,9 @@ class Db(Plugin):
     def password(self):
         if self.state.password is None:
             ret = self.get_config('password')
-            if ret is None:
+            if not ret:
                 ret = input("Synack Password: ")
                 self.password = ret
-            self.state.password = ret
             return ret
         else:
             return self.state.password

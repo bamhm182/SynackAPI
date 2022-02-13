@@ -6,8 +6,6 @@ As seen in the following example, you can create a State variable externally and
 In the event that you do not pass in a State, one is created automatically.
 You can also continue to manipulate the State in the ways shown below.
 
-
-
 ```
 #!/usr/bin/env python3
 
@@ -32,6 +30,12 @@ handler.state.debug = True
 handler.debug.log("Test", "This message WILL be seen")
 ```
 
+Out of all of the State variables, `login` is the most important to understand.
+If this is set to true, whenever your Handler is created, it will make sure you are logged in.
+If you have a bunch of scripts based on SynackAPI, it is probably a good idea to have `login` set to False, which is the default, for the majority of scripts.
+Then you can have a couple scripts which are run periodically with `login` set to True so it becomes responsible for making sure that everything is logged in.
+
+As an example of a good function to set `login` to True, check out the [Register Targets](../examples/register-targets.md) Example.
 
 ## Database vs State
 
