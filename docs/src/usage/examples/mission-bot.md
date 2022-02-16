@@ -23,7 +23,7 @@ while True:
     curr_missions = h.missions.get_count()
     if curr_missions > known_missions:
         known_missions = curr_missions
-        msns = h.missions.get_available()
+        missions = h.missions.get_available()
         for m in missions:
             time.sleep(1)
             h.missions.set_claimed(m)
