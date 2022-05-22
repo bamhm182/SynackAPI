@@ -253,9 +253,9 @@ known_missions = 0
 while True:
     time.sleep(30)
     curr_missions = h.missions.get_count()
-    if curr_missions and curr_missions &gt; known_missions:
+    if curr_missions &gt; known_missions:
         known_missions = curr_missions
-        missions = h.missions.get_available()
+        msns = h.missions.get_available()
         for m in missions:
             time.sleep(1)
             h.missions.set_claimed(m)
@@ -281,7 +281,7 @@ def replace_placeholders(template, mission):
     &quot;&quot;&quot;
     for k in template.keys():
         template[k] = template[k].replace('__CODENAME__',
-                                          mission['listingCodename'])
+                                          mission['listingCodename']
 
 h = synack.Handler()
 
