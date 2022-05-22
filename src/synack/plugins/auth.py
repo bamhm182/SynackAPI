@@ -102,17 +102,26 @@ class Auth(Plugin):
             return j['token']
 
     def set_login_script(self):
-        script = "(function() {" +\
-            "setTimeout(()=>{" +\
+        script = "let forceLogin = () => {" +\
             "const loc = window.location;" +\
-            "if (loc.href.startsWith('https://login.synack.com/')) {" +\
+            "if(loc.href.startsWith('https://login.synack.com/')) {" +\
             "loc.replace('https://platform.synack.com');" +\
-            "}" +\
-            "},15000);" +\
-            "sessionStorage.setItem(" +\
-            "'shared-session-com.synack.accessToken','" +\
+            "}};" +\
+            "(function() {" +\
+            "sessionStorage.setItem('shared-session-com.synack.accessToken'" +\
+            ",'" +\
             self.db.api_token +\
-            "');})();"
+            "');" +\
+            "setTimeout(forceLogin,60000);" +\
+            "let btn = document.createElement('button');" +\
+            "btn.addEventListener('click',forceLogin);" +\
+            "btn.style = 'margin-top: 20px;';" +\
+            "btn.innerText = 'SynackAPI Log In';" +\
+            "btn.classList.add('btn');" +\
+            "btn.classList.add('btn-blue');" +\
+            "document.getElementsByClassName('onboarding-form')[0]" +\
+            ".appendChild(btn)}" +\
+            ")();"
         with open(self.state.config_dir / 'login.js', 'w') as fp:
             fp.write(script)
 
