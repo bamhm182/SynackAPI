@@ -21,15 +21,11 @@ def upgrade():
                     sa.Column('api_token', sa.VARCHAR(200), server_default=""),
                     sa.Column('debug', sa.BOOLEAN, server_default='f'),
                     sa.Column('email', sa.VARCHAR(150), server_default=""),
-                    sa.Column('http_proxy', sa.VARCHAR(50),
-                              server_default='http://localhost:8080'),
-                    sa.Column('https_proxy', sa.VARCHAR(50),
-                              server_default='http://localhost:8080'),
+                    sa.Column('http_proxy', sa.VARCHAR(50), server_default='http://localhost:8080'),
+                    sa.Column('https_proxy', sa.VARCHAR(50), server_default='http://localhost:8080'),
                     sa.Column('login', sa.BOOLEAN, server_default='f'),
-                    sa.Column('template_dir', sa.VARCHAR(250),
-                              server_default='~/Templates'),
-                    sa.Column('notifications_token', sa.VARCHAR(1000),
-                              server_default=""),
+                    sa.Column('template_dir', sa.VARCHAR(250), server_default='~/Templates'),
+                    sa.Column('notifications_token', sa.VARCHAR(1000), server_default=""),
                     sa.Column('otp_secret', sa.VARCHAR(50), server_default=""),
                     sa.Column('password', sa.VARCHAR(150), server_default=""),
                     sa.Column('user_id', sa.VARCHAR(20), server_default=""),
@@ -38,20 +34,16 @@ def upgrade():
     op.create_table('categories',
                     sa.Column('id', sa.INTEGER, primary_key=True),
                     sa.Column('name', sa.VARCHAR(100)),
-                    sa.Column('passed_practical', sa.BOOLEAN,
-                              server_default='f'),
-                    sa.Column('passed_written', sa.BOOLEAN,
-                              server_default='f'))
+                    sa.Column('passed_practical', sa.BOOLEAN, server_default='f'),
+                    sa.Column('passed_written', sa.BOOLEAN, server_default='f'))
 
     op.create_table('organizations',
                     sa.Column('slug', sa.VARCHAR(20), primary_key=True))
 
     op.create_table('targets',
                     sa.Column('slug', sa.VARCHAR(20), primary_key=True),
-                    sa.Column('category', sa.INTEGER,
-                              sa.ForeignKey('categories.id')),
-                    sa.Column('organization', sa.VARCHAR(20),
-                              sa.ForeignKey('organizations.slug')),
+                    sa.Column('category', sa.INTEGER, sa.ForeignKey('categories.id')),
+                    sa.Column('organization', sa.VARCHAR(20), sa.ForeignKey('organizations.slug')),
                     sa.Column('average_payout', sa.REAL, server_default='0.0'),
                     sa.Column('codename', sa.VARCHAR(100)),
                     sa.Column('date_updated', sa.INTEGER, default=0),
@@ -62,10 +54,8 @@ def upgrade():
                     sa.Column('is_updated', sa.BOOLEAN, default='f'),
                     sa.Column('last_submitted', sa.INTEGER, default=0),
                     sa.Column('start_date', sa.INTEGER, default=0),
-                    sa.Column('vulnerability_discovery', sa.BOOLEAN,
-                              default='f'),
-                    sa.Column('workspace_access_missing', sa.BOOLEAN,
-                              default='f'))
+                    sa.Column('vulnerability_discovery', sa.BOOLEAN, default='f'),
+                    sa.Column('workspace_access_missing', sa.BOOLEAN, default='f'))
 
 
 def downgrade():

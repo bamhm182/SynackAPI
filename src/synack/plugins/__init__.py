@@ -4,6 +4,7 @@ from .api import Api
 from .auth import Auth
 from .db import Db
 from .debug import Debug
+from .hydra import Hydra
 from .missions import Missions
 from .notifications import Notifications
 from .targets import Targets

@@ -6,6 +6,7 @@ Tests for the plugins/db.py Db class
 import alembic.command
 import alembic.config
 import os
+import sqlalchemy
 import sys
 import pathlib
 import unittest
@@ -54,8 +55,7 @@ class DbTestCase(unittest.TestCase):
             mock_config.return_value = mock
             with patch.object(alembic.command, 'upgrade') as mock_upgrade:
                 self.db.set_migration()
-                mock_config.return_value.set_main_option.\
-                    assert_has_calls(calls)
+                mock_config.return_value.set_main_option.assert_has_calls(calls)
                 mock_upgrade.assert_called_with(mock, 'head')
 
     def test_get_config(self):
@@ -70,6 +70,76 @@ class DbTestCase(unittest.TestCase):
         query.return_value.filter_by.assert_called_with(id=1)
         query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
+
+    def test_add_ips(self):
+        self.db.Session = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
+                "source": "nmap",
+                "ports": [
+                    {
+                        "port": "443",
+                        "protocol": "tcp",
+                        "service": "Super Apache NGINX Deluxe",
+                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
+                        "url": "http://bubba.net"
+                    },
+                    {
+                        "port": "53",
+                        "protocol": "udp",
+                        "service": "DNS plz AXFR me"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_ips(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.IP)
+            query.return_value.filter_by.assert_called_with('sqlalchemy.and_')
+            query.return_value.filter_by.return_value.first.assert_called_with()
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+
+    def test_add_ports(self):
+        self.db.Session = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
+                "source": "nmap",
+                "ports": [
+                    {
+                        "port": "443",
+                        "protocol": "tcp",
+                        "service": "Super Apache NGINX Deluxe",
+                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
+                        "url": "http://bubba.net"
+                    },
+                    {
+                        "port": "53",
+                        "protocol": "udp",
+                        "service": "DNS plz AXFR me"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_ports(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Port)
+            query.return_value.filter_by.assert_called_with('sqlalchemy.and_')
+            query.return_value.filter_by.return_value.first.assert_called_with()
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
 
     def test_add_categories(self):
         self.db.Session = MagicMock()
@@ -302,13 +372,11 @@ class DbTestCase(unittest.TestCase):
         targets = [{
             "organization": {"slug": "qweqwe"}
         }]
-        mock.query.return_value.filter_by.return_value.\
-            first.return_value = None
+        mock.query.return_value.filter_by.return_value.first.return_value = None
         self.db.add_organizations(targets, mock)
         mock.query.assert_called_with(synack.db.models.Organization)
         mock.query.return_value.filter_by.assert_called_with(slug='qweqwe')
-        mock.query.return_value.filter_by.return_value.first.\
-            assert_called_with()
+        mock.query.return_value.filter_by.return_value.first.assert_called_with()
         mock.add.assert_called()
 
     def test_add_organizations_organization_id(self):
@@ -317,13 +385,11 @@ class DbTestCase(unittest.TestCase):
         targets = [{
             "organization_id": "asdasd"
         }]
-        mock.query.return_value.filter_by.return_value.\
-            first.return_value = None
+        mock.query.return_value.filter_by.return_value.first.return_value = None
         self.db.add_organizations(targets, mock)
         mock.query.assert_called_with(synack.db.models.Organization)
         mock.query.return_value.filter_by.assert_called_with(slug='asdasd')
-        mock.query.return_value.filter_by.return_value.first.\
-            assert_called_with()
+        mock.query.return_value.filter_by.return_value.first.assert_called_with()
         mock.add.assert_called()
 
     def test_add_targets(self):

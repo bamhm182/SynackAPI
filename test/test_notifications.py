@@ -24,8 +24,7 @@ class NotificationsTestCase(unittest.TestCase):
     def test_get(self):
         """Should get a list of notifications"""
         self.notifications.api.notifications.return_value.status_code = 200
-        self.notifications.api.notifications.\
-            return_value.json.return_value = {"one": "1"}
+        self.notifications.api.notifications.return_value.json.return_value = {"one": "1"}
         path = "notifications?meta=1"
         self.assertEqual({"one": "1"}, self.notifications.get())
         self.notifications.api.notifications.assert_called_with("GET", path)
@@ -33,8 +32,7 @@ class NotificationsTestCase(unittest.TestCase):
     def test_get_unread_count(self):
         """Should get the number of unread notifications"""
         self.notifications.api.notifications.return_value.status_code = 200
-        self.notifications.api.notifications.\
-            return_value.json.return_value = {"one": "1"}
+        self.notifications.api.notifications.return_value.json.return_value = {"one": "1"}
         self.notifications.db.notifications_token = "good_token"
         query = {
             "authorization_token": "good_token"

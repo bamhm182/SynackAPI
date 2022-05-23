@@ -12,7 +12,9 @@ from sqlalchemy.orm import sessionmaker
 from synack.db.models import Target
 from synack.db.models import Config
 from synack.db.models import Category
+from synack.db.models import IP
 from synack.db.models import Organization
+from synack.db.models import Port
 
 from .base import Plugin
 
@@ -46,7 +48,30 @@ class Db(Plugin):
         session.commit()
         session.close()
 
-    def add_organizations(self, targets, session):
+    def add_ips(self, results, session=None):
+        close = False
+        if session is None:
+            session = self.Session()
+            close = True
+        q = session.query(IP)
+        for result in results:
+            db_ip = q.filter_by(sa.and_(
+                IP.ip.like(result.get('ip')),
+                IP.target.like(result.get('target')))).first()
+            if not db_ip:
+                db_ip = IP(
+                    ip=result.get('ip'),
+                    target=result.get('target'))
+                session.add(db_ip)
+        if close:
+            session.commit()
+            session.close()
+
+    def add_organizations(self, targets, session=None):
+        close = False
+        if session is None:
+            session = self.Session()
+            close = True
         q = session.query(Organization)
         for t in targets:
             if t.get('organization'):
@@ -57,6 +82,32 @@ class Db(Plugin):
             if not db_o:
                 db_o = Organization(slug=slug)
                 session.add(db_o)
+        if close:
+            session.commit()
+            session.close()
+
+    def add_ports(self, results, **kwargs):
+        session = self.Session()
+        self.add_ips(results, session)
+        q = session.query(Port)
+        for result in results:
+            for port in result.get('ports', []):
+                db_port = q.filter_by(sa.and_(
+                    Port.port.like(port.get('port')),
+                    Port.protocol.like(port.get('protocol')),
+                    Port.ip.like(result.get('ip')),
+                    Port.source.like(result.get('source'))))
+                if not db_port:
+                    db_port = Port(
+                        port=port.get('port'),
+                        protocol=port.get('protocol'),
+                        service=port.get('service'),
+                        screenshot_url=port.get('screenshot_url'),
+                        url=port.get('url'),
+                        ip=result.get('ip'),
+                        source=result.get('source'))
+        session.commit()
+        session.close()
 
     def add_targets(self, targets, **kwargs):
         session = self.Session()
