@@ -55,9 +55,11 @@ class Db(Plugin):
             close = True
         q = session.query(IP)
         for result in results:
-            db_ip = q.filter_by(sa.and_(
+            filt = sa.and_(
                 IP.ip.like(result.get('ip')),
-                IP.target.like(result.get('target')))).first()
+                IP.target.like(result.get('target'))
+            )
+            db_ip = q.filter(filt).first()
             if not db_ip:
                 db_ip = IP(
                     ip=result.get('ip'),
@@ -87,25 +89,41 @@ class Db(Plugin):
             session.close()
 
     def add_ports(self, results, **kwargs):
+        self.add_ips(results)
         session = self.Session()
-        self.add_ips(results, session)
         q = session.query(Port)
+        ips = session.query(IP)
         for result in results:
-            for port in result.get('ports', []):
-                db_port = q.filter_by(sa.and_(
-                    Port.port.like(port.get('port')),
-                    Port.protocol.like(port.get('protocol')),
-                    Port.ip.like(result.get('ip')),
-                    Port.source.like(result.get('source'))))
-                if not db_port:
-                    db_port = Port(
-                        port=port.get('port'),
-                        protocol=port.get('protocol'),
-                        service=port.get('service'),
-                        screenshot_url=port.get('screenshot_url'),
-                        url=port.get('url'),
-                        ip=result.get('ip'),
-                        source=result.get('source'))
+            ip = ips.filter_by(ip=result.get('ip'))
+            if ip:
+                ip = ip.first()
+                for port in result.get('ports', []):
+                    filt = sa.and_(
+                        Port.port.like(port.get('port')),
+                        Port.protocol.like(port.get('protocol')),
+                        Port.ip.like(ip.id),
+                        Port.source.like(result.get('source')))
+                    db_port = q.filter(filt)
+                    if not db_port:
+                        db_port = Port(
+                            port=port.get('port'),
+                            protocol=port.get('protocol'),
+                            service=port.get('service'),
+                            screenshot_url=port.get('screenshot_url'),
+                            url=port.get('url'),
+                            ip=ip.id,
+                            source=result.get('source'),
+                            open=port.get('open'),
+                            updated=port.get('updated')
+                        )
+                    else:
+                        db_port = db_port.first()
+                        db_port.service = port.get('service', db_port.service),
+                        db_port.screenshot_url = port.get('screenshot_url', db_port.screenshort_url),
+                        db_port.url = port.get('url', db_port.url),
+                        db_port.open = port.get('open', db_port.open),
+                        db_port.updated = port.get('updated', db_port.updated)
+                    session.add(db_port)
         session.commit()
         session.close()
 

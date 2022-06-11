@@ -71,7 +71,8 @@ class DbTestCase(unittest.TestCase):
         query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_add_ips(self):
+    def test_add_ips_existing_ips(self):
+        """Should not add IPs if already in db"""
         self.db.Session = MagicMock()
         results = [
             {
@@ -89,7 +90,7 @@ class DbTestCase(unittest.TestCase):
                     {
                         "port": "53",
                         "protocol": "udp",
-                        "service": "DNS plz AXFR me"
+                        "service": "DNS"
                     }
                 ]
             }
@@ -101,13 +102,96 @@ class DbTestCase(unittest.TestCase):
 
             mock_and.assert_called()
             query.asset_called_with(synack.db.models.IP)
-            query.return_value.filter_by.assert_called_with('sqlalchemy.and_')
-            query.return_value.filter_by.return_value.first.assert_called_with()
+            query.return_value.filter.assert_called_with('sqlalchemy.and_')
+            query.return_value.filter.return_value.first.assert_called_with()
             self.db.Session.return_value.commit.assert_called_with()
             self.db.Session.return_value.close.assert_called_with()
 
-    def test_add_ports(self):
+    def test_add_ips_new_ips(self):
+        """Should app IPs if new"""
         self.db.Session = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
+                "source": "nmap",
+                "ports": [
+                    {
+                        "port": "443",
+                        "protocol": "tcp",
+                        "service": "Super Apache NGINX Deluxe",
+                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
+                        "url": "http://bubba.net"
+                    },
+                    {
+                        "port": "53",
+                        "protocol": "udp",
+                        "service": "DNS"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        self.db.Session.return_value.query.return_value.filter.return_value.first.return_value = None
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_ips(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.IP)
+            query.return_value.filter.assert_called_with('sqlalchemy.and_')
+            query.return_value.filter.return_value.first.assert_called_with()
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+
+    def test_add_ports_update(self):
+        """Should update ports if existing"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
+                "source": "nmap",
+                "ports": [
+                    {
+                        "port": "443",
+                        "protocol": "tcp",
+                        "service": "Super Apache NGINX Deluxe",
+                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
+                        "url": "http://bubba.net",
+                        "open": True,
+                        "updated": 1654969137
+
+                    },
+                    {
+                        "port": "53",
+                        "protocol": "udp",
+                        "service": "DNS"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_ports(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Port)
+            query.return_value.filter_by.assert_has_calls([
+                unittest.mock.call(ip='1.1.1.1'),
+                unittest.mock.call().__bool__(),
+                unittest.mock.call().first()
+            ])
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+            self.db.add_ips.assert_called_with(results)
+
+    def test_add_ports_new(self):
+        """Should add port if new"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
         results = [
             {
                 "ip": "1.1.1.1",
@@ -130,14 +214,14 @@ class DbTestCase(unittest.TestCase):
             }
         ]
         query = self.db.Session.return_value.query
+        query.return_value.filter.return_value = None
         with patch.object(sqlalchemy, 'and_') as mock_and:
             mock_and.return_value = 'sqlalchemy.and_'
             self.db.add_ports(results)
 
             mock_and.assert_called()
             query.asset_called_with(synack.db.models.Port)
-            query.return_value.filter_by.assert_called_with('sqlalchemy.and_')
-            query.return_value.filter_by.return_value.first.assert_called_with()
+            query.return_value.filter.assert_called_with('sqlalchemy.and_')
             self.db.Session.return_value.commit.assert_called_with()
             self.db.Session.return_value.close.assert_called_with()
 
@@ -378,6 +462,18 @@ class DbTestCase(unittest.TestCase):
         mock.query.return_value.filter_by.assert_called_with(slug='qweqwe')
         mock.query.return_value.filter_by.return_value.first.assert_called_with()
         mock.add.assert_called()
+
+    def test_add_organizations_no_session(self):
+        """Should create and destroy a db session if not provided"""
+        self.db.Session = MagicMock()
+        targets = [{
+            "organization": {"slug": "qweqwe"}
+        }]
+        self.db.Session.return_value.query.return_value.filter_by.return_value.first.return_value = None
+        self.db.add_organizations(targets)
+        self.db.Session.assert_called()
+        self.db.Session.return_value.commit.assert_called()
+        self.db.Session.return_value.close.assert_called()
 
     def test_add_organizations_organization_id(self):
         """Should update Organizations table if organization_id provided"""
