@@ -118,10 +118,10 @@ class Db(Plugin):
                         )
                     else:
                         db_port = db_port.first()
-                        db_port.service = port.get('service', db_port.service),
-                        db_port.screenshot_url = port.get('screenshot_url', db_port.screenshort_url),
-                        db_port.url = port.get('url', db_port.url),
-                        db_port.open = port.get('open', db_port.open),
+                        db_port.service = port.get('service', db_port.service)
+                        db_port.screenshot_url = port.get('screenshot_url', db_port.screenshot_url)
+                        db_port.url = port.get('url', db_port.url)
+                        db_port.open = port.get('open', db_port.open)
                         db_port.updated = port.get('updated', db_port.updated)
                     session.add(db_port)
         session.commit()
@@ -308,6 +308,13 @@ class Db(Plugin):
         ports = session.query(Port).all()
         session.close()
         return ports
+
+    @property
+    def ports(self):
+        session = self.Session()
+        ips = session.query(IP).all()
+        session.close()
+        return ips
 
     @property
     def api_token(self):

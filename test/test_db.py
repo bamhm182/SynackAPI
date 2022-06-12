@@ -474,6 +474,17 @@ class DbTestCase(unittest.TestCase):
         query.return_value.all.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
+    def test_ips(self):
+        """Should get all ips from the database"""
+        self.db.Session = MagicMock()
+        query = self.db.Session.return_value.query
+        query.return_value.all.return_value = 'ips'
+
+        self.assertEqual('ips', self.db.ips)
+        query.assert_called_with(synack.db.models.IP)
+        query.return_value.all.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
     def test_http_proxy(self):
         """Should set and get the http_proxy from the database"""
         self.db.get_config = MagicMock()
