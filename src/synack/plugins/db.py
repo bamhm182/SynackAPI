@@ -310,7 +310,7 @@ class Db(Plugin):
         return ports
 
     @property
-    def ports(self):
+    def ips(self):
         session = self.Session()
         ips = session.query(IP).all()
         session.close()
