@@ -225,7 +225,7 @@ class Db(Plugin):
 
         session.expunge_all()
         session.close()
-        
+
         ret = list()
         for ip in ips:
             ret.append({

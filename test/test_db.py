@@ -71,6 +71,100 @@ class DbTestCase(unittest.TestCase):
         query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
+    def test_find_ips(self):
+        """Should return a list of IPs"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = [
+            synack.db.models.IP(ip='1.2.3.4', target='487egfue'),
+            synack.db.models.IP(ip='4.3.2.1', target='487egfue')
+        ]
+
+        returned = self.db.find_ips()
+        expected = [
+            {'ip': '1.2.3.4', 'target': '487egfue'},
+            {'ip': '4.3.2.1', 'target': '487egfue'}
+        ]
+        self.assertTrue(returned, expected)
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_ips_filters(self):
+        """Should apply filters to IPs search"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = []
+
+        self.db.find_ips(ip='1.2.3.4', codename='SLEEPYPUPPY')
+        self.db.Session.return_value.query.return_value.filter_by.assert_called_with(ip='1.2.3.4')
+        self.db.Session.return_value.query.return_value.filter_by.return_value.join.return_value. \
+            filter_by.assert_called_with(codename='SLEEPYPUPPY')
+
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_ports(self):
+        """Should return a list of Ports"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.join.return_value.all.return_value = [
+            synack.db.models.Port(ip='1', port='443', protocol='tcp'),
+            synack.db.models.Port(ip='1', port='53', protocol='udp')
+        ]
+
+        returned = self.db.find_ports()
+        expected = [
+            {'ip': '1.2.3.4', 'target': '487egfue', 'ports': {'port': '443', 'protocol': 'tcp'}},
+            {'ip': '4.3.2.1', 'target': '487egfue', 'ports': {'port': '53', 'protocol': 'udp'}}
+        ]
+        self.assertTrue(returned, expected)
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_ports_filters(self):
+        """Should apply filters to Ports search"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = []
+
+        self.db.find_ports(port=25, ip='1.2.3.4', codename='SLEEPYPUPPY')
+        self.db.Session.return_value.query.return_value.filter_by.assert_called_with(port=25)
+        self.db.Session.return_value.query.return_value.filter_by.return_value.join.return_value. \
+            filter_by.assert_called_with(ip='1.2.3.4')
+        self.db.Session.return_value.query.return_value.filter_by.return_value.join.return_value. \
+            filter_by.return_value.join.return_value.filter_by.assert_called_with(codename='SLEEPYPUPPY')
+
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_ports_filter_by_source(self):
+        """Should apply source filters to Ports search"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = []
+
+        self.db.find_ports(source='nmap')
+        self.db.Session.return_value.query.return_value.filter_by.assert_called_with(source='nmap')
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_ports_filter_by_protocol(self):
+        """Should apply source filters to Ports search"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = []
+
+        self.db.find_ports(protocol='tcp')
+        self.db.Session.return_value.query.return_value.filter_by.assert_called_with(protocol='tcp')
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
     def test_add_ips_existing_ips(self):
         """Should not add IPs if already in db"""
         self.db.Session = MagicMock()
@@ -366,6 +460,17 @@ class DbTestCase(unittest.TestCase):
 
         self.assertEqual('tgts', self.db.targets)
         query.assert_called_with(synack.db.models.Target)
+        query.return_value.all.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_ports(self):
+        """Should get all ports from the database"""
+        self.db.Session = MagicMock()
+        query = self.db.Session.return_value.query
+        query.return_value.all.return_value = 'ports'
+
+        self.assertEqual('ports', self.db.ports)
+        query.assert_called_with(synack.db.models.Port)
         query.return_value.all.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
