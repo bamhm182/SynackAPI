@@ -710,9 +710,11 @@ Additionally, some properties can be overridden by the State, which allows you t
 <tr><td>email</td><td>No</td><td>Yes</td><td>The email used to log into Synack</td></tr>
 <tr><td>http_proxy</td><td>No</td><td>Yes</td><td>The http web proxy (Burp, etc.) to use for requests</td></tr>
 <tr><td>https_proxy</td><td>No</td><td>Yes</td><td>The https web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>ips</td><td>Yes</td><td>No</td><td>All cached IPs</td></tr>
 <tr><td>notifications_token</td><td>No</td><td>No</td><td>Synack Notifications Token used to authenticate requests</td></tr>
 <tr><td>otp_secret</td><td>No</td><td>Yes</td><td>Synack OTP Secret</td></tr>
 <tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
+<tr><td>ports</td><td>Yes</td><td>No</td><td>All cached Ports</td></tr>
 <tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
 <tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
 <tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
@@ -754,6 +756,46 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ips to return ones which match a given criteria</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ips(codename=&quot;SLEEPYPUPPY&quot;)
+[{'ip': '1.1.1.1, 'target': '12398h21'}, ... ]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_portsport-protocol-source-ip-kwargs"><a class="header" href="#dbfind_portsport-protocol-source-ip-kwargs">db.find_ports(port, protocol, source, ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ports to return ones which match a given criteria</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>port</code></td><td>int</td><td>Port number to search for (443, 80, 25, etc.)</td></tr>
+<tr><td><code>protocol</code></td><td>str</td><td>Protocol to search for (tcp, udp, etc.)</td></tr>
+<tr><td><code>source</code></td><td>str</td><td>Source to search for (hydra, nmap, etc.)</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
+[
+  {
+    'ip': '1.2.3.4', 'source': 'hydra', 'target': '123hg912',
+      'ports': [
+        { 'open': True, 'port': '443', 'protocol': 'tcp', 'screenshot_url': '', 'service': 'https - Wordpress', 'updated': 1654840021 },
+        ...
+      ]
+  },
+  ...
+]
 </code></pre>
 </blockquote>
 </blockquote>
