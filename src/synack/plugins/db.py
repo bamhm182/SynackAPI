@@ -163,6 +163,78 @@ class Db(Plugin):
         session.close()
         return targets
 
+    def find_ports(self, port=None, protocol=None, source=None, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(Port)
+        if port:
+            query = query.filter_by(port=port)
+        if protocol:
+            query = query.filter_by(protocol=protocol)
+        if source:
+            query = query.filter_by(source=source)
+
+        query = query.join(IP)
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        ports = query.all()
+
+        ips = dict()
+        for port in ports:
+            ips[port.ip] = ips.get(port.ip, list())
+            ips[port.ip].append({
+                "port": port.port,
+                "protocol": port.protocol,
+                "service": port.service,
+                "source": port.source,
+                "open": port.open,
+                "updated": port.updated,
+                "url": port.url,
+                "screenshot_url": port.screenshot_url
+            })
+
+        ret = list()
+        for ip_id in ips.keys():
+            ip = session.query(IP).filter_by(id=ip_id).first()
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target,
+                "ports": ips[ip_id]
+            })
+
+        session.expunge_all()
+        session.close()
+        return ret
+
+    def find_ips(self, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(IP)
+
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        ips = query.all()
+
+        session.expunge_all()
+        session.close()
+        
+        ret = list()
+        for ip in ips:
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target
+            })
+
+        return ret
+
     def get_config(self, name=None):
         session = self.Session()
         config = session.query(Config).filter_by(id=1).first()
@@ -229,6 +301,13 @@ class Db(Plugin):
         targets = session.query(Target).all()
         session.close()
         return targets
+
+    @property
+    def ports(self):
+        session = self.Session()
+        ports = session.query(Port).all()
+        session.close()
+        return ports
 
     @property
     def api_token(self):
