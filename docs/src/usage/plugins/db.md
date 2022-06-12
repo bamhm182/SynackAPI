@@ -14,9 +14,11 @@ Additionally, some properties can be overridden by the State, which allows you t
 | email | No | Yes | The email used to log into Synack
 | http_proxy | No | Yes | The http web proxy (Burp, etc.) to use for requests
 | https_proxy | No | Yes | The https web proxy (Burp, etc.) to use for requests
+| ips | Yes | No | All cached IPs
 | notifications_token | No | No | Synack Notifications Token used to authenticate requests
 | otp_secret | No | Yes | Synack OTP Secret
 | password | No | Yes | The password used to log into Synack
+| ports | Yes | No | All cached Ports
 | proxies | Yes | Yes | A dict built from http_proxy and https_proxy
 | targets | Yes | No | All cached Targets
 | template_dir | No | Yes | The path to a directory where your templates are stored
@@ -62,6 +64,48 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> Examples
 >> ```python3
 >> >>> h.db.add_targets([{...}, {...}, {...}])
+>> ```
+
+## db.find_ips(ip, **kwargs)
+
+> Filters through all the ips to return ones which match a given criteria
+>
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `ip` | str | IP Address to search for
+> | `kwargs` | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.db.find_ips(codename="SLEEPYPUPPY")
+>> [{'ip': '1.1.1.1, 'target': '12398h21'}, ... ]
+>> ```
+
+## db.find_ports(port, protocol, source, ip, **kwargs)
+
+> Filters through all the ports to return ones which match a given criteria
+>
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `port` | int | Port number to search for (443, 80, 25, etc.)
+> | `protocol` | str | Protocol to search for (tcp, udp, etc.)
+> | `source` | str | Source to search for (hydra, nmap, etc.)
+> | `ip` | str | IP Address to search for
+> | `kwargs` | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.db.find_ports(codename="SLEEPYPUPPY")
+>> [
+>>   {
+>>     'ip': '1.2.3.4', 'source': 'hydra', 'target': '123hg912',
+>>       'ports': [
+>>         { 'open': True, 'port': '443', 'protocol': 'tcp', 'screenshot_url': '', 'service': 'https - Wordpress', 'updated': 1654840021 },
+>>         ...
+>>       ]
+>>   },
+>>   ...
+>> ]
 >> ```
 
 ## db.find_targets(**kwargs)

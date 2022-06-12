@@ -12,9 +12,7 @@ class Api(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for plugin in ['Debug', 'Db']:
-            setattr(self,
-                    plugin.lower(),
-                    self.registry.get(plugin)(self.state))
+            setattr(self, plugin.lower(), self.registry.get(plugin)(self.state))
 
     def login(self, method, path, **kwargs):
         """Modify API Request for Login

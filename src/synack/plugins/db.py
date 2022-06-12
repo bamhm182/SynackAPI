@@ -12,7 +12,9 @@ from sqlalchemy.orm import sessionmaker
 from synack.db.models import Target
 from synack.db.models import Config
 from synack.db.models import Category
+from synack.db.models import IP
 from synack.db.models import Organization
+from synack.db.models import Port
 
 from .base import Plugin
 
@@ -46,7 +48,32 @@ class Db(Plugin):
         session.commit()
         session.close()
 
-    def add_organizations(self, targets, session):
+    def add_ips(self, results, session=None):
+        close = False
+        if session is None:
+            session = self.Session()
+            close = True
+        q = session.query(IP)
+        for result in results:
+            filt = sa.and_(
+                IP.ip.like(result.get('ip')),
+                IP.target.like(result.get('target'))
+            )
+            db_ip = q.filter(filt).first()
+            if not db_ip:
+                db_ip = IP(
+                    ip=result.get('ip'),
+                    target=result.get('target'))
+                session.add(db_ip)
+        if close:
+            session.commit()
+            session.close()
+
+    def add_organizations(self, targets, session=None):
+        close = False
+        if session is None:
+            session = self.Session()
+            close = True
         q = session.query(Organization)
         for t in targets:
             if t.get('organization'):
@@ -57,6 +84,48 @@ class Db(Plugin):
             if not db_o:
                 db_o = Organization(slug=slug)
                 session.add(db_o)
+        if close:
+            session.commit()
+            session.close()
+
+    def add_ports(self, results, **kwargs):
+        self.add_ips(results)
+        session = self.Session()
+        q = session.query(Port)
+        ips = session.query(IP)
+        for result in results:
+            ip = ips.filter_by(ip=result.get('ip'))
+            if ip:
+                ip = ip.first()
+                for port in result.get('ports', []):
+                    filt = sa.and_(
+                        Port.port.like(port.get('port')),
+                        Port.protocol.like(port.get('protocol')),
+                        Port.ip.like(ip.id),
+                        Port.source.like(result.get('source')))
+                    db_port = q.filter(filt)
+                    if not db_port:
+                        db_port = Port(
+                            port=port.get('port'),
+                            protocol=port.get('protocol'),
+                            service=port.get('service'),
+                            screenshot_url=port.get('screenshot_url'),
+                            url=port.get('url'),
+                            ip=ip.id,
+                            source=result.get('source'),
+                            open=port.get('open'),
+                            updated=port.get('updated')
+                        )
+                    else:
+                        db_port = db_port.first()
+                        db_port.service = port.get('service', db_port.service)
+                        db_port.screenshot_url = port.get('screenshot_url', db_port.screenshot_url)
+                        db_port.url = port.get('url', db_port.url)
+                        db_port.open = port.get('open', db_port.open)
+                        db_port.updated = port.get('updated', db_port.updated)
+                    session.add(db_port)
+        session.commit()
+        session.close()
 
     def add_targets(self, targets, **kwargs):
         session = self.Session()
@@ -93,6 +162,78 @@ class Db(Plugin):
         session.expunge_all()
         session.close()
         return targets
+
+    def find_ports(self, port=None, protocol=None, source=None, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(Port)
+        if port:
+            query = query.filter_by(port=port)
+        if protocol:
+            query = query.filter_by(protocol=protocol)
+        if source:
+            query = query.filter_by(source=source)
+
+        query = query.join(IP)
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        ports = query.all()
+
+        ips = dict()
+        for port in ports:
+            ips[port.ip] = ips.get(port.ip, list())
+            ips[port.ip].append({
+                "port": port.port,
+                "protocol": port.protocol,
+                "service": port.service,
+                "source": port.source,
+                "open": port.open,
+                "updated": port.updated,
+                "url": port.url,
+                "screenshot_url": port.screenshot_url
+            })
+
+        ret = list()
+        for ip_id in ips.keys():
+            ip = session.query(IP).filter_by(id=ip_id).first()
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target,
+                "ports": ips[ip_id]
+            })
+
+        session.expunge_all()
+        session.close()
+        return ret
+
+    def find_ips(self, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(IP)
+
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        ips = query.all()
+
+        session.expunge_all()
+        session.close()
+
+        ret = list()
+        for ip in ips:
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target
+            })
+
+        return ret
 
     def get_config(self, name=None):
         session = self.Session()
@@ -160,6 +301,20 @@ class Db(Plugin):
         targets = session.query(Target).all()
         session.close()
         return targets
+
+    @property
+    def ports(self):
+        session = self.Session()
+        ports = session.query(Port).all()
+        session.close()
+        return ports
+
+    @property
+    def ips(self):
+        session = self.Session()
+        ips = session.query(IP).all()
+        session.close()
+        return ips
 
     @property
     def api_token(self):

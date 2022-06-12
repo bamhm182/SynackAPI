@@ -58,7 +58,7 @@ class Missions(Plugin):
                 utc = datetime.utcnow()
                 claimed_on = datetime.strptime(m['claimedOn'],
                                                "%Y-%m-%dT%H:%M:%S.%fZ")
-                elapsed = (utc - claimed_on).seconds
+                elapsed = int((utc - claimed_on).total_seconds())
                 time = m['maxCompletionTimeInSecs'] - elapsed
                 if time < ret['time'] or ret['time'] == 0:
                     ret['time'] = time

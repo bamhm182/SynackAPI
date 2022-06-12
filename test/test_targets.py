@@ -170,8 +170,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = "json_return"
 
-        url = 'asset/v1/organizations/qwewqe/owners/listings/asdasd/' +\
-              'users/bobby/credentials'
+        url = 'asset/v1/organizations/qwewqe/owners/listings/asdasd/users/bobby/credentials'
 
         self.assertEqual("json_return",
                          self.targets.get_credentials(codename='SLEEPYSLUG'))

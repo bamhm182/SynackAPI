@@ -23,7 +23,7 @@ def replace_placeholders(template, mission):
     """
     for k in template.keys():
         template[k] = template[k].replace('__CODENAME__',
-                                          mission['listingCodename']
+                                          mission['listingCodename'])
 
 h = synack.Handler()
 

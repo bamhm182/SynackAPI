@@ -29,8 +29,7 @@ class State(object):
     @property
     def config_dir(self) -> pathlib.PosixPath:
         if self._config_dir is None:
-            self._config_dir = pathlib.Path('~/.config/synack').\
-                                       expanduser().resolve()
+            self._config_dir = pathlib.Path('~/.config/synack').expanduser().resolve()
         if self._config_dir:
             self._config_dir.mkdir(parents=True, exist_ok=True)
         return self._config_dir

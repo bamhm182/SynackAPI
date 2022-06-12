@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# VIM extensions
+*.swo
+*.swp
+
 # Distribution / packaging
 .Python
 build/

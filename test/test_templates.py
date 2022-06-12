@@ -93,8 +93,7 @@ class TemplatesTestCase(unittest.TestCase):
             mock_exists.return_value = True
             self.templates.get_file(mission)
             self.templates.build_filepath.assert_called_with(mission)
-            self.templates.build_sections.\
-                assert_called_with('/tmp/mission.txt')
+            self.templates.build_sections.assert_called_with('/tmp/mission.txt')
 
     def test_set_file(self):
         self.templates.build_filepath = MagicMock()
