@@ -247,6 +247,34 @@ This is most often used with the <code>targets.get_assessments()</code> function
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="dbadd_urlsresults"><a class="header" href="#dbadd_urlsresults">db.add_urls(results)</a></h2>
+<blockquote>
+<p>Add urls results to the database</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         &quot;ip&quot;: &quot;1.1.1.1&quot;,
+...         &quot;target&quot;: &quot;7gh33tjf72&quot;,
+...         &quot;urls&quot;: [
+...             {
+...                 &quot;url&quot;: &quot;https://www.google.com&quot;,
+...                 &quot;screenshot_url&quot;: &quot;https://imgur.com/2uregtu&quot;,
+...             },
+...             {
+...                 &quot;url&quot;: &quot;https://www.ebay.com&quot;,
+...                 &quot;screenshot_url&quot;: &quot;file:///tmp/948grt.png&quot;,
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_urls(results)
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ips to return ones which match a given criteria</p>
@@ -278,7 +306,7 @@ This is most often used with the <code>targets.get_assessments()</code> function
   {
     'ip': '1.2.3.4', 'source': 'hydra', 'target': '123hg912',
       'ports': [
-        { 'open': True, 'port': '443', 'protocol': 'tcp', 'screenshot_url': '', 'service': 'https - Wordpress', 'updated': 1654840021 },
+        { 'open': True, 'port': '443', 'protocol': 'tcp', 'service': 'https - Wordpress', 'updated': 1654840021 },
         ...
       ]
   },
@@ -297,6 +325,34 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename=&quot;SLEEPYPUPPY&quot;)
 [&lt;class 'synack.db.models.Target'&gt;, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_urlsurlnone-ipnone-kwargs"><a class="header" href="#dbfind_urlsurlnone-ipnone-kwargs">db.find_urls(url=None, ip=None, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ports to return ones which match a given criteria</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>url</code></td><td>str</td><td>Url hosting a service on the IP</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
+[
+  {
+    'ip': '1.2.3.4',
+    'target': '123hg912',
+    'ports': [
+      {  
+        'url': 'https://www.google.com',
+        'screenshot_url': 'file:///tmp/2948geybu24.png'
+      },
+      ...
+    ]
+  },
+  ...
+]
 </code></pre>
 </blockquote>
 </blockquote>
