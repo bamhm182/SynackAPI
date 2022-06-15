@@ -30,18 +30,18 @@
 >> 'uwfpmfpgjlum'
 >> ```
 
-## targets.build_web_scope_burp(scope)
+## targets.build_scope_web_burp(scope)
 
-> Prints a dictionary compatible with Burp Suite from the output of `targets.get_web_scope()`
+> Prints a dictionary compatible with Burp Suite from the output of `targets.get_scope_web()`
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `scope` | list(dict) | Return of `targets.get_web_scope()` from Synack's API
+> | `scope` | list(dict) | Return of `targets.get_scope_web()` from Synack's API
 >
 >> Examples
 >> ```python3
 >> >>> scope = h.targets.get_scope(codename='SLAPPYMONKEY')
->> >>> h.targets.build_web_scope_burp(scope)
+>> >>> h.targets.build_scope_web_burp(scope)
 >> {'target': {'scope': {
 >>     'advanced_mode': 'true',
 >>     'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
@@ -49,18 +49,18 @@
 >> }}}
 >> ```
 
-## targets.build_web_scope_urls(scope)
+## targets.build_scope_web_urls(scope)
 
 > Prints a dictionary containing lists of `in` scope and `out` of scope URLs
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `scope` | list(dict) | Return of `targets.get_web_scope()` from Synack's API
+> | `scope` | list(dict) | Return of `targets.get_scope_web()` from Synack's API
 >
 >> Examples
 >> ```python3
 >> >>> scope = h.targets.get_scope(codename'SLAPPYMONKEY')
->> >>> h.targets.build_web_scope_urls(scope)
+>> >>> h.targets.build_scope_web_urls(scope)
 >> {'in': ['good.monkey.com'], 'out': ['bad.monkey.com']}
 >> ```
 
@@ -102,7 +102,7 @@
 >> {"slug": "ulmpupflgm", "codename": "GOOFYGOPHER", "status": "Connected"}
 >> ```
 
-## targets.get_host_scope(target, **kwargs)
+## targets.get_scope_host(target, **kwargs)
 
 > Return CIDR IP Addresses in scope when given a Target or target identifiers
 >
@@ -114,9 +114,9 @@
 >> Examples
 >> ```python3
 >> >>> tgt = h.db.find_targets(codename='SILLYFILLY')
->> >>> h.targets.get_host_scope(tgt)
+>> >>> h.targets.get_scope_host(tgt)
 >> ['1.1.1.1/32', '10.0.0.0/8', ...]
->> >>> h.targets.get_host_scope(slug='92wg38itur')
+>> >>> h.targets.get_scope_host(slug='92wg38itur')
 >> ['9,9,9,9/32', ...]
 >> ```
 
@@ -160,7 +160,7 @@
 >> [{"slug": "lfjpgmk",...},...]
 >> ```
 
-## targets.get_web_scope(target, **kwargs)
+## targets.get_scope_web(target, **kwargs)
 
 > Returns a ton of information about a web target's scope given a Target or target identifiers
 >
@@ -171,7 +171,7 @@
 >
 >> Examples
 >> ```python3
->> >>> h.targets.get_web_scope(codename='SLAPPYFROG')
+>> >>> h.targets.get_scope_web(codename='SLAPPYFROG')
 >> [{
 >>   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
 >>   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]

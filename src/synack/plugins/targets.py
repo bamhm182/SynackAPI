@@ -41,7 +41,7 @@ class Targets(Plugin):
             slug = targets[0].slug
         return slug
 
-    def build_web_scope_burp(self, scope):
+    def build_scope_web_burp(self, scope):
         """Return a Burp Suite scope given retrieved web scope"""
         ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': [], 'include': []}}}
         for asset in scope:
@@ -60,7 +60,7 @@ class Targets(Plugin):
                 })
         return ret
 
-    def build_web_scope_urls(self, scope):
+    def build_scope_web_urls(self, scope):
         """Return a list of the raw urls gived a retrieved web scope"""
         ret = {"in": list(), "out": list()}
         for asset in scope:
@@ -107,17 +107,6 @@ class Targets(Plugin):
             }
             return ret
 
-    def get_host_scope(self, target=None, **kwargs):
-        """Get the scope of a Host target"""
-        if target is None:
-            target = self.db.find_targets(**kwargs)
-            if target:
-                target = target[0]
-        if target:
-            res = self.api.request('GET', f'targets/{target.slug}/cidrs?page=all')
-            if res.status_code == 200:
-                return res.json()['cidrs']
-
     def get_registered_summary(self):
         """Get information on your registered targets"""
         res = self.api.request('GET', 'targets/registered_summary')
@@ -138,9 +127,35 @@ class Targets(Plugin):
             for category in self.db.categories:
                 categories[category.id] = category.name
             if categories[target.category].lower() == 'host':
-                return self.get_host_scope(target)
+                return self.get_scope_host(target)
             elif categories[target.category].lower() == 'web application':
-                return self.get_web_scope(target)
+                return self.get_scope_web(target)
+
+    def get_scope_host(self, target=None, **kwargs):
+        """Get the scope of a Host target"""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        if target:
+            res = self.api.request('GET', f'targets/{target.slug}/cidrs?page=all')
+            if res.status_code == 200:
+                return res.json()['cidrs']
+
+    def get_scope_web(self, target=None, **kwargs):
+        """Get the scope of a Web target"""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        res = self.api.request('GET', f'asset/v1/organizations/{target.organization}' +
+                                      f'/owners/listings/{target.slug}/webapps')
+        if res.status_code == 200:
+            scope = list()
+            for asset in res.json():
+                if target.slug in [o['owner_uid'] for o in asset['owners']]:
+                    scope.append(asset)
+            return scope
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
@@ -163,21 +178,6 @@ class Targets(Plugin):
             for t in res.json():
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
         return ret
-
-    def get_web_scope(self, target=None, **kwargs):
-        """Get the scope of a Web target"""
-        if target == None:
-            target = self.db.find_targets(**kwargs)
-            if target:
-                target = target[0]
-        res = self.api.request('GET', f'asset/v1/organizations/{target.organization}' +
-                                      f'/owners/listings/{target.slug}/webapps')
-        if res.status_code == 200:
-            scope = list()
-            for asset in res.json():
-                if target.slug in [o['owner_uid'] for o in asset['owners']]:
-                    scope.append(asset)
-            return scope
 
     def set_registered(self, targets=None):
         """Register all unregistered targets"""
