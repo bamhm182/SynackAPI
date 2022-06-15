@@ -39,6 +39,20 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> >>> h.db.add_categories([{...}, {...}, {...}])
 >> ```
 
+## db.add_ips(results, session=None)
+
+> Add IP Addresses to the database
+>
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `results` | list(dict) | A list of dictionaries containing `ip` addresses and `target` slugs
+> | `session` | sqlalchemy.orm.sessionmaker() | A database session. This function is often used with `db.add_ports()` and can have a session passed into it
+>
+>> Examples
+>> ```python3
+>> >>> h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
+>> ```
+
 ## db.add_organizations(targets, session)
 
 > Add Organizations from the Synack API to the Database
@@ -46,11 +60,48 @@ Additionally, some properties can be overridden by the State, which allows you t
 > | Argument | Type | Description
 > | --- | --- | ---
 > | `targets` | list | A list of Target dictionaries returned from the Synack API
-> | `session` | sqlalchemy.orm.sessionmaker() | A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session
+> | `session` | sqlalchemy.orm.sessionmaker() | A database session. This function is most often used with `db.add_targets()` and I was having issues getting it to work when it would create a new session
 >
 >> Examples
 >> ```python3
 >> >>> h.db.add_organizations([{...}, {...}, {...}])
+>> ```
+
+## db.add_ports(results)
+
+> Add port results to the database
+> 
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `results` | list(dict) | A list of dictionaries containing results from some scan, Hydra, etc.
+>
+>> Examples
+>> ```python3
+>> >>> results = [
+>> ...     {
+>> ...         "ip": "1.1.1.1",
+>> ...         "target": "7gh33tjf72",
+>> ...         "source": "nmap",
+>> ...         "ports": [
+>> ...             {
+>> ...                 "port": "443",
+>> ...                 "protocol": "tcp",
+>> ...                 "service": "Super Apache NGINX Deluxe",
+>> ...                 "screenshot_url": "http://127.0.0.1/h3298h23.png",
+>> ...                 "url": "http://bubba.net",
+>> ...                 "open": True,
+>> ...                 "updated": 1654969137
+>> ...
+>> ...             },
+>> ...             {
+>> ...                 "port": "53",
+>> ...                 "protocol": "udp",
+>> ...                 "service": "DNS"
+>> ...             }
+>> ...         ]
+>> ...     }
+>> ... ]
+>> >>> h.db.add_ports(results)
 >> ```
 
 ## db.add_targets(targets)

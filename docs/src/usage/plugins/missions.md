@@ -139,7 +139,7 @@
 >> Examples
 >> ```python3
 >> >>> msns = h.missions.get_available()
->> >>> h.set_claimed(msns[0])
+>> >>> h.missions.set_claimed(msns[0])
 >> {'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
 >>     'status': 'CLAIMED', 'success': True}
 >> ```
@@ -181,3 +181,23 @@
 >> >>> h.missions.set_evidences(msns[0])
 >> {'evidenceId': 'uuid4...', 'title': 'Some Mission', 'codename': 'SLEEPYPUPPY'}
 >> ```
+
+## missions.set_status(mission, status)
+
+> Sets the status of a mission. Used in `mission.set_claimed` and `missions.set_disclaimed`.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `mission` | dict | A single mission dict returned from the SynackAPI
+> | `status` | str | Status to set it to (i.e., `CLAIM`, `DISCLAIM`)
+>
+>> Examples
+>> ```python3
+>> >>> msns = h.missions.get_available()
+>> >>> h.missions.set_status(msns[0], 'CLAIM')
+>> {'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+>>     'status': 'CLAIMED', 'success': True}
+>> >>> h.missions.set_status(msns[0], 'DISCLAIM')
+>> {'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+>>     'status': 'DISCLAIMED', 'success': True}
+
