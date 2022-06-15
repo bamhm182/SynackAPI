@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - wip-hydra
+      - wip-scope
   pull_request:
 
 jobs:

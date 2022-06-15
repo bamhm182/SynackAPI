@@ -88,7 +88,7 @@ class Db(Plugin):
             session.commit()
             session.close()
 
-    def add_ports(self, results, **kwargs):
+    def add_ports(self, results):
         self.add_ips(results)
         session = self.Session()
         q = session.query(Port)

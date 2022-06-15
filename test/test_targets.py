@@ -21,6 +21,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets = synack.plugins.Targets(self.state)
         self.targets.api = MagicMock()
         self.targets.db = MagicMock()
+        self.maxDiff = None
 
     def test_get_assessments_all_passed(self):
         """Should return a list of passed assessments"""
@@ -52,6 +53,74 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.categories = [cat1]
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.add_categories.assert_called_with(assessments)
+
+    def test_build_scope_web_burp(self):
+        """Should build a Burp Suite Scope given a Synack API Scope"""
+        scope = [
+            {
+                'raw_url': 'https://good.stuff.com',
+                'status': 'in',
+                'rules': [
+                    {'rule': '*.stuff.com/*'},
+                    {'rule': 'https://super.stuff.com/'},
+                ]
+            },
+            {
+                'raw_url': 'http://evil.stuff.com',
+                'status': 'out',
+                'rules': [
+                    {'rule': '*.evil.stuff.com/login/*'},
+                ]
+            }
+        ]
+        expected = {
+            'target': {
+                'scope': {
+                    'advanced_mode': 'true',
+                    'exclude': [
+                        {
+                            'enabled': True,
+                            'scheme': 'http',
+                            'host': 'evil.stuff.com',
+                            'file': '/login/'
+                        }
+                    ],
+                    'include': [
+                        {
+                            'enabled': True,
+                            'scheme': 'https',
+                            'host': 'stuff.com',
+                            'file': '/'
+                        },
+                        {
+                            'enabled': True,
+                            'scheme': 'https',
+                            'host': 'super.stuff.com',
+                            'file': '/'
+                        }
+                    ]
+                }
+            }
+        }
+        self.assertEqual(expected, self.targets.build_scope_web_burp(scope))
+
+    def test_build_scope_web_urls(self):
+        """Should build dictionaries of Web Application URLs given a Synack API Scope"""
+        scope = [
+            {
+                'raw_url': 'https://good.stuff.com',
+                'status': 'in'
+            },
+            {
+                'raw_url': 'https://bad.stuff.com',
+                'status': 'out'
+            }
+        ]
+        expected = {
+            'in': ['https://good.stuff.com'],
+            'out': ['https://bad.stuff.com']
+        }
+        self.assertEqual(expected, self.targets.build_scope_web_urls(scope))
 
     def test_build_slug_from_codename(self):
         """Should return a slug for a given codename"""
@@ -135,6 +204,63 @@ class TargetsTestCase(unittest.TestCase):
             "status": "Connecting"
         }
         self.assertEqual(out, self.targets.get_connected())
+
+    def test_get_scope_for_host(self):
+        """Should get the scope for a Host when given Host information"""
+        self.targets.get_scope_host = MagicMock()
+        self.targets.get_scope_host.return_value = 'HostScope'
+        tgt = Target(category=1)
+        self.targets.db.find_targets.return_value = [tgt]
+        self.targets.db.categories = [Category(id=1, name='Host')]
+        out = self.targets.get_scope(slug='1392g78yr')
+        self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
+        self.targets.get_scope_host.assert_called_with(tgt)
+        self.assertEquals(out, 'HostScope')
+
+    def test_get_scope_for_web(self):
+        """Should get the scope for a Host when given Web information"""
+        self.targets.get_scope_web = MagicMock()
+        self.targets.get_scope_web.return_value = 'WebScope'
+        tgt = Target(category=2)
+        self.targets.db.find_targets.return_value = [tgt]
+        self.targets.db.categories = [Category(id=2, name='Web Application')]
+        out = self.targets.get_scope(slug='1392g78yr')
+        self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
+        self.targets.get_scope_web.assert_called_with(tgt)
+        self.assertEquals(out, 'WebScope')
+
+    def test_get_scope_host(self):
+        """Should get the scope for a Host"""
+        ips = ['1.1.1.1/32', '2.2.2.2/32']
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = {
+            'cidrs': ips
+        }
+        self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
+        out = self.targets.get_scope_host(codename='SASSYSQUIRREL')
+        self.assertEqual(ips, out)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
+        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
+        self.targets.api.request.return_value.json.assert_called()
+
+    def test_get_scope_web(self):
+        """Should get the scope for a Web Application"""
+        self.targets.api.request.return_value.status_code = 200
+        web_results = [{
+            'web_results': 'yup these them!',
+            'owners': [{
+                'owner_uid': '213h89h3'
+            }]
+        }]
+        self.targets.api.request.return_value.json.return_value = web_results
+        tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
+        self.targets.db.find_targets.return_value = [tgt]
+        out = self.targets.get_scope_web(codename='SASSYSQUIRREL')
+        self.assertEqual(web_results, out)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')
+        self.targets.api.request.return_value.json.assert_called()
 
     def test_get_registered_summary(self):
         """Should make a request to get basic info about registered targets"""
