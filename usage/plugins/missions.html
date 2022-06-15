@@ -268,7 +268,7 @@ Also consider that if there are multiple pages, you may just be better off still
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
-&gt;&gt;&gt; h.set_claimed(msns[0])
+&gt;&gt;&gt; h.missions.set_claimed(msns[0])
 {'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
     'status': 'CLAIMED', 'success': True}
 </code></pre>
@@ -305,6 +305,25 @@ Check out the <a href="../examples/mission-templates.html">Mission Templates</a>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
 &gt;&gt;&gt; h.missions.set_evidences(msns[0])
 {'evidenceId': 'uuid4...', 'title': 'Some Mission', 'codename': 'SLEEPYPUPPY'}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsset_statusmission-status"><a class="header" href="#missionsset_statusmission-status">missions.set_status(mission, status)</a></h2>
+<blockquote>
+<p>Sets the status of a mission. Used in <code>mission.set_claimed</code> and <code>missions.set_disclaimed</code>.</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the SynackAPI</td></tr>
+<tr><td><code>status</code></td><td>str</td><td>Status to set it to (i.e., <code>CLAIM</code>, <code>DISCLAIM</code>)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
+&gt;&gt;&gt; h.missions.set_status(msns[0], 'CLAIM')
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'CLAIMED', 'success': True}
+&gt;&gt;&gt; h.missions.set_status(msns[0], 'DISCLAIM')
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'DISCLAIMED', 'success': True}
 </code></pre>
 </blockquote>
 </blockquote>

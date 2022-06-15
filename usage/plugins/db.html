@@ -173,16 +173,65 @@ This is most often used with the <code>targets.get_assessments()</code> function
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="dbadd_ipsresults-sessionnone"><a class="header" href="#dbadd_ipsresults-sessionnone">db.add_ips(results, session=None)</a></h2>
+<blockquote>
+<p>Add IP Addresses to the database</p>
+<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing <code>ip</code> addresses and <code>target</code> slugs</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is often used with <code>db.add_ports()</code> and can have a session passed into it</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
 <blockquote>
 <p>Add Organizations from the Synack API to the Database</p>
 <table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
-<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database section. This function is most often used with add_targets and I was having issues getting it to work when it would create a new session</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is most often used with <code>db.add_targets()</code> and I was having issues getting it to work when it would create a new session</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_portsresults"><a class="header" href="#dbadd_portsresults">db.add_ports(results)</a></h2>
+<blockquote>
+<p>Add port results to the database</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         &quot;ip&quot;: &quot;1.1.1.1&quot;,
+...         &quot;target&quot;: &quot;7gh33tjf72&quot;,
+...         &quot;source&quot;: &quot;nmap&quot;,
+...         &quot;ports&quot;: [
+...             {
+...                 &quot;port&quot;: &quot;443&quot;,
+...                 &quot;protocol&quot;: &quot;tcp&quot;,
+...                 &quot;service&quot;: &quot;Super Apache NGINX Deluxe&quot;,
+...                 &quot;screenshot_url&quot;: &quot;http://127.0.0.1/h3298h23.png&quot;,
+...                 &quot;url&quot;: &quot;http://bubba.net&quot;,
+...                 &quot;open&quot;: True,
+...                 &quot;updated&quot;: 1654969137
+...
+...             },
+...             {
+...                 &quot;port&quot;: &quot;53&quot;,
+...                 &quot;protocol&quot;: &quot;udp&quot;,
+...                 &quot;service&quot;: &quot;DNS&quot;
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_ports(results)
 </code></pre>
 </blockquote>
 </blockquote>

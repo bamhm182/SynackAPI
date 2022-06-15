@@ -165,6 +165,38 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsbuild_web_scope_burpscope"><a class="header" href="#targetsbuild_web_scope_burpscope">targets.build_web_scope_burp(scope)</a></h2>
+<blockquote>
+<p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_web_scope()</code></p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_web_scope()</code> from Synack's API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
+&gt;&gt;&gt; h.targets.build_web_scope_burp(scope)
+{'target': {'scope': {
+    'advanced_mode': 'true',
+    'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
+    'include': [{'enabled': True, 'scheme': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
+}}}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_web_scope_urlsscope"><a class="header" href="#targetsbuild_web_scope_urlsscope">targets.build_web_scope_urls(scope)</a></h2>
+<blockquote>
+<p>Prints a dictionary containing lists of <code>in</code> scope and <code>out</code> of scope URLs</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_web_scope()</code> from Synack's API</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename'SLAPPYMONKEY')
+&gt;&gt;&gt; h.targets.build_web_scope_urls(scope)
+{'in': ['good.monkey.com'], 'out': ['bad.monkey.com']}
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
 <blockquote>
 <p>Pull back a list of assessments and whether you have passed them.</p>
@@ -201,6 +233,23 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_host_scopetarget-kwargs"><a class="header" href="#targetsget_host_scopetarget-kwargs">targets.get_host_scope(target, **kwargs)</a></h2>
+<blockquote>
+<p>Return CIDR IP Addresses in scope when given a Target or target identifiers</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; tgt = h.db.find_targets(codename='SILLYFILLY')
+&gt;&gt;&gt; h.targets.get_host_scope(tgt)
+['1.1.1.1/32', '10.0.0.0/8', ...]
+&gt;&gt;&gt; h.targets.get_host_scope(slug='92wg38itur')
+['9,9,9,9/32', ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
 <blockquote>
 <p>The Registered Summary is a short list of information about every target you have registered.
@@ -214,6 +263,19 @@ eventhough it sounds like a lot, it isn't bad.</p>
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
+<blockquote>
+<p>Returns scope information for web or host targets when given target identifiers</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
+['1.1.1.1/32', '10.0.0.0/8', ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
 <blockquote>
 <p>Gets a list of unregistered Targets from the Synack API.</p>
@@ -222,6 +284,23 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
 [{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_web_scopetarget-kwargs"><a class="header" href="#targetsget_web_scopetarget-kwargs">targets.get_web_scope(target, **kwargs)</a></h2>
+<blockquote>
+<p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
+<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_web_scope(codename='SLAPPYFROG')
+[{
+  'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
+  'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
+}, ...]
 </code></pre>
 </blockquote>
 </blockquote>
