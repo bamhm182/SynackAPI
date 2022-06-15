@@ -1205,16 +1205,16 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsbuild_web_scope_burpscope"><a class="header" href="#targetsbuild_web_scope_burpscope">targets.build_web_scope_burp(scope)</a></h2>
+<h2 id="targetsbuild_scope_web_burpscope"><a class="header" href="#targetsbuild_scope_web_burpscope">targets.build_scope_web_burp(scope)</a></h2>
 <blockquote>
-<p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_web_scope()</code></p>
+<p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_scope_web()</code></p>
 <table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_web_scope()</code> from Synack's API</td></tr>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
-&gt;&gt;&gt; h.targets.build_web_scope_burp(scope)
+&gt;&gt;&gt; h.targets.build_scope_web_burp(scope)
 {'target': {'scope': {
     'advanced_mode': 'true',
     'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
@@ -1223,16 +1223,16 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsbuild_web_scope_urlsscope"><a class="header" href="#targetsbuild_web_scope_urlsscope">targets.build_web_scope_urls(scope)</a></h2>
+<h2 id="targetsbuild_scope_web_urlsscope"><a class="header" href="#targetsbuild_scope_web_urlsscope">targets.build_scope_web_urls(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary containing lists of <code>in</code> scope and <code>out</code> of scope URLs</p>
 <table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_web_scope()</code> from Synack's API</td></tr>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename'SLAPPYMONKEY')
-&gt;&gt;&gt; h.targets.build_web_scope_urls(scope)
+&gt;&gt;&gt; h.targets.build_scope_web_urls(scope)
 {'in': ['good.monkey.com'], 'out': ['bad.monkey.com']}
 </code></pre>
 </blockquote>
@@ -1273,7 +1273,7 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_host_scopetarget-kwargs"><a class="header" href="#targetsget_host_scopetarget-kwargs">targets.get_host_scope(target, **kwargs)</a></h2>
+<h2 id="targetsget_scope_hosttarget-kwargs"><a class="header" href="#targetsget_scope_hosttarget-kwargs">targets.get_scope_host(target, **kwargs)</a></h2>
 <blockquote>
 <p>Return CIDR IP Addresses in scope when given a Target or target identifiers</p>
 <table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -1283,9 +1283,9 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; tgt = h.db.find_targets(codename='SILLYFILLY')
-&gt;&gt;&gt; h.targets.get_host_scope(tgt)
+&gt;&gt;&gt; h.targets.get_scope_host(tgt)
 ['1.1.1.1/32', '10.0.0.0/8', ...]
-&gt;&gt;&gt; h.targets.get_host_scope(slug='92wg38itur')
+&gt;&gt;&gt; h.targets.get_scope_host(slug='92wg38itur')
 ['9,9,9,9/32', ...]
 </code></pre>
 </blockquote>
@@ -1327,7 +1327,7 @@ eventhough it sounds like a lot, it isn't bad.</p>
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_web_scopetarget-kwargs"><a class="header" href="#targetsget_web_scopetarget-kwargs">targets.get_web_scope(target, **kwargs)</a></h2>
+<h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
 <blockquote>
 <p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
 <table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -1336,7 +1336,7 @@ eventhough it sounds like a lot, it isn't bad.</p>
 </tbody></table>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_web_scope(codename='SLAPPYFROG')
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope_web(codename='SLAPPYFROG')
 [{
   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
