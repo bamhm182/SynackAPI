@@ -15,6 +15,7 @@ from synack.db.models import Category
 from synack.db.models import IP
 from synack.db.models import Organization
 from synack.db.models import Port
+from synack.db.models import Url
 
 from .base import Plugin
 
@@ -109,8 +110,6 @@ class Db(Plugin):
                             port=port.get('port'),
                             protocol=port.get('protocol'),
                             service=port.get('service'),
-                            screenshot_url=port.get('screenshot_url'),
-                            url=port.get('url'),
                             ip=ip.id,
                             source=result.get('source'),
                             open=port.get('open'),
@@ -119,8 +118,6 @@ class Db(Plugin):
                     else:
                         db_port = db_port.first()
                         db_port.service = port.get('service', db_port.service)
-                        db_port.screenshot_url = port.get('screenshot_url', db_port.screenshot_url)
-                        db_port.url = port.get('url', db_port.url)
                         db_port.open = port.get('open', db_port.open)
                         db_port.updated = port.get('updated', db_port.updated)
                     session.add(db_port)
@@ -153,6 +150,35 @@ class Db(Plugin):
             db_t.last_submitted = t.get('lastSubmitted')
             for k in kwargs.keys():
                 setattr(db_t, k, kwargs[k])
+        session.commit()
+        session.close()
+
+    def add_urls(self, results, **kwargs):
+        self.add_ips(results)
+        session = self.Session()
+        q = session.query(Url)
+        ips = session.query(IP)
+        for result in results:
+            ip = ips.filter_by(ip=result.get('ip'))
+            if ip:
+                ip = ip.first()
+                for url in result.get('urls', []):
+                    filt = sa.and_(
+                        Url.url.like(url.get('url')),
+                        Url.ip.like(ip.id))
+                    db_url = q.filter(filt)
+                    if not db_url:
+                        db_url = Url(
+                            ip=ip.id,
+                            url=url.get('url'),
+                            screenshot_url=url.get('screenshot_url'),
+                        )
+                    else:
+                        db_url = db_url.first()
+                        db_url.ip = ip.id
+                        db_url.url = url.get('url')
+                        db_url.screenshot_url = url.get('screenshot_url')
+                    session.add(db_url)
         session.commit()
         session.close()
 
@@ -193,8 +219,6 @@ class Db(Plugin):
                 "source": port.source,
                 "open": port.open,
                 "updated": port.updated,
-                "url": port.url,
-                "screenshot_url": port.screenshot_url
             })
 
         ret = list()
@@ -233,6 +257,43 @@ class Db(Plugin):
                 "target": ip.target
             })
 
+        return ret
+
+    def find_urls(self, url=None, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(Url)
+        if url:
+            query = query.filter_by(url=url)
+
+        query = query.join(IP)
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        urls = query.all()
+
+        ips = dict()
+        for url in urls:
+            ips[url.ip] = ips.get(url.ip, list())
+            ips[url.ip].append({
+                'url': url.url,
+                'screenshot_url': url.screenshot_url,
+            })
+
+        ret = list()
+        for ip_id in ips.keys():
+            ip = session.query(IP).filter_by(id=ip_id).first()
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target,
+                "urls": ips[ip_id]
+            })
+
+        session.expunge_all()
+        session.close()
         return ret
 
     def get_config(self, name=None):
@@ -315,6 +376,13 @@ class Db(Plugin):
         ips = session.query(IP).all()
         session.close()
         return ips
+
+    @property
+    def urls(self):
+        session = self.Session()
+        urls = session.query(Url).all()
+        session.close()
+        return urls
 
     @property
     def api_token(self):
