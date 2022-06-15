@@ -117,6 +117,35 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> >>> h.db.add_targets([{...}, {...}, {...}])
 >> ```
 
+## db.add_urls(results)
+
+> Add urls results to the database
+> 
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `results` | list(dict) | A list of dictionaries containing results from some scan, Hydra, etc.
+>
+>> Examples
+>> ```python3
+>> >>> results = [
+>> ...     {
+>> ...         "ip": "1.1.1.1",
+>> ...         "target": "7gh33tjf72",
+>> ...         "urls": [
+>> ...             {
+>> ...                 "url": "https://www.google.com",
+>> ...                 "screenshot_url": "https://imgur.com/2uregtu",
+>> ...             },
+>> ...             {
+>> ...                 "url": "https://www.ebay.com",
+>> ...                 "screenshot_url": "file:///tmp/948grt.png",
+>> ...             }
+>> ...         ]
+>> ...     }
+>> ... ]
+>> >>> h.db.add_urls(results)
+>> ```
+
 ## db.find_ips(ip, **kwargs)
 
 > Filters through all the ips to return ones which match a given criteria
@@ -171,6 +200,35 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> ```python3
 >> >>> h.db.find_targets(codename="SLEEPYPUPPY")
 >> [<class 'synack.db.models.Target'>, ...]
+>> ```
+
+## db.find_urls(url=None, ip=None, **kwargs)
+
+> Filters through all the ports to return ones which match a given criteria
+>
+> | Argument | Type | Description
+> | --- | --- | ---
+> | `url` | str | Url hosting a service on the IP
+> | `ip` | str | IP Address to search for
+> | `kwargs` | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.db.find_ports(codename="SLEEPYPUPPY")
+>> [
+>>   {
+>>     'ip': '1.2.3.4',
+>>     'target': '123hg912',
+>>     'ports': [
+>>       {  
+>>         'url': 'https://www.google.com',
+>>         'screenshot_url': 'file:///tmp/2948geybu24.png'
+>>       },
+>>       ...
+>>     ]
+>>   },
+>>   ...
+>> ]
 >> ```
 
 ## db.get_config(name)
