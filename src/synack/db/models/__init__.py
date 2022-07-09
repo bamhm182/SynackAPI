@@ -6,3 +6,4 @@ from .category import Category
 from .ip import IP
 from .organization import Organization
 from .port import Port
+from .url import Url

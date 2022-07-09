@@ -55,7 +55,6 @@ class Hydra(Plugin):
                             ' - ' + \
                             h_src.get('product', {'parsed': 'unknown'})['parsed']
                         service = service.strip(' - ')
-                        screenshot_url = result['ports'][port][protocol][hydra_src].get('screenshot_key', '')
                         port_open = result['ports'][port][protocol][hydra_src]['open']['parsed']
                         epoch = datetime(1970, 1, 1)
                         try:
@@ -68,7 +67,6 @@ class Hydra(Plugin):
                             "port": port,
                             "protocol": protocol,
                             "service": service,
-                            "screenshot_url": screenshot_url,
                             "open": port_open,
                             "updated": updated
                         })

@@ -165,6 +165,50 @@ class DbTestCase(unittest.TestCase):
         self.db.Session.return_value.expunge_all.assert_called()
         self.db.Session.return_value.close.assert_called()
 
+    def test_find_urls(self):
+        """Should return a list of Urls"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.join.return_value.all.return_value = [
+            synack.db.models.Url(ip='1', url='https://www.google.com', screenshot_url='file:///tmp/qiuwe.png'),
+            synack.db.models.Url(ip='2', url='https://www.ebay.com', screenshot_url='file:///tmp/uo932g8.png')
+        ]
+
+        returned = self.db.find_urls()
+        expected = [
+            {
+                'ip': '1.2.3.4',
+                'target': '487egfue',
+                'urls': [{'url': 'https://www.ebay.com', 'screenshot_url': 'file:///tmp/uo932g8.png'}]
+            },
+            {
+                'ip': '4.3.2.1',
+                'target': '487egfue',
+                'urls': [{'url': 'https://www.google.com', 'screenshot_url': 'file:///tmp/qiuwe.png'}]
+            }
+        ]
+        self.assertTrue(returned, expected)
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
+    def test_find_urls_filters(self):
+        """Should apply filters to Urls search"""
+        self.db.Session = MagicMock()
+
+        self.db.Session.return_value.query.return_value.join.return_value.all.return_value = []
+
+        self.db.find_urls(url='https://www.google.com', ip='1.2.3.4', codename='SLEEPYPUPPY')
+        self.db.Session.return_value.query.return_value.filter_by.assert_called_with(url='https://www.google.com')
+        self.db.Session.return_value.query.return_value.filter_by.return_value.join.return_value. \
+            filter_by.assert_called_with(ip='1.2.3.4')
+        self.db.Session.return_value.query.return_value.filter_by.return_value.join.return_value. \
+            filter_by.return_value.join.return_value.filter_by.assert_called_with(codename='SLEEPYPUPPY')
+
+        self.db.Session.assert_called()
+        self.db.Session.return_value.expunge_all.assert_called()
+        self.db.Session.return_value.close.assert_called()
+
     def test_add_ips_existing_ips(self):
         """Should not add IPs if already in db"""
         self.db.Session = MagicMock()
@@ -178,8 +222,6 @@ class DbTestCase(unittest.TestCase):
                         "port": "443",
                         "protocol": "tcp",
                         "service": "Super Apache NGINX Deluxe",
-                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
-                        "url": "http://bubba.net"
                     },
                     {
                         "port": "53",
@@ -214,8 +256,6 @@ class DbTestCase(unittest.TestCase):
                         "port": "443",
                         "protocol": "tcp",
                         "service": "Super Apache NGINX Deluxe",
-                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
-                        "url": "http://bubba.net"
                     },
                     {
                         "port": "53",
@@ -252,8 +292,6 @@ class DbTestCase(unittest.TestCase):
                         "port": "443",
                         "protocol": "tcp",
                         "service": "Super Apache NGINX Deluxe",
-                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
-                        "url": "http://bubba.net",
                         "open": True,
                         "updated": 1654969137
 
@@ -296,8 +334,6 @@ class DbTestCase(unittest.TestCase):
                         "port": "443",
                         "protocol": "tcp",
                         "service": "Super Apache NGINX Deluxe",
-                        "screenshot_url": "http://127.0.0.1/h3298h23.png",
-                        "url": "http://bubba.net"
                     },
                     {
                         "port": "53",
@@ -315,6 +351,72 @@ class DbTestCase(unittest.TestCase):
 
             mock_and.assert_called()
             query.asset_called_with(synack.db.models.Port)
+            query.return_value.filter.assert_called_with('sqlalchemy.and_')
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+
+    def test_add_url_update(self):
+        """Should update urls if existing"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "urls": [
+                    {
+                        "url": "https://www.google.com",
+                        "screenshot_url": "https://imgur.com/219hi4"
+                    },
+                    {
+                        "url": "https://www.ebay.com",
+                        "screenshot_url": "file:///tmp/qwh82938.jpg"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_urls(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Url)
+            query.return_value.filter_by.assert_has_calls([
+                unittest.mock.call(ip='1.1.1.1'),
+                unittest.mock.call().__bool__(),
+                unittest.mock.call().first()
+            ])
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+            self.db.add_ips.assert_called_with(results)
+
+    def test_add_urls_new(self):
+        """Should add url if new"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [
+            {
+                "ip": "1.1.1.1",
+                "urls": [
+                    {
+                        "url": "https://www.google.com",
+                        "screenshot_url": "https://imgur.com/219hi4"
+                    },
+                    {
+                        "url": "https://www.ebay.com",
+                        "screenshot_url": "file:///tmp/qwh82938.jpg"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        query.return_value.filter.return_value = None
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_urls(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Url)
             query.return_value.filter.assert_called_with('sqlalchemy.and_')
             self.db.Session.return_value.commit.assert_called_with()
             self.db.Session.return_value.close.assert_called_with()
@@ -482,6 +584,17 @@ class DbTestCase(unittest.TestCase):
 
         self.assertEqual('ips', self.db.ips)
         query.assert_called_with(synack.db.models.IP)
+        query.return_value.all.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    def test_urls(self):
+        """Should get all urls from the database"""
+        self.db.Session = MagicMock()
+        query = self.db.Session.return_value.query
+        query.return_value.all.return_value = 'urls'
+
+        self.assertEqual('urls', self.db.urls)
+        query.assert_called_with(synack.db.models.Url)
         query.return_value.all.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 

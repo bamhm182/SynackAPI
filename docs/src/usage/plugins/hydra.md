@@ -29,7 +29,7 @@
 >>   {
 >>     'ip': '1.2.3.4', 'source': 'hydra', 'target': '123hg912',
 >>       'ports': [
->>         { 'open': True, 'port': '443', 'protocol': 'tcp', 'screenshot_url': '', 'service': 'https - Wordpress', 'updated': 1654840021 },
+>>         { 'open': True, 'port': '443', 'protocol': 'tcp', 'service': 'https - Wordpress', 'updated': 1654840021 },
 >>         ...
 >>       ]
 >>   },
