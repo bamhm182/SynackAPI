@@ -30,6 +30,27 @@
 >> 'uwfpmfpgjlum'
 >> ```
 
+## targets.build_scope_host_db(slug, scope)
+
+> Prints a list of IPs ready to ingest into the Database
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `slug` | str | The slug of a Target
+> | `scope` | list(dict) | Return of `targets.get_scope_host()` from Synack's API
+>
+>> Examples
+>> ```python3
+>> >>> scope = h.targets.get_scope(codename='JANGLYJALOPY')
+>> >>> scope_db = h.targets.build_scope_host_db(scope)
+>> >>> scope_db
+>> [
+>>   {'ip': '1.1.1.1', 'target': '2398her8h'},
+>>   ...
+>> ]
+>> >>> h.db.add_ips(scope_db)
+>> ```
+
 ## targets.build_scope_web_burp(scope)
 
 > Prints a dictionary compatible with Burp Suite from the output of `targets.get_scope_web()`
@@ -47,6 +68,29 @@
 >>     'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
 >>     'include': [{'enabled': True, 'scheme': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
 >> }}}
+>> ```
+
+## targets.build_scope_web_db(scope)
+
+> Prints a list of URLs which can be ingested into the Database
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `scope` | list(dict) | Return of `targets.get_scope_web()` from Synack's API
+>
+>> Examples
+>> ```python3
+>> >>> scope = h.targets.get_scope(codename='SLAPPYMONKEY')
+>> >>> scope_db = h.targets.build_scope_web_db(scope)
+>> >>> scope_db
+>> [
+>>   {
+>>     'target': '94hw8ier',
+>>     'urls': [{'url': https://good.monkey.com'}]
+>>   },
+>>   ...
+>> ]
+>> >>> h.db.add_urls(scope_db)
 >> ```
 
 ## targets.build_scope_web_urls(scope)
@@ -176,6 +220,22 @@
 >>   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
 >>   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 >> }, ...]
+
+## targets.set_connected(target, **kwargs)
+
+> Connect to a specified target
+>
+> | Argments | Type | Description
+> | `target` | db.models.Target | A single Target returned from the database
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> h.targets.set_connected(codename='BLINKYBABOON')
+>> >>> {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
+>> h.targets.set_connected(slug='12083y9')
+>> >>> {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
+>> ```
 
 ## targets.set_registered(targets)
 

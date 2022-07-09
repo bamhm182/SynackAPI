@@ -3,6 +3,8 @@
 Functions related to handling and checking targets
 """
 
+import ipaddress
+
 from urllib.parse import urlparse
 from .base import Plugin
 
@@ -41,6 +43,17 @@ class Targets(Plugin):
             slug = targets[0].slug
         return slug
 
+    def build_scope_host_db(self, slug, scope):
+        """Return a Host Scope that can be ingested into the Database"""
+        ret = list()
+        for asset in scope:
+            for ip in [str(ip) for ip in ipaddress.ip_network(asset)]:
+                ret.append({
+                    'target': slug,
+                    'ip': ip
+                })
+        return ret
+
     def build_scope_web_burp(self, scope):
         """Return a Burp Suite scope given retrieved web scope"""
         ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': [], 'include': []}}}
@@ -60,11 +73,25 @@ class Targets(Plugin):
                 })
         return ret
 
+    def build_scope_web_db(self, scope):
+        """Return a Web Scope that can be ingested into the Database"""
+        ret = list()
+        for asset in scope:
+            if asset.get('status') == 'in':
+                for owner in asset.get('owners'):
+                    ret.append({
+                        "target": owner.get('owner_uid'),
+                        "urls": [{
+                            "url": asset.get('raw_url')
+                        }]
+                    })
+        return ret
+
     def build_scope_web_urls(self, scope):
         """Return a list of the raw urls gived a retrieved web scope"""
         ret = {"in": list(), "out": list()}
         for asset in scope:
-            if asset["status"] == "in":
+            if asset.get('status') == 'in':
                 ret["in"].append(asset["raw_url"])
             else:
                 ret["out"].append(asset["raw_url"])
@@ -178,6 +205,17 @@ class Targets(Plugin):
             for t in res.json():
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
         return ret
+
+    def set_connected(self, target=None, **kwargs):
+        """Connect to a target"""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        if target:
+            res = self.api.request('PUT', 'launchpoint', data={'listing_id': target.slug})
+            if res.status_code == 200:
+                return self.get_connected()
 
     def set_registered(self, targets=None):
         """Register all unregistered targets"""

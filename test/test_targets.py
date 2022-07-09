@@ -54,6 +54,20 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.add_categories.assert_called_with(assessments)
 
+    def test_build_scope_host_db(self):
+        """Should build a scope that can be ingested into the Database given a Synack API Scope"""
+        scope = [
+            '10.0.0.0/31',
+            '192.168.254.15'
+        ]
+        slug = 'b23iuub'
+        expected = [
+            {'target': slug, 'ip': '10.0.0.0'},
+            {'target': slug, 'ip': '10.0.0.1'},
+            {'target': slug, 'ip': '192.168.254.15'},
+        ]
+        self.assertEqual(expected, self.targets.build_scope_host_db(slug, scope))
+
     def test_build_scope_web_burp(self):
         """Should build a Burp Suite Scope given a Synack API Scope"""
         scope = [
@@ -103,6 +117,36 @@ class TargetsTestCase(unittest.TestCase):
             }
         }
         self.assertEqual(expected, self.targets.build_scope_web_burp(scope))
+
+    def test_build_scope_web_db(self):
+        """Should build a web scope that can be ingested into the Database"""
+        scope = [
+            {
+                'raw_url': 'https://good.stuff.com',
+                'owners': [{'owner_uid': '12345'}, {'owner_uid': '67890'}],
+                'status': 'in'
+            },
+            {
+                'raw_url': 'https://bad.stuff.com',
+                'owners': [{'owner_uid': 'abcde'}],
+                'status': 'out'
+            }
+        ]
+        expected = [
+            {
+                'target': '12345',
+                'urls': [{
+                    'url': 'https://good.stuff.com'
+                }]
+            },
+            {
+                'target': '67890',
+                'urls': [{
+                    'url': 'https://good.stuff.com'
+                }]
+            }
+        ]
+        self.assertEqual(expected, self.targets.build_scope_web_db(scope))
 
     def test_build_scope_web_urls(self):
         """Should build dictionaries of Web Application URLs given a Synack API Scope"""
@@ -346,6 +390,17 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with("GET",
                                                     "targets",
                                                     query=query)
+
+    def test_set_connected(self):
+        """Should connect to a given target"""
+        self.targets.db.find_targets.return_value = [Target(slug='28h93iw')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.get_connected = MagicMock()
+        self.targets.set_connected(slug='28h93iw')
+        self.targets.api.request.assert_called_with('PUT',
+                                                    'launchpoint',
+                                                    data={'listing_id': '28h93iw'})
+        self.targets.get_connected.assert_called_with()
 
     def test_set_registered(self):
         """Should register each unregistered target"""
