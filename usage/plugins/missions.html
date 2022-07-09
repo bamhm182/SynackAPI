@@ -141,10 +141,11 @@
 <h2 id="missionsbuild_ordermissions-sort"><a class="header" href="#missionsbuild_ordermissions-sort">missions.build_order(missions, sort)</a></h2>
 <blockquote>
 <p>Takes in a list of missions and returns them sorted in a particular way</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions pulled from the SynackAPI</td></tr>
 <tr><td><code>sort</code></td><td>srt</td><td>The way the missions should be sorted</br>(Default: &quot;payout-high&quot;)</br>(Options: &quot;payout-high&quot;, &quot;payout-low&quot;, &quot;shuffle&quot;, &quot;reverse&quot;)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = [{&quot;title&quot;: &quot;Some mission&quot;,...}, {&quot;title&quot;: &quot;Another mission&quot;,...}]
@@ -156,9 +157,10 @@
 <h2 id="missionsbuild_summarymissions"><a class="header" href="#missionsbuild_summarymissions">missions.build_summary(missions)</a></h2>
 <blockquote>
 <p>Takes a list of missions and summarizes them</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.missions.build_summary(h.missions.get_claimed())
@@ -169,13 +171,14 @@
 <h2 id="missionsgetstatus-max_pages-page-per_page-listing_uids"><a class="header" href="#missionsgetstatus-max_pages-page-per_page-listing_uids">missions.get(status, max_pages, page, per_page, listing_uids)</a></h2>
 <blockquote>
 <p>Get a list of missions from the Synack API</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
 <tr><td><code>max_pages</code></td><td>int</td><td>The maximum number of pages to grab</br>(Default: 1)</td></tr>
 <tr><td><code>page</code></td><td>int</td><td>The page you wish to start on</br>(Default: 1)</td></tr>
 <tr><td><code>per_page</code></td><td>int</td><td>The number of missions you wish to return per page</br>(Default: 20)</td></tr>
 <tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query for missions</br>(Default: None)</td></tr>
 </tbody></table>
+</div>
 <p>The default <code>per_page</code> on the Synack API is 20.
 I recommend leaving it there unless you also plan to try and get multiple pages of missions if there are more than 20.
 Don't set this number TOO high, or you may be requesting a lot of data, which may actually be detremental to the speed of your bot and the Synack API.
@@ -221,10 +224,11 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsget_countstatus-listing_uids"><a class="header" href="#missionsget_countstatus-listing_uids">missions.get_count(status, listing_uids)</a></h2>
 <blockquote>
 <p>Get the number of missions</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
 <tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query</br>(Default: None)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_count()
@@ -235,9 +239,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsget_evidencesmission"><a class="header" href="#missionsget_evidencesmission">missions.get_evidences(mission)</a></h2>
 <blockquote>
 <p>Download the text part of a mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>Mission dict pulled from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
@@ -262,9 +267,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsset_claimedmission"><a class="header" href="#missionsset_claimedmission">missions.set_claimed(mission)</a></h2>
 <blockquote>
 <p>Try and claim one mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
@@ -277,9 +283,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsset_disclaimedmission"><a class="header" href="#missionsset_disclaimedmission">missions.set_disclaimed(mission)</a></h2>
 <blockquote>
 <p>Release one mission you currently have</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -297,9 +304,10 @@ These protections currently include confirming that the current fields of the mi
 If you have a lot of text in a mission and wish to replace it with a template, replace all of the text with a single character and try again.</p>
 <p>Also note that the templates are pulled from your local file templates.
 Check out the <a href="../examples/mission-templates.html">Mission Templates</a> page for more information.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -311,10 +319,11 @@ Check out the <a href="../examples/mission-templates.html">Mission Templates</a>
 <h2 id="missionsset_statusmission-status"><a class="header" href="#missionsset_statusmission-status">missions.set_status(mission, status)</a></h2>
 <blockquote>
 <p>Sets the status of a mission. Used in <code>mission.set_claimed</code> and <code>missions.set_disclaimed</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the SynackAPI</td></tr>
 <tr><td><code>status</code></td><td>str</td><td>Status to set it to (i.e., <code>CLAIM</code>, <code>DISCLAIM</code>)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()

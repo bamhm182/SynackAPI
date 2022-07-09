@@ -172,10 +172,11 @@
 <h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
 <blockquote>
 <p>Get a Login Grant Token by providing an OTP Code</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>csrf</code></td><td>str</td><td>A CSRF Token used while logging in</td></tr>
 <tr><td><code>progress_token</code></td><td>str</td><td>A token returned after submitting a valid username and password</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
@@ -188,9 +189,10 @@
 <h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
 <blockquote>
 <p>Get the Login Progress Token by authenticating with email and password</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>csrf</code></td><td>str</td><td>A CSRF Token used while logging in</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()

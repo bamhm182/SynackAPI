@@ -142,9 +142,10 @@
 <blockquote>
 <p>Returns a Target's codename given its slug.</p>
 <p>This hits the local database, then hits the Synack API if it can't find it.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_codename_from_slug('uwfpmfpgjlum')
@@ -155,9 +156,10 @@
 <h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
 <blockquote>
 <p>Returns a Target's slug given its codename.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
@@ -168,9 +170,10 @@
 <h2 id="targetsbuild_scope_web_burpscope"><a class="header" href="#targetsbuild_scope_web_burpscope">targets.build_scope_web_burp(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_scope_web()</code></p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
@@ -186,9 +189,10 @@
 <h2 id="targetsbuild_scope_web_urlsscope"><a class="header" href="#targetsbuild_scope_web_urlsscope">targets.build_scope_web_urls(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary containing lists of <code>in</code> scope and <code>out</code> of scope URLs</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename'SLAPPYMONKEY')
@@ -211,9 +215,10 @@
 <h2 id="targetsget_credentialskwargs"><a class="header" href="#targetsget_credentialskwargs">targets.get_credentials(**kwargs)</a></h2>
 <blockquote>
 <p>Pulls back the credentials for a Target</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Some attribute that will be used to identify a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_credentials(slug='ljufpbgylu')
@@ -236,10 +241,11 @@
 <h2 id="targetsget_scope_hosttarget-kwargs"><a class="header" href="#targetsget_scope_hosttarget-kwargs">targets.get_scope_host(target, **kwargs)</a></h2>
 <blockquote>
 <p>Return CIDR IP Addresses in scope when given a Target or target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; tgt = h.db.find_targets(codename='SILLYFILLY')
@@ -266,9 +272,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
 <blockquote>
 <p>Returns scope information for web or host targets when given target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
@@ -290,10 +297,11 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
 <blockquote>
 <p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope_web(codename='SLAPPYFROG')
@@ -308,9 +316,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <blockquote>
 <p>Registers unregistered Targets.</p>
 <p>If no <code>targets</code> are provided, <code>targets.get_unregistered()</code> is used so that all unregistered targets are registered.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>targets</code></td><td>list(dict)</td><td>A list of targets returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.targets.get_unregistered()

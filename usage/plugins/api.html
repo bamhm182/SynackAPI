@@ -145,11 +145,12 @@ It is the last stop before our code is sent to the Synack API.</p>
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; headers = {
@@ -168,11 +169,12 @@ This function takes in several arguments to build information that is sent to <c
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://notifications.synack.com/api/v2/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.api.notifications('GET', 'notifications?meta=1')
@@ -183,7 +185,7 @@ This function takes in several arguments to build information that is sent to <c
 <h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
 <blockquote>
 <p>This function is used to set up requests sent to the primary API at <code>https://platform.synack.com/api/*</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>kwargs['headers']</code></td><td>dict</td><td>Headers that should be applied to only the current request</td></tr>
@@ -191,6 +193,7 @@ This function takes in several arguments to build information that is sent to <c
 <tr><td><code>kwargs['data']</code></td><td>dict</td><td>Data parameters that should be used in the Body</td></tr>
 <tr><td></td><td></td><td></td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; query = {

@@ -141,9 +141,10 @@
 <h2 id="templatesbuild_filepathmission"><a class="header" href="#templatesbuild_filepathmission">templates.build_filepath(mission)</a></h2>
 <blockquote>
 <p>Builds a safe filepath for the template to exist at</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msn = {
@@ -166,9 +167,10 @@
 <h2 id="templatesbuild_safe_namename"><a class="header" href="#templatesbuild_safe_namename">templates.build_safe_name(name)</a></h2>
 <blockquote>
 <p>Takes a name and converts it into something that is definitely safe for a filepath </p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>Some string to convert into a standardized string that if definitely safe to use as a filepath</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.build_safe_name('R@ND0M     G@RB@G3!!!!!')
@@ -179,9 +181,10 @@
 <h2 id="templatesbuild_sectionspath"><a class="header" href="#templatesbuild_sectionspath">templates.build_sections(path)</a></h2>
 <blockquote>
 <p>Take the text from a local template file and prepare it to be sent to the Synack API</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>path</code></td><td>pathlib.PosixPath</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.templates.build_sections(Path('/home/user/Templates/mission/web/mission.txt'))
@@ -197,9 +200,10 @@
 <h2 id="templatesget_filemission"><a class="header" href="#templatesget_filemission">templates.get_file(mission)</a></h2>
 <blockquote>
 <p>Pulls in a local template file to upload to a given mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A mission dict from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -212,9 +216,10 @@
 <blockquote>
 <p>Writes evidences pulled from <code>missions.get_evidences()</code> to a local template file</p>
 <p>Note that if the file already exists, it will not be overwritten</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>evidences</code></td><td>dict</td><td>Evidences from <code>missions.get_evidences()</code></td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()

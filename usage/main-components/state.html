@@ -177,7 +177,7 @@ For example, the api_token, which should be shared by all Handlers or cached Tar
 <p>The State only persists within <strong>one</strong> instance of the Handler.
 In the event that one of the State variables is set and is <strong>not</strong> constantly at risk of being changed (such as the api_token), the value stored in the State will be provided <strong>instead of</strong> the Database value. This is useful when you want to <strong>override</strong> Database variables in a single Handler. For example, you may wish to enable the <code>debug</code> variable for a single Handler without affecting other Handlers you may have running.</p>
 <h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
-<table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td>api_token</td><td>str</td><td>This is the Synack Access Token used to authenticate requests</td></tr>
 <tr><td>config_dir</td><td>pathlib.Path</td><td>The location of the Database and Login script</td></tr>
 <tr><td>debug</td><td>bool</td><td>Used to show/hide debugging messages</td></tr>
@@ -193,7 +193,7 @@ In the event that one of the State variables is set and is <strong>not</strong> 
 <tr><td>use_proxies</td><td>bool</td><td>Enables/Disables Web Proxy Usage</td></tr>
 <tr><td>user_id</td><td>bool</td><td>Your Synack user id used in many requests</td></tr>
 </tbody></table>
-
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

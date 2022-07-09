@@ -519,7 +519,7 @@ For example, the api_token, which should be shared by all Handlers or cached Tar
 <p>The State only persists within <strong>one</strong> instance of the Handler.
 In the event that one of the State variables is set and is <strong>not</strong> constantly at risk of being changed (such as the api_token), the value stored in the State will be provided <strong>instead of</strong> the Database value. This is useful when you want to <strong>override</strong> Database variables in a single Handler. For example, you may wish to enable the <code>debug</code> variable for a single Handler without affecting other Handlers you may have running.</p>
 <h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
-<table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td>api_token</td><td>str</td><td>This is the Synack Access Token used to authenticate requests</td></tr>
 <tr><td>config_dir</td><td>pathlib.Path</td><td>The location of the Database and Login script</td></tr>
 <tr><td>debug</td><td>bool</td><td>Used to show/hide debugging messages</td></tr>
@@ -535,12 +535,12 @@ In the event that one of the State variables is set and is <strong>not</strong> 
 <tr><td>use_proxies</td><td>bool</td><td>Enables/Disables Web Proxy Usage</td></tr>
 <tr><td>user_id</td><td>bool</td><td>Your Synack user id used in many requests</td></tr>
 </tbody></table>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
 <p>Within the SynackAPI, various &quot;Plugins&quot; exist to allow us to easily separate functions based on their purpose.</p>
 <h2 id="function-naming-convension"><a class="header" href="#function-naming-convension">Function Naming Convension</a></h2>
 <p>Similar to PowerShell, functions within this package will begin with a verb.
 This is a list of approved verbs and their meaning.</p>
-<table><thead><tr><th>Verb</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Verb</th><th>Description</th></tr></thead><tbody>
 <tr><td>add</td><td>Insert/Update item(s) in the Database</td></tr>
 <tr><td>build</td><td>Change data/items in some way</td></tr>
 <tr><td>find</td><td>Query the Database</td></tr>
@@ -548,6 +548,7 @@ This is a list of approved verbs and their meaning.</p>
 <tr><td>remove</td><td>Delete item(s) from the Database</td></tr>
 <tr><td>set</td><td>Push changes to the Synack API or Local Files</td></tr>
 </tbody></table>
+</div>
 <p>Additionally, function names should not be redundant.
 In other words, consider the function name <code>missions.get_missions()</code>.
 <code>missions</code> is specified twice, when <code>missions.get()</code> is just as clear.
@@ -560,11 +561,12 @@ It is the last stop before our code is sent to the Synack API.</p>
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; headers = {
@@ -583,11 +585,12 @@ This function takes in several arguments to build information that is sent to <c
 <blockquote>
 <p>This function is used to set up requests sent to <code>https://notifications.synack.com/api/v2/*</code>.<br />
 This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.api.notifications('GET', 'notifications?meta=1')
@@ -598,7 +601,7 @@ This function takes in several arguments to build information that is sent to <c
 <h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
 <blockquote>
 <p>This function is used to set up requests sent to the primary API at <code>https://platform.synack.com/api/*</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
 <tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
 <tr><td><code>kwargs['headers']</code></td><td>dict</td><td>Headers that should be applied to only the current request</td></tr>
@@ -606,6 +609,7 @@ This function takes in several arguments to build information that is sent to <c
 <tr><td><code>kwargs['data']</code></td><td>dict</td><td>Data parameters that should be used in the Body</td></tr>
 <tr><td></td><td></td><td></td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; query = {
@@ -652,10 +656,11 @@ This function takes in several arguments to build information that is sent to <c
 <h2 id="authget_login_grant_tokencsrf-progress_token"><a class="header" href="#authget_login_grant_tokencsrf-progress_token">auth.get_login_grant_token(csrf, progress_token)</a></h2>
 <blockquote>
 <p>Get a Login Grant Token by providing an OTP Code</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>csrf</code></td><td>str</td><td>A CSRF Token used while logging in</td></tr>
 <tr><td><code>progress_token</code></td><td>str</td><td>A token returned after submitting a valid username and password</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
@@ -668,9 +673,10 @@ This function takes in several arguments to build information that is sent to <c
 <h2 id="authget_login_progress_tokencsrf"><a class="header" href="#authget_login_progress_tokencsrf">auth.get_login_progress_token(csrf)</a></h2>
 <blockquote>
 <p>Get the Login Progress Token by authenticating with email and password</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>csrf</code></td><td>str</td><td>A CSRF Token used while logging in</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
@@ -703,7 +709,7 @@ This function takes in several arguments to build information that is sent to <c
 <p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
 Some properties are Read-Only, while others can be Set.
 Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
-<table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
 <tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
 <tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
 <tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
@@ -721,13 +727,15 @@ Additionally, some properties can be overridden by the State, which allows you t
 <tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
 <tr><td>user_id</td><td>No</td><td>No</td><td>Your Synack User ID used for requests</td></tr>
 </tbody></table>
+</div>
 <h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
 <blockquote>
 <p>Add Target Categories from the Synack API to the Database
 This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>categories</code></td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
@@ -737,10 +745,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_ipsresults-sessionnone"><a class="header" href="#dbadd_ipsresults-sessionnone">db.add_ips(results, session=None)</a></h2>
 <blockquote>
 <p>Add IP Addresses to the database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing <code>ip</code> addresses and <code>target</code> slugs</td></tr>
 <tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is often used with <code>db.add_ports()</code> and can have a session passed into it</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
@@ -750,10 +759,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
 <blockquote>
 <p>Add Organizations from the Synack API to the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
 <tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is most often used with <code>db.add_targets()</code> and I was having issues getting it to work when it would create a new session</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
@@ -763,9 +773,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_portsresults"><a class="header" href="#dbadd_portsresults">db.add_ports(results)</a></h2>
 <blockquote>
 <p>Add port results to the database</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; results = [
@@ -799,9 +810,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
 <blockquote>
 <p>Adds Target from the Synack API to the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaties returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
@@ -811,9 +823,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_urlsresults"><a class="header" href="#dbadd_urlsresults">db.add_urls(results)</a></h2>
 <blockquote>
 <p>Add urls results to the database</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; results = [
@@ -839,10 +852,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ips to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ips(codename=&quot;SLEEPYPUPPY&quot;)
@@ -853,13 +867,14 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_portsport-protocol-source-ip-kwargs"><a class="header" href="#dbfind_portsport-protocol-source-ip-kwargs">db.find_ports(port, protocol, source, ip, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ports to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>port</code></td><td>int</td><td>Port number to search for (443, 80, 25, etc.)</td></tr>
 <tr><td><code>protocol</code></td><td>str</td><td>Protocol to search for (tcp, udp, etc.)</td></tr>
 <tr><td><code>source</code></td><td>str</td><td>Source to search for (hydra, nmap, etc.)</td></tr>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
@@ -879,9 +894,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the targets to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename=&quot;SLEEPYPUPPY&quot;)
@@ -892,11 +908,12 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_urlsurlnone-ipnone-kwargs"><a class="header" href="#dbfind_urlsurlnone-ipnone-kwargs">db.find_urls(url=None, ip=None, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ports to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>url</code></td><td>str</td><td>Url hosting a service on the IP</td></tr>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
@@ -920,9 +937,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
 <blockquote>
 <p>Returns a configuration from the Database.</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
@@ -936,9 +954,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Remove targets from the Database based on criteria.
 <strong>If no criteria is provided, all entries are deleted</strong></p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
@@ -948,10 +967,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
 <blockquote>
 <p>Permanently sets a configuration in the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>Name of the config to set</td></tr>
 <tr><td><code>value</code></td><td>?</td><td>Value to set the config to</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
@@ -973,10 +993,11 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 <h2 id="debuglogtitle-message"><a class="header" href="#debuglogtitle-message">debug.log(title, message)</a></h2>
 <blockquote>
 <p>Prints a debug message to the screen if the State of Database is set to True</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>title</code></td><td>Title for the debug message. Appears in the top line in capital letters</td></tr>
 <tr><td><code>message</code></td><td>Message that appears on the second line</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.debug('Some Title', 'Some Message')
@@ -989,11 +1010,12 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 <h2 id="hydraget_hydrapage-max_page-update_db-kwargs"><a class="header" href="#hydraget_hydrapage-max_page-update_db-kwargs">hydra.get_hydra(page, max_page, update_db, **kwargs)</a></h2>
 <blockquote>
 <p>Returns information from Synack Hydra Service</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>page</code></td><td>int</td><td>Page of the Hydra Service to start on (Default: 1)</td></tr>
 <tr><td><code>max_page</code></td><td>int</td><td>Highest page that should be queried (Default: 5)</td></tr>
 <tr><td><code>update_db</code></td><td>bool</td><td>Store the results in the database</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.hydra.get_hydra(codename='SLEEPYPUPPY')
@@ -1026,10 +1048,11 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 <h2 id="missionsbuild_ordermissions-sort"><a class="header" href="#missionsbuild_ordermissions-sort">missions.build_order(missions, sort)</a></h2>
 <blockquote>
 <p>Takes in a list of missions and returns them sorted in a particular way</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions pulled from the SynackAPI</td></tr>
 <tr><td><code>sort</code></td><td>srt</td><td>The way the missions should be sorted</br>(Default: &quot;payout-high&quot;)</br>(Options: &quot;payout-high&quot;, &quot;payout-low&quot;, &quot;shuffle&quot;, &quot;reverse&quot;)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = [{&quot;title&quot;: &quot;Some mission&quot;,...}, {&quot;title&quot;: &quot;Another mission&quot;,...}]
@@ -1041,9 +1064,10 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 <h2 id="missionsbuild_summarymissions"><a class="header" href="#missionsbuild_summarymissions">missions.build_summary(missions)</a></h2>
 <blockquote>
 <p>Takes a list of missions and summarizes them</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.missions.build_summary(h.missions.get_claimed())
@@ -1054,13 +1078,14 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 <h2 id="missionsgetstatus-max_pages-page-per_page-listing_uids"><a class="header" href="#missionsgetstatus-max_pages-page-per_page-listing_uids">missions.get(status, max_pages, page, per_page, listing_uids)</a></h2>
 <blockquote>
 <p>Get a list of missions from the Synack API</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
 <tr><td><code>max_pages</code></td><td>int</td><td>The maximum number of pages to grab</br>(Default: 1)</td></tr>
 <tr><td><code>page</code></td><td>int</td><td>The page you wish to start on</br>(Default: 1)</td></tr>
 <tr><td><code>per_page</code></td><td>int</td><td>The number of missions you wish to return per page</br>(Default: 20)</td></tr>
 <tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query for missions</br>(Default: None)</td></tr>
 </tbody></table>
+</div>
 <p>The default <code>per_page</code> on the Synack API is 20.
 I recommend leaving it there unless you also plan to try and get multiple pages of missions if there are more than 20.
 Don't set this number TOO high, or you may be requesting a lot of data, which may actually be detremental to the speed of your bot and the Synack API.
@@ -1106,10 +1131,11 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsget_countstatus-listing_uids"><a class="header" href="#missionsget_countstatus-listing_uids">missions.get_count(status, listing_uids)</a></h2>
 <blockquote>
 <p>Get the number of missions</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: &quot;PUBLISHED&quot;)</td></tr>
 <tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query</br>(Default: None)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_count()
@@ -1120,9 +1146,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsget_evidencesmission"><a class="header" href="#missionsget_evidencesmission">missions.get_evidences(mission)</a></h2>
 <blockquote>
 <p>Download the text part of a mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>Mission dict pulled from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
@@ -1147,9 +1174,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsset_claimedmission"><a class="header" href="#missionsset_claimedmission">missions.set_claimed(mission)</a></h2>
 <blockquote>
 <p>Try and claim one mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
@@ -1162,9 +1190,10 @@ Also consider that if there are multiple pages, you may just be better off still
 <h2 id="missionsset_disclaimedmission"><a class="header" href="#missionsset_disclaimedmission">missions.set_disclaimed(mission)</a></h2>
 <blockquote>
 <p>Release one mission you currently have</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -1182,9 +1211,10 @@ These protections currently include confirming that the current fields of the mi
 If you have a lot of text in a mission and wish to replace it with a template, replace all of the text with a single character and try again.</p>
 <p>Also note that the templates are pulled from your local file templates.
 Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission Templates</a> page for more information.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -1196,10 +1226,11 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="missionsset_statusmission-status"><a class="header" href="#missionsset_statusmission-status">missions.set_status(mission, status)</a></h2>
 <blockquote>
 <p>Sets the status of a mission. Used in <code>mission.set_claimed</code> and <code>missions.set_disclaimed</code>.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the SynackAPI</td></tr>
 <tr><td><code>status</code></td><td>str</td><td>Status to set it to (i.e., <code>CLAIM</code>, <code>DISCLAIM</code>)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
@@ -1238,9 +1269,10 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <blockquote>
 <p>Returns a Target's codename given its slug.</p>
 <p>This hits the local database, then hits the Synack API if it can't find it.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_codename_from_slug('uwfpmfpgjlum')
@@ -1251,9 +1283,10 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
 <blockquote>
 <p>Returns a Target's slug given its codename.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
@@ -1264,9 +1297,10 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="targetsbuild_scope_web_burpscope"><a class="header" href="#targetsbuild_scope_web_burpscope">targets.build_scope_web_burp(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_scope_web()</code></p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
@@ -1282,9 +1316,10 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="targetsbuild_scope_web_urlsscope"><a class="header" href="#targetsbuild_scope_web_urlsscope">targets.build_scope_web_urls(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary containing lists of <code>in</code> scope and <code>out</code> of scope URLs</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename'SLAPPYMONKEY')
@@ -1307,9 +1342,10 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="targetsget_credentialskwargs"><a class="header" href="#targetsget_credentialskwargs">targets.get_credentials(**kwargs)</a></h2>
 <blockquote>
 <p>Pulls back the credentials for a Target</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Some attribute that will be used to identify a Target</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_credentials(slug='ljufpbgylu')
@@ -1332,10 +1368,11 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <h2 id="targetsget_scope_hosttarget-kwargs"><a class="header" href="#targetsget_scope_hosttarget-kwargs">targets.get_scope_host(target, **kwargs)</a></h2>
 <blockquote>
 <p>Return CIDR IP Addresses in scope when given a Target or target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; tgt = h.db.find_targets(codename='SILLYFILLY')
@@ -1362,9 +1399,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
 <blockquote>
 <p>Returns scope information for web or host targets when given target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
@@ -1386,10 +1424,11 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
 <blockquote>
 <p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope_web(codename='SLAPPYFROG')
@@ -1404,9 +1443,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <blockquote>
 <p>Registers unregistered Targets.</p>
 <p>If no <code>targets</code> are provided, <code>targets.get_unregistered()</code> is used so that all unregistered targets are registered.</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>targets</code></td><td>list(dict)</td><td>A list of targets returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.targets.get_unregistered()
@@ -1422,9 +1462,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="templatesbuild_filepathmission"><a class="header" href="#templatesbuild_filepathmission">templates.build_filepath(mission)</a></h2>
 <blockquote>
 <p>Builds a safe filepath for the template to exist at</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A mission dict returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msn = {
@@ -1447,9 +1488,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="templatesbuild_safe_namename"><a class="header" href="#templatesbuild_safe_namename">templates.build_safe_name(name)</a></h2>
 <blockquote>
 <p>Takes a name and converts it into something that is definitely safe for a filepath </p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>Some string to convert into a standardized string that if definitely safe to use as a filepath</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.build_safe_name('R@ND0M     G@RB@G3!!!!!')
@@ -1460,9 +1502,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="templatesbuild_sectionspath"><a class="header" href="#templatesbuild_sectionspath">templates.build_sections(path)</a></h2>
 <blockquote>
 <p>Take the text from a local template file and prepare it to be sent to the Synack API</p>
-<table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>path</code></td><td>pathlib.PosixPath</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.templates.build_sections(Path('/home/user/Templates/mission/web/mission.txt'))
@@ -1478,9 +1521,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="templatesget_filemission"><a class="header" href="#templatesget_filemission">templates.get_file(mission)</a></h2>
 <blockquote>
 <p>Pulls in a local template file to upload to a given mission</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A mission dict from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
@@ -1493,9 +1537,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <blockquote>
 <p>Writes evidences pulled from <code>missions.get_evidences()</code> to a local template file</p>
 <p>Note that if the file already exists, it will not be overwritten</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>evidences</code></td><td>dict</td><td>Evidences from <code>missions.get_evidences()</code></td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
@@ -1520,9 +1565,10 @@ eventhough it sounds like a lot, it isn't bad.</p>
 <h2 id="usersget_profileuser_id"><a class="header" href="#usersget_profileuser_id">users.get_profile(user_id)</a></h2>
 <blockquote>
 <p>DESCRIPTION</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>user_id</code></td><td>str</td><td>The user id to pull back data for<br>(Default: &quot;me&quot;)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.user.get_profile()

@@ -142,7 +142,7 @@
 <p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
 Some properties are Read-Only, while others can be Set.
 Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
-<table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
 <tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
 <tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
 <tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
@@ -160,13 +160,15 @@ Additionally, some properties can be overridden by the State, which allows you t
 <tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
 <tr><td>user_id</td><td>No</td><td>No</td><td>Your Synack User ID used for requests</td></tr>
 </tbody></table>
+</div>
 <h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
 <blockquote>
 <p>Add Target Categories from the Synack API to the Database
 This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>categories</code></td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
@@ -176,10 +178,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_ipsresults-sessionnone"><a class="header" href="#dbadd_ipsresults-sessionnone">db.add_ips(results, session=None)</a></h2>
 <blockquote>
 <p>Add IP Addresses to the database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing <code>ip</code> addresses and <code>target</code> slugs</td></tr>
 <tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is often used with <code>db.add_ports()</code> and can have a session passed into it</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
@@ -189,10 +192,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
 <blockquote>
 <p>Add Organizations from the Synack API to the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
 <tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is most often used with <code>db.add_targets()</code> and I was having issues getting it to work when it would create a new session</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
@@ -202,9 +206,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_portsresults"><a class="header" href="#dbadd_portsresults">db.add_ports(results)</a></h2>
 <blockquote>
 <p>Add port results to the database</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; results = [
@@ -238,9 +243,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
 <blockquote>
 <p>Adds Target from the Synack API to the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaties returned from the Synack API</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
@@ -250,9 +256,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbadd_urlsresults"><a class="header" href="#dbadd_urlsresults">db.add_urls(results)</a></h2>
 <blockquote>
 <p>Add urls results to the database</p>
-<table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, Hydra, etc.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; results = [
@@ -278,10 +285,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ips to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ips(codename=&quot;SLEEPYPUPPY&quot;)
@@ -292,13 +300,14 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_portsport-protocol-source-ip-kwargs"><a class="header" href="#dbfind_portsport-protocol-source-ip-kwargs">db.find_ports(port, protocol, source, ip, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ports to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>port</code></td><td>int</td><td>Port number to search for (443, 80, 25, etc.)</td></tr>
 <tr><td><code>protocol</code></td><td>str</td><td>Protocol to search for (tcp, udp, etc.)</td></tr>
 <tr><td><code>source</code></td><td>str</td><td>Source to search for (hydra, nmap, etc.)</td></tr>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
@@ -318,9 +327,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the targets to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename=&quot;SLEEPYPUPPY&quot;)
@@ -331,11 +341,12 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbfind_urlsurlnone-ipnone-kwargs"><a class="header" href="#dbfind_urlsurlnone-ipnone-kwargs">db.find_urls(url=None, ip=None, **kwargs)</a></h2>
 <blockquote>
 <p>Filters through all the ports to return ones which match a given criteria</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>url</code></td><td>str</td><td>Url hosting a service on the IP</td></tr>
 <tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename=&quot;SLEEPYPUPPY&quot;)
@@ -359,9 +370,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
 <blockquote>
 <p>Returns a configuration from the Database.</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
@@ -375,9 +387,10 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <blockquote>
 <p>Remove targets from the Database based on criteria.
 <strong>If no criteria is provided, all entries are deleted</strong></p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>kwargs</code></td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
@@ -387,10 +400,11 @@ This is most often used with the <code>targets.get_assessments()</code> function
 <h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
 <blockquote>
 <p>Permanently sets a configuration in the Database</p>
-<table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>str</td><td>Name of the config to set</td></tr>
 <tr><td><code>value</code></td><td>?</td><td>Value to set the config to</td></tr>
 </tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
