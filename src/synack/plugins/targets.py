@@ -23,7 +23,7 @@ class Targets(Plugin):
         Arguments:
         slug -- Slug of desired target
         """
-        codename = None
+        codename = 'NONE'
         targets = self.db.find_targets(slug=slug)
         if not targets:
             self.get_registered_summary()
@@ -127,6 +127,10 @@ class Targets(Plugin):
             else:
                 slug = j['slug']
                 status = "Connected"
+
+            if slug == '':
+                status = 'Not Connected'
+
             ret = {
                 "slug": slug,
                 "codename": self.build_codename_from_slug(slug),
@@ -208,12 +212,18 @@ class Targets(Plugin):
 
     def set_connected(self, target=None, **kwargs):
         """Connect to a target"""
-        if target is None:
+        slug = None
+        if target:
+            slug = target.slug
+        elif len(kwargs) == 0:
+            slug = ''
+        else:
             target = self.db.find_targets(**kwargs)
             if target:
-                target = target[0]
-        if target:
-            res = self.api.request('PUT', 'launchpoint', data={'listing_id': target.slug})
+                slug = target[0].slug
+
+        if slug is not None:
+            res = self.api.request('PUT', 'launchpoint', data={'listing_id': slug})
             if res.status_code == 200:
                 return self.get_connected()
 

@@ -215,6 +215,13 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.find_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
+    def test_build_codename_from_slug_invalid(self):
+        """Should return NONE if non-real slug"""
+        self.targets.db.find_targets.return_value = []
+        self.assertEqual("NONE",
+                         self.targets.build_codename_from_slug("qwfars"))
+        self.targets.db.find_targets.assert_called_with(slug="qwfars")
+
     def test_get_connected(self):
         """Should make a request to get the currently selected target"""
         self.targets.api.request.return_value.status_code = 200
@@ -246,6 +253,23 @@ class TargetsTestCase(unittest.TestCase):
             "slug": "qwfars",
             "codename": "SLOPPYSLUG",
             "status": "Connecting"
+        }
+        self.assertEqual(out, self.targets.get_connected())
+
+    def test_get_connected_disconnected(self):
+        """Should report Not Connected when not connected to a target"""
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = {
+            "pending_slug": "-1",
+            "slug": "",
+            "status": "connected"
+        }
+        self.targets.build_codename_from_slug = MagicMock()
+        self.targets.build_codename_from_slug.return_value = "NONE"
+        out = {
+            "slug": "",
+            "codename": "NONE",
+            "status": "Not Connected"
         }
         self.assertEqual(out, self.targets.get_connected())
 
@@ -392,7 +416,7 @@ class TargetsTestCase(unittest.TestCase):
                                                     query=query)
 
     def test_set_connected(self):
-        """Should connect to a given target"""
+        """Should connect to a given target provided kwargs"""
         self.targets.db.find_targets.return_value = [Target(slug='28h93iw')]
         self.targets.api.request.return_value.status_code = 200
         self.targets.get_connected = MagicMock()
@@ -400,6 +424,27 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with('PUT',
                                                     'launchpoint',
                                                     data={'listing_id': '28h93iw'})
+        self.targets.get_connected.assert_called_with()
+
+    def test_set_connected_target(self):
+        """Should connect to a given target provided a target"""
+        target = Target(slug='28h93iw')
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.get_connected = MagicMock()
+        self.targets.set_connected(target)
+        self.targets.api.request.assert_called_with('PUT',
+                                                    'launchpoint',
+                                                    data={'listing_id': '28h93iw'})
+        self.targets.get_connected.assert_called_with()
+
+    def test_set_connected_disconnect(self):
+        """Should disconnect from target if none specified"""
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.get_connected = MagicMock()
+        self.targets.set_connected()
+        self.targets.api.request.assert_called_with('PUT',
+                                                    'launchpoint',
+                                                    data={'listing_id': ''})
         self.targets.get_connected.assert_called_with()
 
     def test_set_registered(self):
