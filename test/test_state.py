@@ -40,6 +40,16 @@ class StateTestCase(unittest.TestCase):
         self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
                          self.state._template_dir)
 
+    def test_scratchspace_dir(self):
+        self.assertEqual(None, self.state.scratchspace_dir)
+        self.assertEqual(None, self.state._scratchspace_dir)
+        self.state.scratchspace_dir = "/tmp"
+        self.assertEqual(pathlib.PosixPath, type(self.state.scratchspace_dir))
+        self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
+                         self.state.scratchspace_dir)
+        self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
+                         self.state._scratchspace_dir)
+
     def test_debug(self):
         self.assertEqual(None, self.state.debug)
         self.assertEqual(None, self.state._debug)

@@ -429,12 +429,12 @@ class Db(Plugin):
         self.set_config('slack_url', value)
 
     @property
-    def smtp_from_email(self):
-        return self.get_config('smtp_from_email')
+    def smtp_email_from(self):
+        return self.get_config('smtp_email_from')
 
-    @smtp_from_email.setter
-    def smtp_from_email(self, value):
-        self.set_config('smtp_from_email', value)
+    @smtp_email_from.setter
+    def smtp_email_from(self, value):
+        self.set_config('smtp_email_from', value)
 
     @property
     def smtp_password(self):
@@ -461,12 +461,12 @@ class Db(Plugin):
         self.set_config('smtp_server', value)
 
     @property
-    def smtp_to_email(self):
-        return self.get_config('smtp_to_email')
+    def smtp_email_to(self):
+        return self.get_config('smtp_email_to')
 
-    @smtp_to_email.setter
-    def smtp_to_email(self, value):
-        self.set_config('smtp_to_email', value)
+    @smtp_email_to.setter
+    def smtp_email_to(self, value):
+        self.set_config('smtp_email_to', value)
 
     @property
     def smtp_starttls(self):

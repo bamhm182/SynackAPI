@@ -23,9 +23,9 @@ def upgrade():
         batch_op.add_column(sa.Column('smtp_email_from', sa.VARCHAR(250), server_default=''))
         batch_op.add_column(sa.Column('smtp_email_to', sa.VARCHAR(250), server_default=''))
         batch_op.add_column(sa.Column('smtp_password', sa.VARCHAR(250), server_default=''))
-        batch_op.add_column(sa.Column('smtp_port', sa.SMALLINT, server_default=465))
+        batch_op.add_column(sa.Column('smtp_port', sa.INTEGER, server_default='465'))
         batch_op.add_column(sa.Column('smtp_server', sa.VARCHAR(250), server_default=''))
-        batch_op.add_column(sa.Column('smtp_starttls', sa.BOOLEAN, server_default=True))
+        batch_op.add_column(sa.Column('smtp_starttls', sa.BOOLEAN, server_default='t'))
         batch_op.add_column(sa.Column('smtp_username', sa.VARCHAR(250), server_default=''))
 
 
