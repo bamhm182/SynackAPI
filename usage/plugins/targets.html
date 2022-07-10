@@ -167,6 +167,27 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsbuild_scope_host_dbslug-scope"><a class="header" href="#targetsbuild_scope_host_dbslug-scope">targets.build_scope_host_db(slug, scope)</a></h2>
+<blockquote>
+<p>Prints a list of IPs ready to ingest into the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_host()</code> from Synack's API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='JANGLYJALOPY')
+&gt;&gt;&gt; scope_db = h.targets.build_scope_host_db(scope)
+&gt;&gt;&gt; scope_db
+[
+  {'ip': '1.1.1.1', 'target': '2398her8h'},
+  ...
+]
+&gt;&gt;&gt; h.db.add_ips(scope_db)
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsbuild_scope_web_burpscope"><a class="header" href="#targetsbuild_scope_web_burpscope">targets.build_scope_web_burp(scope)</a></h2>
 <blockquote>
 <p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_scope_web()</code></p>
@@ -183,6 +204,29 @@
     'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
     'include': [{'enabled': True, 'scheme': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
 }}}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_scope_web_dbscope"><a class="header" href="#targetsbuild_scope_web_dbscope">targets.build_scope_web_db(scope)</a></h2>
+<blockquote>
+<p>Prints a list of URLs which can be ingested into the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
+&gt;&gt;&gt; scope_db = h.targets.build_scope_web_db(scope)
+&gt;&gt;&gt; scope_db
+[
+  {
+    'target': '94hw8ier',
+    'urls': [{'url': https://good.monkey.com'}]
+  },
+  ...
+]
+&gt;&gt;&gt; h.db.add_urls(scope_db)
 </code></pre>
 </blockquote>
 </blockquote>
@@ -309,6 +353,21 @@ eventhough it sounds like a lot, it isn't bad.</p>
   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 }, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsset_connectedtarget-kwargs"><a class="header" href="#targetsset_connectedtarget-kwargs">targets.set_connected(target, **kwargs)</a></h2>
+<blockquote>
+<p>Connect to a specified target</p>
+<p>| Argments | Type | Description
+| <code>target</code> | db.models.Target | A single Target returned from the database
+| <code>kwargs</code> | kwargs | Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.targets.set_connected(codename='BLINKYBABOON')
+&gt;&gt;&gt; {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
+h.targets.set_connected(slug='12083y9')
+&gt;&gt;&gt; {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
 </code></pre>
 </blockquote>
 </blockquote>
