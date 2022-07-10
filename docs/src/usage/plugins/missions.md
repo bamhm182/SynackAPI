@@ -128,6 +128,26 @@
 >> [{"status": "FOR_REVIEW", "title": "Some Mission",...},...]
 >> ```
 
+## missions.get_wallet_claimed()
+
+> Get the amount of missions counting against your Mission Wallet
+>
+>> Examples
+>> ```python3
+>> >>> h.missions.get_wallet_claimed()
+>> 25
+>> ```
+
+## missions.get_wallet_limit()
+
+> Get the amount you are able to hold in your Missions Wallet
+>
+>> Examples
+>> ```python3
+>> >>> h.missions.get_wallet_limit()
+>> 100
+>> ```
+
 ## missions.set_claimed(mission)
 
 > Try and claim one mission

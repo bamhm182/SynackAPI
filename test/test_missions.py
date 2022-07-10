@@ -55,6 +55,26 @@ class MissionsTestCase(unittest.TestCase):
                          self.missions.get_in_review())
         self.missions.get.assert_called_with("FOR_REVIEW")
 
+    def test_get_wallet_claimed(self):
+        """Should report the Mission Wallet Claimed Amount"""
+        self.missions.api.request.return_value.status_code = 200
+        self.missions.api.request.return_value.json.return_value = {
+            "claimedAmount": "20"
+        }
+        self.assertEqual(20, self.missions.get_wallet_claimed())
+        self.missions.api.request.assert_called_with('GET',
+                                                     'tasks/v2/researcher/claimed_amount')
+
+    def test_get_wallet_limit(self):
+        """Should report the Mission Wallet Limit Amount"""
+        self.missions.api.request.return_value.status_code = 200
+        self.missions.api.request.return_value.json.return_value = {
+            "claim_limit": "20"
+        }
+        self.assertEqual(20, self.missions.get_wallet_limit())
+        self.missions.api.request.assert_called_with('GET',
+                                                     'profiles/me')
+
     def test_get_count(self):
         """Should get the current number of published missions"""
         self.missions.api.request.return_value.status_code = 204
