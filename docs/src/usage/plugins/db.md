@@ -20,6 +20,15 @@ Additionally, some properties can be overridden by the State, which allows you t
 | password | No | Yes | The password used to log into Synack
 | ports | Yes | No | All cached Ports
 | proxies | Yes | Yes | A dict built from http_proxy and https_proxy
+| scratchspace_dir | No | Yes | The path to a directory where your working files (scopes, scans, etc.) are stored
+| slack_url | No | Yes | The Slack API URL used for Notifications
+| smtp_email_from | No | Yes | Email Source for SMTP Notifications
+| smtp_email_to | No | Yes | Email Destination for SMTP Notifications
+| smtp_password | No | Yes | Password to use for SMTP Server Auth
+| smtp_port | No | Yes | Port of SMTP Server (Ex: 465)
+| smtp_server | No | Yes | URL of SMTP Server (Ex: smtp.gmail.com)
+| smtp_starttls | No | Yes | Boolean to determine whether TLS is used for SMTP
+| smtp_username | No | Yes | Username to use for SMTP Server Auth
 | targets | Yes | No | All cached Targets
 | template_dir | No | Yes | The path to a directory where your templates are stored
 | use_proxies | No | Yes | Changes whether or not http_proxy and https_proxies are used

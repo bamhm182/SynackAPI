@@ -421,6 +421,70 @@ class Db(Plugin):
         self.set_config('email', value)
 
     @property
+    def slack_url(self):
+        return self.get_config('slack_url')
+
+    @slack_url.setter
+    def slack_url(self, value):
+        self.set_config('slack_url', value)
+
+    @property
+    def smtp_from_email(self):
+        return self.get_config('smtp_from_email')
+
+    @smtp_from_email.setter
+    def smtp_from_email(self, value):
+        self.set_config('smtp_from_email', value)
+
+    @property
+    def smtp_password(self):
+        return self.get_config('smtp_password')
+
+    @smtp_password.setter
+    def smtp_password(self, value):
+        self.set_config('smtp_password', value)
+
+    @property
+    def smtp_port(self):
+        return self.get_config('smtp_port')
+
+    @smtp_port.setter
+    def smtp_port(self, value):
+        self.set_config('smtp_port', value)
+
+    @property
+    def smtp_server(self):
+        return self.get_config('smtp_server')
+
+    @smtp_server.setter
+    def smtp_server(self, value):
+        self.set_config('smtp_server', value)
+
+    @property
+    def smtp_to_email(self):
+        return self.get_config('smtp_to_email')
+
+    @smtp_to_email.setter
+    def smtp_to_email(self, value):
+        self.set_config('smtp_to_email', value)
+
+    @property
+    def smtp_starttls(self):
+        return self.get_config('smtp_starttls')
+
+    @smtp_starttls.setter
+    def smtp_starttls(self, value):
+        self.set_config('smtp_starttls', value)
+
+    @property
+    def smtp_username(self):
+        return self.get_config('smtp_username')
+
+    @smtp_username.setter
+    def smtp_username(self, value):
+        self.set_config('smtp_username', value)
+
+    @property
     def http_proxy(self):
         return self.get_config('http_proxy')
 
@@ -489,6 +553,19 @@ class Db(Plugin):
     @template_dir.setter
     def template_dir(self, value):
         self.set_config('template_dir', value)
+
+    @property
+    def scratchspace_dir(self):
+        if self.state.scratchspace_dir is None:
+            ret = Path(self.get_config('scratchspace_dir')).expanduser().resolve()
+            self.state.scratchspace_dir = ret
+        else:
+            ret = self.state.scratchspace_dir
+        return ret
+
+    @scratchspace_dir.setter
+    def scratchspace_dir(self, value):
+        self.set_config('scratchspace_dir', value)
 
     @property
     def use_proxies(self):
