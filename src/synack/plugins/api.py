@@ -121,6 +121,12 @@ class Api(Plugin):
                                           headers=headers,
                                           proxies=proxies,
                                           verify=verify)
+        elif method.upper() == 'PUT':
+            res = self.state.session.put(url,
+                                         headers=headers,
+                                         proxies=proxies,
+                                         params=data,
+                                         verify=verify)
 
         self.debug.log("Network Request",
                        f"{res.status_code} -- {method.upper()} -- {url}" +

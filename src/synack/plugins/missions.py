@@ -155,6 +155,20 @@ class Missions(Plugin):
         """Get a list of missions currently in review"""
         return self.get("FOR_REVIEW")
 
+    def get_wallet_claimed(self):
+        """Get Current Claimed Amount for Mission Wallet"""
+        res = self.api.request('GET',
+                               'tasks/v2/researcher/claimed_amount')
+        if res.status_code == 200:
+            return int(res.json().get('claimedAmount', '0'))
+
+    def get_wallet_limit(self):
+        """Get Current Mission Wallet Limit"""
+        res = self.api.request('GET',
+                               'profiles/me')
+        if res.status_code == 200:
+            return int(res.json().get('claim_limit', '0'))
+
     def set_claimed(self, mission):
         """Try to claim a single mission
 

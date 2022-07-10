@@ -207,6 +207,25 @@ class ApiTestCase(unittest.TestCase):
                                                         proxies=None,
                                                         verify=True)
 
+    def test_request_put(self):
+        """PUT requests should work"""
+        self.api.state.session.put = MagicMock()
+        data = {'test': 'test'}
+        self.api.db.use_proxies = False
+        self.api.db.user_id = "paco"
+        self.api.db.api_token = "12345"
+        url = 'https://platform.synack.com/api/test'
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco'
+        }
+        self.api.request('PUT', 'test', data=data)
+        self.api.state.session.put.assert_called_with(url,
+                                                      params=data,
+                                                      headers=headers,
+                                                      proxies=None,
+                                                      verify=True)
+
     def test_request_proxies(self):
         """Proxies should be used if set"""
         proxies = {
