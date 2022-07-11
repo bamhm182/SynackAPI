@@ -25,6 +25,7 @@ class State(object):
         self._template_dir = None
         self._scratchspace_dir = None
         self._use_proxies = None
+        self._use_scratchspace = None
         self._user_id = None
 
     @property
@@ -96,6 +97,14 @@ class State(object):
     @use_proxies.setter
     def use_proxies(self, value: bool) -> None:
         self._use_proxies = value
+
+    @property
+    def use_scratchspace(self) -> bool:
+        return self._use_scratchspace
+
+    @use_scratchspace.setter
+    def use_scratchspace(self, value: bool) -> None:
+        self._use_scratchspace = value
 
     @property
     def http_proxy(self) -> str:

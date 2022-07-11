@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     with op.batch_alter_table('config') as batch_op:
-        batch_op.add_column(sa.Column('scratchspace_dir', sa.VARCHAR(250), server_default=''))
+        batch_op.add_column(sa.Column('scratchspace_dir', sa.VARCHAR(250), server_default='~/Scratchspace'))
         batch_op.add_column(sa.Column('slack_url', sa.VARCHAR(500), server_default=''))
         batch_op.add_column(sa.Column('smtp_email_from', sa.VARCHAR(250), server_default=''))
         batch_op.add_column(sa.Column('smtp_email_to', sa.VARCHAR(250), server_default=''))
@@ -32,11 +32,11 @@ def upgrade():
 def downgrade():
     with op.batch_alter_table('config') as batch_op:
         batch_op.drop_column('scratchspace_dir')
-        batch_op.add_column('slack_url')
-        batch_op.add_column('smtp_from_email')
-        batch_op.add_column('smtp_password')
-        batch_op.add_column('smtp_port')
-        batch_op.add_column('smtp_server')
-        batch_op.add_column('smtp_to_email')
-        batch_op.add_column('smtp_starttls')
-        batch_op.add_column('smtp_username')
+        batch_op.drop_column('slack_url')
+        batch_op.drop_column('smtp_from_email')
+        batch_op.drop_column('smtp_password')
+        batch_op.drop_column('smtp_port')
+        batch_op.drop_column('smtp_server')
+        batch_op.drop_column('smtp_to_email')
+        batch_op.drop_column('smtp_starttls')
+        batch_op.drop_column('smtp_username')

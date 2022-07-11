@@ -381,11 +381,36 @@ class DbTestCase(unittest.TestCase):
 
             mock_and.assert_called()
             query.asset_called_with(synack.db.models.Url)
-            query.return_value.filter_by.assert_has_calls([
-                unittest.mock.call(ip='1.1.1.1'),
-                unittest.mock.call().__bool__(),
-                unittest.mock.call().first()
-            ])
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+            self.db.add_ips.assert_called_with(results)
+
+    def test_add_url_no_ip(self):
+        """Should be fine if IP isn't included"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [
+            {
+                "urls": [
+                    {
+                        "url": "https://www.google.com",
+                        "screenshot_url": "https://imgur.com/219hi4"
+                    },
+                    {
+                        "url": "https://www.ebay.com",
+                        "screenshot_url": "file:///tmp/qwh82938.jpg"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        query.return_value.filter_by.return_value.first.return_value = None
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_urls(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Url)
             self.db.Session.return_value.commit.assert_called_with()
             self.db.Session.return_value.close.assert_called_with()
             self.db.add_ips.assert_called_with(results)
@@ -410,7 +435,7 @@ class DbTestCase(unittest.TestCase):
             }
         ]
         query = self.db.Session.return_value.query
-        query.return_value.filter.return_value = None
+        query.return_value.filter.return_value.first.return_value = None
         with patch.object(sqlalchemy, 'and_') as mock_and:
             mock_and.return_value = 'sqlalchemy.and_'
             self.db.add_urls(results)
@@ -741,6 +766,30 @@ class DbTestCase(unittest.TestCase):
         self.assertEqual(False, self.db.use_proxies)
         self.db.state.use_proxies = True
         self.assertEqual(True, self.db.use_proxies)
+
+    def test_use_scratchspace(self):
+        """Should set and get use_scratchspace from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = True
+
+        self.db.use_scratchspace = True
+        self.db.set_config.assert_called_with("use_scratchspace", True)
+        self.assertEqual(True, self.db.use_scratchspace)
+
+    def test_use_scratchspace_state(self):
+        """State use_scratchspace should override database"""
+        self.db.get_config = MagicMock()
+
+        self.db.get_config.return_value = True
+
+        self.assertEqual(True, self.db.use_scratchspace)
+
+        self.db.state.use_scratchspace = False
+        self.assertEqual(False, self.db.use_scratchspace)
+        self.db.state.use_scratchspace = True
+        self.assertEqual(True, self.db.use_scratchspace)
 
     def test_proxies(self):
         """Should get http_proxy and https_proxy and return them in a dict"""

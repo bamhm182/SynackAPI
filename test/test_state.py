@@ -75,6 +75,13 @@ class StateTestCase(unittest.TestCase):
         self.assertEqual(True, self.state.use_proxies)
         self.assertEqual(True, self.state._use_proxies)
 
+    def test_use_scratchspace(self):
+        self.assertEqual(None, self.state.use_scratchspace)
+        self.assertEqual(None, self.state._use_scratchspace)
+        self.state.use_scratchspace = True
+        self.assertEqual(True, self.state.use_scratchspace)
+        self.assertEqual(True, self.state._use_scratchspace)
+
     def test_http_proxy(self):
         self.assertEqual(None, self.state.http_proxy)
         self.assertEqual(None, self.state._http_proxy)

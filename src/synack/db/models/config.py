@@ -33,3 +33,4 @@ class Config(Base):
     template_dir = sa.Column(sa.VARCHAR(250), default='~/Templates')
     user_id = sa.Column(sa.VARCHAR(20), default='')
     use_proxies = sa.Column(sa.BOOLEAN, default=False)
+    use_scratchspace = sa.Column(sa.BOOLEAN, default=False)

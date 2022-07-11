@@ -56,16 +56,17 @@ class Db(Plugin):
             close = True
         q = session.query(IP)
         for result in results:
-            filt = sa.and_(
-                IP.ip.like(result.get('ip')),
-                IP.target.like(result.get('target'))
-            )
-            db_ip = q.filter(filt).first()
-            if not db_ip:
-                db_ip = IP(
-                    ip=result.get('ip'),
-                    target=result.get('target'))
-                session.add(db_ip)
+            if result.get('ip'):
+                filt = sa.and_(
+                    IP.ip.like(result.get('ip')),
+                    IP.target.like(result.get('target'))
+                )
+                db_ip = q.filter(filt).first()
+                if not db_ip:
+                    db_ip = IP(
+                        ip=result.get('ip'),
+                        target=result.get('target'))
+                    session.add(db_ip)
         if close:
             session.commit()
             session.close()
@@ -159,26 +160,23 @@ class Db(Plugin):
         q = session.query(Url)
         ips = session.query(IP)
         for result in results:
-            ip = ips.filter_by(ip=result.get('ip'))
-            if ip:
-                ip = ip.first()
-                for url in result.get('urls', []):
+            ip = ips.filter_by(ip=result.get('ip')).first()
+            for url in result.get('urls', []):
+                if ip:
                     filt = sa.and_(
                         Url.url.like(url.get('url')),
                         Url.ip.like(ip.id))
-                    db_url = q.filter(filt)
-                    if not db_url:
-                        db_url = Url(
-                            ip=ip.id,
-                            url=url.get('url'),
-                            screenshot_url=url.get('screenshot_url'),
-                        )
-                    else:
-                        db_url = db_url.first()
-                        db_url.ip = ip.id
-                        db_url.url = url.get('url')
-                        db_url.screenshot_url = url.get('screenshot_url')
-                    session.add(db_url)
+                else:
+                    filt = sa.and_(
+                        Url.url.like(url.get('url')))
+                db_url = q.filter(filt).first()
+                if not db_url:
+                    db_url = Url()
+                db_url.url = url.get('url')
+                db_url.screenshot_url = url.get('screenshot_url')
+                if ip:
+                    db_url.ip = ip.id
+                session.add(db_url)
         session.commit()
         session.close()
 
@@ -578,6 +576,18 @@ class Db(Plugin):
     def use_proxies(self, value):
         self.state.use_proxies = value
         self.set_config('use_proxies', value)
+
+    @property
+    def use_scratchspace(self):
+        if self.state.use_scratchspace is None:
+            return self.get_config('use_scratchspace')
+        else:
+            return self.state.use_scratchspace
+
+    @use_scratchspace.setter
+    def use_scratchspace(self, value):
+        self.state.use_scratchspace = value
+        self.set_config('use_scratchspace', value)
 
     @property
     def user_id(self):
