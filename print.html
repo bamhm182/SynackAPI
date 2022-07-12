@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="support/index.html">Support</a></li><li class="chapter-item "><a href="tests/index.html">Tests</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/hydra.html">Hydra</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Introduction</a></li><li class="chapter-item "><a href="support/index.html">Support</a></li><li class="chapter-item "><a href="tests/index.html">Tests</a></li><li class="chapter-item "><a href="usage/index.html">Usage</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/index.html">Examples</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/examples/check-invisible-missions.html">Check Invisible Missions</a></li><li class="chapter-item "><a href="usage/examples/mission-bot.html">Mission Bot</a></li><li class="chapter-item "><a href="usage/examples/mission-templates.html">Mission Templates</a></li><li class="chapter-item "><a href="usage/examples/register-targets.html">Register Targets</a></li></ol></li><li class="chapter-item "><a href="usage/main-components/index.html">Main Components</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/main-components/files.html">Files</a></li><li class="chapter-item "><a href="usage/main-components/handler.html">Handler</a></li><li class="chapter-item "><a href="usage/main-components/state.html">State</a></li></ol></li><li class="chapter-item "><a href="usage/plugins/index.html">Plugins</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="usage/plugins/alerts.html">Alerts</a></li><li class="chapter-item "><a href="usage/plugins/api.html">Api</a></li><li class="chapter-item "><a href="usage/plugins/auth.html">Auth</a></li><li class="chapter-item "><a href="usage/plugins/db.html">Db</a></li><li class="chapter-item "><a href="usage/plugins/debug.html">Debug</a></li><li class="chapter-item "><a href="usage/plugins/hydra.html">Hydra</a></li><li class="chapter-item "><a href="usage/plugins/missions.html">Missions</a></li><li class="chapter-item "><a href="usage/plugins/notifications.html">Notifications</a></li><li class="chapter-item "><a href="usage/plugins/scratchspace.html">Scratchspace</a></li><li class="chapter-item "><a href="usage/plugins/targets.html">Targets</a></li><li class="chapter-item "><a href="usage/plugins/templates.html">Templates</a></li><li class="chapter-item "><a href="usage/plugins/transactions.html">Transactions</a></li><li class="chapter-item "><a href="usage/plugins/users.html">Users</a></li></ol></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -553,6 +553,48 @@ This is a list of approved verbs and their meaning.</p>
 In other words, consider the function name <code>missions.get_missions()</code>.
 <code>missions</code> is specified twice, when <code>missions.get()</code> is just as clear.
 <code>missions.get()</code> is the optimal choice.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="alerts"><a class="header" href="#alerts">Alerts</a></h1>
+<p>The Alerts Plugin is used to send alerts to various external services.</p>
+<p>The functions within this plugin don't follow the standard naming convention.</p>
+<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
+<blockquote>
+<p>This function makes a POST request to Slack in order to post a message.
+This function expects <code>h.db.slack_url</code> to be set.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
+&gt;&gt;&gt; h.alerts.slack('Something important happened!')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="alertsemailsubject-message"><a class="header" href="#alertsemailsubject-message">alerts.email(subject, message)</a></h2>
+<blockquote>
+<blockquote>
+<p>This function attempts to use SMTP to send an email.
+This function expects <code>h.db.smtp_x</code> attributes to have been set.</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subject</code></td><td>str</td><td>Email Subject</td></tr>
+<tr><td><code>message</code></td><td>str</td><td>Email Message</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.smtp_server = 'smtp.email.com'
+&gt;&gt;&gt; h.db.smtp_port = 465
+&gt;&gt;&gt; h.db.smtp_starttls = True
+&gt;&gt;&gt; h.db.smtp_username = 'me@email.com'
+&gt;&gt;&gt; h.db.smtp_password = 'password123'
+&gt;&gt;&gt; h.db.smtp_email_to = 'you@email.com'
+&gt;&gt;&gt; h.db.smtp_email_from = 'me@email.com'
+&gt;&gt;&gt; h.alerts.email('Look out!', 'Some other important thing happened!')
+</code></pre>
+</blockquote>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">Api</a></h1>
 <p>The Api Plugin is used to interact DIRECTLY with the Synack API.
 It is the last stop before our code is sent to the Synack API.</p>
@@ -722,6 +764,15 @@ Additionally, some properties can be overridden by the State, which allows you t
 <tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
 <tr><td>ports</td><td>Yes</td><td>No</td><td>All cached Ports</td></tr>
 <tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
+<tr><td>scratchspace_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your working files (scopes, scans, etc.) are stored</td></tr>
+<tr><td>slack_url</td><td>No</td><td>Yes</td><td>The Slack API URL used for Notifications</td></tr>
+<tr><td>smtp_email_from</td><td>No</td><td>Yes</td><td>Email Source for SMTP Notifications</td></tr>
+<tr><td>smtp_email_to</td><td>No</td><td>Yes</td><td>Email Destination for SMTP Notifications</td></tr>
+<tr><td>smtp_password</td><td>No</td><td>Yes</td><td>Password to use for SMTP Server Auth</td></tr>
+<tr><td>smtp_port</td><td>No</td><td>Yes</td><td>Port of SMTP Server (Ex: 465)</td></tr>
+<tr><td>smtp_server</td><td>No</td><td>Yes</td><td>URL of SMTP Server (Ex: smtp.gmail.com)</td></tr>
+<tr><td>smtp_starttls</td><td>No</td><td>Yes</td><td>Boolean to determine whether TLS is used for SMTP</td></tr>
+<tr><td>smtp_username</td><td>No</td><td>Yes</td><td>Username to use for SMTP Server Auth</td></tr>
 <tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
 <tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
 <tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
@@ -1281,6 +1332,59 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.notifications.get_unread_count()
 7
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="scratchspace"><a class="header" href="#scratchspace">Scratchspace</a></h1>
+<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
+&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
+'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_burp_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_burp_filecontent-targetnone-codenamenone">scratchspace.set_burp_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>burp.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_web()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_web(codename='ADAMANTANT')
+&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/burp.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/test.txt'
 </code></pre>
 </blockquote>
 </blockquote>
