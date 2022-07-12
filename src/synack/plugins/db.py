@@ -56,16 +56,17 @@ class Db(Plugin):
             close = True
         q = session.query(IP)
         for result in results:
-            filt = sa.and_(
-                IP.ip.like(result.get('ip')),
-                IP.target.like(result.get('target'))
-            )
-            db_ip = q.filter(filt).first()
-            if not db_ip:
-                db_ip = IP(
-                    ip=result.get('ip'),
-                    target=result.get('target'))
-                session.add(db_ip)
+            if result.get('ip'):
+                filt = sa.and_(
+                    IP.ip.like(result.get('ip')),
+                    IP.target.like(result.get('target'))
+                )
+                db_ip = q.filter(filt).first()
+                if not db_ip:
+                    db_ip = IP(
+                        ip=result.get('ip'),
+                        target=result.get('target'))
+                    session.add(db_ip)
         if close:
             session.commit()
             session.close()
@@ -159,26 +160,23 @@ class Db(Plugin):
         q = session.query(Url)
         ips = session.query(IP)
         for result in results:
-            ip = ips.filter_by(ip=result.get('ip'))
-            if ip:
-                ip = ip.first()
-                for url in result.get('urls', []):
+            ip = ips.filter_by(ip=result.get('ip')).first()
+            for url in result.get('urls', []):
+                if ip:
                     filt = sa.and_(
                         Url.url.like(url.get('url')),
                         Url.ip.like(ip.id))
-                    db_url = q.filter(filt)
-                    if not db_url:
-                        db_url = Url(
-                            ip=ip.id,
-                            url=url.get('url'),
-                            screenshot_url=url.get('screenshot_url'),
-                        )
-                    else:
-                        db_url = db_url.first()
-                        db_url.ip = ip.id
-                        db_url.url = url.get('url')
-                        db_url.screenshot_url = url.get('screenshot_url')
-                    session.add(db_url)
+                else:
+                    filt = sa.and_(
+                        Url.url.like(url.get('url')))
+                db_url = q.filter(filt).first()
+                if not db_url:
+                    db_url = Url()
+                db_url.url = url.get('url')
+                db_url.screenshot_url = url.get('screenshot_url')
+                if ip:
+                    db_url.ip = ip.id
+                session.add(db_url)
         session.commit()
         session.close()
 
@@ -421,6 +419,70 @@ class Db(Plugin):
         self.set_config('email', value)
 
     @property
+    def slack_url(self):
+        return self.get_config('slack_url')
+
+    @slack_url.setter
+    def slack_url(self, value):
+        self.set_config('slack_url', value)
+
+    @property
+    def smtp_email_from(self):
+        return self.get_config('smtp_email_from')
+
+    @smtp_email_from.setter
+    def smtp_email_from(self, value):
+        self.set_config('smtp_email_from', value)
+
+    @property
+    def smtp_password(self):
+        return self.get_config('smtp_password')
+
+    @smtp_password.setter
+    def smtp_password(self, value):
+        self.set_config('smtp_password', value)
+
+    @property
+    def smtp_port(self):
+        return self.get_config('smtp_port')
+
+    @smtp_port.setter
+    def smtp_port(self, value):
+        self.set_config('smtp_port', value)
+
+    @property
+    def smtp_server(self):
+        return self.get_config('smtp_server')
+
+    @smtp_server.setter
+    def smtp_server(self, value):
+        self.set_config('smtp_server', value)
+
+    @property
+    def smtp_email_to(self):
+        return self.get_config('smtp_email_to')
+
+    @smtp_email_to.setter
+    def smtp_email_to(self, value):
+        self.set_config('smtp_email_to', value)
+
+    @property
+    def smtp_starttls(self):
+        return self.get_config('smtp_starttls')
+
+    @smtp_starttls.setter
+    def smtp_starttls(self, value):
+        self.set_config('smtp_starttls', value)
+
+    @property
+    def smtp_username(self):
+        return self.get_config('smtp_username')
+
+    @smtp_username.setter
+    def smtp_username(self, value):
+        self.set_config('smtp_username', value)
+
+    @property
     def http_proxy(self):
         return self.get_config('http_proxy')
 
@@ -491,6 +553,19 @@ class Db(Plugin):
         self.set_config('template_dir', value)
 
     @property
+    def scratchspace_dir(self):
+        if self.state.scratchspace_dir is None:
+            ret = Path(self.get_config('scratchspace_dir')).expanduser().resolve()
+            self.state.scratchspace_dir = ret
+        else:
+            ret = self.state.scratchspace_dir
+        return ret
+
+    @scratchspace_dir.setter
+    def scratchspace_dir(self, value):
+        self.set_config('scratchspace_dir', value)
+
+    @property
     def use_proxies(self):
         if self.state.use_proxies is None:
             return self.get_config('use_proxies')
@@ -501,6 +576,18 @@ class Db(Plugin):
     def use_proxies(self, value):
         self.state.use_proxies = value
         self.set_config('use_proxies', value)
+
+    @property
+    def use_scratchspace(self):
+        if self.state.use_scratchspace is None:
+            return self.get_config('use_scratchspace')
+        else:
+            return self.state.use_scratchspace
+
+    @use_scratchspace.setter
+    def use_scratchspace(self, value):
+        self.state.use_scratchspace = value
+        self.set_config('use_scratchspace', value)
 
     @property
     def user_id(self):

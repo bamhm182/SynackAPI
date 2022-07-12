@@ -23,7 +23,9 @@ class State(object):
         self._proxies = None
         self._session = None
         self._template_dir = None
+        self._scratchspace_dir = None
         self._use_proxies = None
+        self._use_scratchspace = None
         self._user_id = None
 
     @property
@@ -54,6 +56,19 @@ class State(object):
         self._template_dir = value
 
     @property
+    def scratchspace_dir(self) -> pathlib.PosixPath:
+        ret = self._scratchspace_dir
+        if ret:
+            ret.mkdir(parents=True, exist_ok=True)
+        return ret
+
+    @scratchspace_dir.setter
+    def scratchspace_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
+        if type(value) == str:
+            value = pathlib.Path(value).expanduser().resolve()
+        self._scratchspace_dir = value
+
+    @property
     def debug(self) -> bool:
         return self._debug
 
@@ -82,6 +97,14 @@ class State(object):
     @use_proxies.setter
     def use_proxies(self, value: bool) -> None:
         self._use_proxies = value
+
+    @property
+    def use_scratchspace(self) -> bool:
+        return self._use_scratchspace
+
+    @use_scratchspace.setter
+    def use_scratchspace(self, value: bool) -> None:
+        self._use_scratchspace = value
 
     @property
     def http_proxy(self) -> str:

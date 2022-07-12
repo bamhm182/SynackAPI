@@ -381,11 +381,36 @@ class DbTestCase(unittest.TestCase):
 
             mock_and.assert_called()
             query.asset_called_with(synack.db.models.Url)
-            query.return_value.filter_by.assert_has_calls([
-                unittest.mock.call(ip='1.1.1.1'),
-                unittest.mock.call().__bool__(),
-                unittest.mock.call().first()
-            ])
+            self.db.Session.return_value.commit.assert_called_with()
+            self.db.Session.return_value.close.assert_called_with()
+            self.db.add_ips.assert_called_with(results)
+
+    def test_add_url_no_ip(self):
+        """Should be fine if IP isn't included"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [
+            {
+                "urls": [
+                    {
+                        "url": "https://www.google.com",
+                        "screenshot_url": "https://imgur.com/219hi4"
+                    },
+                    {
+                        "url": "https://www.ebay.com",
+                        "screenshot_url": "file:///tmp/qwh82938.jpg"
+                    }
+                ]
+            }
+        ]
+        query = self.db.Session.return_value.query
+        query.return_value.filter_by.return_value.first.return_value = None
+        with patch.object(sqlalchemy, 'and_') as mock_and:
+            mock_and.return_value = 'sqlalchemy.and_'
+            self.db.add_urls(results)
+
+            mock_and.assert_called()
+            query.asset_called_with(synack.db.models.Url)
             self.db.Session.return_value.commit.assert_called_with()
             self.db.Session.return_value.close.assert_called_with()
             self.db.add_ips.assert_called_with(results)
@@ -410,7 +435,7 @@ class DbTestCase(unittest.TestCase):
             }
         ]
         query = self.db.Session.return_value.query
-        query.return_value.filter.return_value = None
+        query.return_value.filter.return_value.first.return_value = None
         with patch.object(sqlalchemy, 'and_') as mock_and:
             mock_and.return_value = 'sqlalchemy.and_'
             self.db.add_urls(results)
@@ -598,6 +623,102 @@ class DbTestCase(unittest.TestCase):
         query.return_value.all.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
+    def test_slack_url(self):
+        """Should set and get the slack_url from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "https://slack.com"
+
+        self.db.slack_url = "https://slack.com"
+        self.db.set_config.assert_called_with("slack_url", "https://slack.com")
+        self.assertEqual("https://slack.com", self.db.slack_url)
+        self.db.get_config.assert_called_with("slack_url")
+
+    def test_smtp_email_from(self):
+        """Should set and get the smtp_email_from from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "1@2.com"
+
+        self.db.smtp_email_from = "1@2.com"
+        self.db.set_config.assert_called_with("smtp_email_from", "1@2.com")
+        self.assertEqual("1@2.com", self.db.smtp_email_from)
+        self.db.get_config.assert_called_with("smtp_email_from")
+
+    def test_smtp_password(self):
+        """Should set and get the smtp_password from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "password123"
+
+        self.db.smtp_password = "password123"
+        self.db.set_config.assert_called_with("smtp_password", "password123")
+        self.assertEqual("password123", self.db.smtp_password)
+        self.db.get_config.assert_called_with("smtp_password")
+
+    def test_smtp_port(self):
+        """Should set and get the smtp_port from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "123"
+
+        self.db.smtp_port = "123"
+        self.db.set_config.assert_called_with("smtp_port", "123")
+        self.assertEqual("123", self.db.smtp_port)
+        self.db.get_config.assert_called_with("smtp_port")
+
+    def test_smtp_server(self):
+        """Should set and get the smtp_server from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "smtp.email.com"
+
+        self.db.smtp_server = "smtp.email.com"
+        self.db.set_config.assert_called_with("smtp_server", "smtp.email.com")
+        self.assertEqual("smtp.email.com", self.db.smtp_server)
+        self.db.get_config.assert_called_with("smtp_server")
+
+    def test_smtp_email_to(self):
+        """Should set and get the smtp_email_to from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "2@2.com"
+
+        self.db.smtp_email_to = "2@2.com"
+        self.db.set_config.assert_called_with("smtp_email_to", "2@2.com")
+        self.assertEqual("2@2.com", self.db.smtp_email_to)
+        self.db.get_config.assert_called_with("smtp_email_to")
+
+    def test_smtp_starttls(self):
+        """Should set and get the smtp_starttls from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = True
+
+        self.db.smtp_starttls = True
+        self.db.set_config.assert_called_with("smtp_starttls", True)
+        self.assertEqual(True, self.db.smtp_starttls)
+        self.db.get_config.assert_called_with("smtp_starttls")
+
+    def test_smtp_username(self):
+        """Should set and get the smtp_username from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = "user5"
+
+        self.db.smtp_username = "user5"
+        self.db.set_config.assert_called_with("smtp_username", "user5")
+        self.assertEqual("user5", self.db.smtp_username)
+        self.db.get_config.assert_called_with("smtp_username")
+
     def test_http_proxy(self):
         """Should set and get the http_proxy from the database"""
         self.db.get_config = MagicMock()
@@ -645,6 +766,30 @@ class DbTestCase(unittest.TestCase):
         self.assertEqual(False, self.db.use_proxies)
         self.db.state.use_proxies = True
         self.assertEqual(True, self.db.use_proxies)
+
+    def test_use_scratchspace(self):
+        """Should set and get use_scratchspace from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+
+        self.db.get_config.return_value = True
+
+        self.db.use_scratchspace = True
+        self.db.set_config.assert_called_with("use_scratchspace", True)
+        self.assertEqual(True, self.db.use_scratchspace)
+
+    def test_use_scratchspace_state(self):
+        """State use_scratchspace should override database"""
+        self.db.get_config = MagicMock()
+
+        self.db.get_config.return_value = True
+
+        self.assertEqual(True, self.db.use_scratchspace)
+
+        self.db.state.use_scratchspace = False
+        self.assertEqual(False, self.db.use_scratchspace)
+        self.db.state.use_scratchspace = True
+        self.assertEqual(True, self.db.use_scratchspace)
 
     def test_proxies(self):
         """Should get http_proxy and https_proxy and return them in a dict"""
@@ -770,6 +915,27 @@ class DbTestCase(unittest.TestCase):
         self.db.state.template_dir = pathlib.Path('/tmp')
 
         self.assertEqual(pathlib.Path('/tmp'), self.db.template_dir)
+        self.db.get_config.assert_not_called()
+
+    def test_scratchspace_dir(self):
+        """Should pull scratchspace dir from the database"""
+        self.db.get_config = MagicMock()
+        self.db.set_config = MagicMock()
+        self.db.get_config.return_value = '/tmp'
+        self.db.scratchspace_dir
+
+        self.assertEqual(pathlib.Path('/tmp'), self.db.scratchspace_dir)
+        self.assertEqual(pathlib.Path('/tmp'), self.db.state.scratchspace_dir)
+        self.db.get_config.assert_called_with('scratchspace_dir')
+        self.db.scratchspace_dir = '/tmp'
+        self.db.set_config.assert_called_with('scratchspace_dir', '/tmp')
+
+    def test_scratchspace_dir_state(self):
+        """Should provide state scratchspace_dir over database"""
+        self.db.get_config = MagicMock()
+        self.db.state.scratchspace_dir = pathlib.Path('/tmp')
+
+        self.assertEqual(pathlib.Path('/tmp'), self.db.scratchspace_dir)
         self.db.get_config.assert_not_called()
 
     def test_categories(self):

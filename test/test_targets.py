@@ -21,6 +21,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets = synack.plugins.Targets(self.state)
         self.targets.api = MagicMock()
         self.targets.db = MagicMock()
+        self.targets.scratchspace = MagicMock()
         self.maxDiff = None
 
     def test_get_assessments_all_passed(self):
@@ -314,17 +315,19 @@ class TargetsTestCase(unittest.TestCase):
     def test_get_scope_web(self):
         """Should get the scope for a Web Application"""
         self.targets.api.request.return_value.status_code = 200
+        self.targets.build_scope_web_burp = MagicMock()
         web_results = [{
             'web_results': 'yup these them!',
             'owners': [{
                 'owner_uid': '213h89h3'
-            }]
+            }],
         }]
         self.targets.api.request.return_value.json.return_value = web_results
         tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
         self.targets.db.find_targets.return_value = [tgt]
         out = self.targets.get_scope_web(codename='SASSYSQUIRREL')
         self.assertEqual(web_results, out)
+        self.targets.build_scope_web_burp.assert_called_with(web_results)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
         self.targets.api.request.assert_called_with('GET',
                                                     'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')

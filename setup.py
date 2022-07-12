@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.9
+
 import setuptools
 
 with open("README.md", "r") as fp:

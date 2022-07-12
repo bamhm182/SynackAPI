@@ -40,6 +40,16 @@ class StateTestCase(unittest.TestCase):
         self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
                          self.state._template_dir)
 
+    def test_scratchspace_dir(self):
+        self.assertEqual(None, self.state.scratchspace_dir)
+        self.assertEqual(None, self.state._scratchspace_dir)
+        self.state.scratchspace_dir = "/tmp"
+        self.assertEqual(pathlib.PosixPath, type(self.state.scratchspace_dir))
+        self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
+                         self.state.scratchspace_dir)
+        self.assertEqual(pathlib.Path('/tmp').expanduser().resolve(),
+                         self.state._scratchspace_dir)
+
     def test_debug(self):
         self.assertEqual(None, self.state.debug)
         self.assertEqual(None, self.state._debug)
@@ -64,6 +74,13 @@ class StateTestCase(unittest.TestCase):
         self.state.use_proxies = True
         self.assertEqual(True, self.state.use_proxies)
         self.assertEqual(True, self.state._use_proxies)
+
+    def test_use_scratchspace(self):
+        self.assertEqual(None, self.state.use_scratchspace)
+        self.assertEqual(None, self.state._use_scratchspace)
+        self.state.use_scratchspace = True
+        self.assertEqual(True, self.state.use_scratchspace)
+        self.assertEqual(True, self.state._use_scratchspace)
 
     def test_http_proxy(self):
         self.assertEqual(None, self.state.http_proxy)

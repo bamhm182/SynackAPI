@@ -12,7 +12,7 @@ from .base import Plugin
 class Targets(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api', 'Db']:
+        for plugin in ['Api', 'Db', 'Scratchspace']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -171,7 +171,11 @@ class Targets(Plugin):
         if target:
             res = self.api.request('GET', f'targets/{target.slug}/cidrs?page=all')
             if res.status_code == 200:
-                return res.json()['cidrs']
+                scope = res.json()['cidrs']
+                self.db.add_ips(self.build_scope_host_db(target.slug, scope))
+                if self.db.use_scratchspace:
+                    self.scratchspace.set_hosts_file(scope, target=target)
+                return scope
 
     def get_scope_web(self, target=None, **kwargs):
         """Get the scope of a Web target"""
@@ -186,6 +190,9 @@ class Targets(Plugin):
             for asset in res.json():
                 if target.slug in [o['owner_uid'] for o in asset['owners']]:
                     scope.append(asset)
+            self.db.add_urls(self.build_scope_web_db(scope))
+            if self.db.use_scratchspace:
+                self.scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
             return scope
 
     def get_unregistered(self):
