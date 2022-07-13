@@ -21,6 +21,23 @@ class TemplatesTestCase(unittest.TestCase):
         self.templates = synack.plugins.Templates(self.state)
         self.templates.db = MagicMock()
 
+    def test_build_filepath_from_evidences(self):
+        """Should return path from evidences json"""
+        self.templates.build_safe_name = MagicMock()
+        self.templates.build_safe_name.side_effect = [
+            'mission',
+            'web',
+            'mission'
+        ]
+        mission = {
+            'taskType': 'MISSION',
+            'asset': 'web',
+            'title': 'Mission'
+        }
+        self.templates.db.template_dir = pathlib.Path('/tmp')
+        self.assertEqual('/tmp/mission/web/mission.txt',
+                         self.templates.build_filepath(mission))
+
     def test_build_filepath_from_mission(self):
         """Should return path from mission json"""
         self.templates.build_safe_name = MagicMock()
@@ -40,22 +57,11 @@ class TemplatesTestCase(unittest.TestCase):
         self.assertEqual('/tmp/mission/web/mission.txt',
                          self.templates.build_filepath(mission))
 
-    def test_build_filepath_from_evidences(self):
-        """Should return path from evidences json"""
-        self.templates.build_safe_name = MagicMock()
-        self.templates.build_safe_name.side_effect = [
-            'mission',
-            'web',
-            'mission'
-        ]
-        mission = {
-            'taskType': 'MISSION',
-            'asset': 'web',
-            'title': 'Mission'
-        }
-        self.templates.db.template_dir = pathlib.Path('/tmp')
-        self.assertEqual('/tmp/mission/web/mission.txt',
-                         self.templates.build_filepath(mission))
+    def test_build_safe_name(self):
+        """Should convert complex missions names to something simpler"""
+        one = self.templates.build_safe_name("S!oME_RaNdOm___MISSION!")
+        one_out = "s_ome_random_mission_"
+        self.assertEqual(one_out, one)
 
     def test_build_sections(self):
         m = mock_open()
@@ -128,9 +134,3 @@ class TemplatesTestCase(unittest.TestCase):
                                  self.templates.set_file(template))
                 m.assert_called_with('/tmp/mission.txt', 'w')
                 m.return_value.write.assert_called_with(out)
-
-    def test_build_safe_name(self):
-        """Should convert complex missions names to something simpler"""
-        one = self.templates.build_safe_name("S!oME_RaNdOm___MISSION!")
-        one_out = "s_ome_random_mission_"
-        self.assertEqual(one_out, one)

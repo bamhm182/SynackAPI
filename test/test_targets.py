@@ -1,4 +1,4 @@
-"""test_Targets.py
+"""test_targets.py
 
 Tests for the Targets Plugin
 """
@@ -285,6 +285,15 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
         self.targets.get_scope_host.assert_called_with(tgt)
         self.assertEquals(out, 'HostScope')
+
+    def test_get_scope_no_provided(self):
+        """Should get the scope for the currently connected target if none is specified"""
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'slug': 'test'}
+        self.targets.db.find_targets.return_value = None
+        self.targets.get_scope()
+        self.targets.get_connected.assert_called_with()
+        self.targets.db.find_targets.assert_called_with(slug='test')
 
     def test_get_scope_for_web(self):
         """Should get the scope for a Host when given Web information"""

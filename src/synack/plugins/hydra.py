@@ -18,32 +18,6 @@ class Hydra(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def get_hydra(self, page=1, max_page=5, update_db=True, **kwargs):
-        """Get Hydra results for target identified using kwargs (codename='x', slug='x', etc.)"""
-        max_page = 1000 if max_page == 0 else max_page
-        results = list()
-        targets = self.db.find_targets(**kwargs)
-        if targets:
-            target = targets[0]
-        if target:
-            query = {
-                'page': page,
-                'listing_uids': target.slug,
-                'q': '+port_is_open:true'
-            }
-            time.sleep(page*0.01)
-            res = self.api.request('GET',
-                                   'hydra_search/search',
-                                   query=query)
-            if res.status_code == 200:
-                curr_results = json.loads(res.content)
-                results.extend(curr_results)
-                if len(curr_results) == 10 and page < max_page:
-                    results.extend(self.get_hydra(page=page+1, max_page=max_page, **kwargs))
-            if update_db:
-                self.db.add_ports(self.build_db_input(results))
-            return results
-
     def build_db_input(self, results):
         """Format the Hydra output so that it can be ingested into the DB"""
         db_input = list()
@@ -79,3 +53,29 @@ class Hydra(Plugin):
                 "ports": ports
             })
         return db_input
+
+    def get_hydra(self, page=1, max_page=5, update_db=True, **kwargs):
+        """Get Hydra results for target identified using kwargs (codename='x', slug='x', etc.)"""
+        max_page = 1000 if max_page == 0 else max_page
+        results = list()
+        targets = self.db.find_targets(**kwargs)
+        if targets:
+            target = targets[0]
+        if target:
+            query = {
+                'page': page,
+                'listing_uids': target.slug,
+                'q': '+port_is_open:true'
+            }
+            time.sleep(page*0.01)
+            res = self.api.request('GET',
+                                   'hydra_search/search',
+                                   query=query)
+            if res.status_code == 200:
+                curr_results = json.loads(res.content)
+                results.extend(curr_results)
+                if len(curr_results) == 10 and page < max_page:
+                    results.extend(self.get_hydra(page=page+1, max_page=max_page, **kwargs))
+            if update_db:
+                self.db.add_ports(self.build_db_input(results))
+            return results

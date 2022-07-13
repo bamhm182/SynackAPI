@@ -151,7 +151,12 @@ class Targets(Plugin):
 
     def get_scope(self, **kwargs):
         """Get the scope of a target"""
-        target = self.db.find_targets(**kwargs)
+        if len(kwargs) > 0:
+            target = self.db.find_targets(**kwargs)
+        else:
+            curr = self.get_connected()
+            target = self.db.find_targets(slug=curr.get('slug'))
+
         if target:
             target = target[0]
             categories = dict()
