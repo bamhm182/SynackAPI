@@ -32,17 +32,6 @@ class Targets(Plugin):
             codename = targets[0].codename
         return codename
 
-    def build_slug_from_codename(self, codename):
-        """Return a slug for a target given its codename"""
-        slug = None
-        targets = self.db.find_targets(codename=codename)
-        if not targets:
-            self.get_registered_summary()
-            targets = self.db.find_targets(codename=codename)
-        if targets:
-            slug = targets[0].slug
-        return slug
-
     def build_scope_host_db(self, slug, scope):
         """Return a Host Scope that can be ingested into the Database"""
         ret = list()
@@ -97,24 +86,23 @@ class Targets(Plugin):
                 ret["out"].append(asset["raw_url"])
         return ret
 
+    def build_slug_from_codename(self, codename):
+        """Return a slug for a target given its codename"""
+        slug = None
+        targets = self.db.find_targets(codename=codename)
+        if not targets:
+            self.get_registered_summary()
+            targets = self.db.find_targets(codename=codename)
+        if targets:
+            slug = targets[0].slug
+        return slug
+
     def get_assessments(self):
         """Check which assessments have been completed"""
         res = self.api.request('GET', 'assessments')
         if res.status_code == 200:
             self.db.add_categories(res.json())
             return self.db.categories
-
-    def get_credentials(self, **kwargs):
-        """Get Credentials for a target"""
-        target = self.db.find_targets(**kwargs)[0]
-        if target:
-            res = self.api.request('POST',
-                                   f'asset/v1/organizations/{target.organization}' +
-                                   f'/owners/listings/{target.slug}' +
-                                   f'/users/{self.db.user_id}' +
-                                   '/credentials')
-            if res.status_code == 200:
-                return res.json()
 
     def get_connected(self):
         """Return information about the currenly selected target"""
@@ -137,6 +125,18 @@ class Targets(Plugin):
                 "status": status
             }
             return ret
+
+    def get_credentials(self, **kwargs):
+        """Get Credentials for a target"""
+        target = self.db.find_targets(**kwargs)[0]
+        if target:
+            res = self.api.request('POST',
+                                   f'asset/v1/organizations/{target.organization}' +
+                                   f'/owners/listings/{target.slug}' +
+                                   f'/users/{self.db.user_id}' +
+                                   '/credentials')
+            if res.status_code == 200:
+                return res.json()
 
     def get_registered_summary(self):
         """Get information on your registered targets"""

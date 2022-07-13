@@ -180,12 +180,73 @@ class Db(Plugin):
         session.commit()
         session.close()
 
-    def find_targets(self, **kwargs):
+    @property
+    def api_token(self):
+        return self.get_config('api_token')
+
+    @api_token.setter
+    def api_token(self, value):
+        self.set_config('api_token', value)
+
+    @property
+    def categories(self):
         session = self.Session()
-        targets = session.query(Target).filter_by(**kwargs).all()
+        categories = session.query(Category).all()
+        session.close()
+        return categories
+
+    @property
+    def debug(self):
+        if self.state.debug is None:
+            return self.get_config('debug')
+        else:
+            return self.state.debug
+
+    @debug.setter
+    def debug(self, value):
+        self.state.debug = value
+        self.set_config('debug', value)
+
+    @property
+    def email(self):
+        if self.state.email is None:
+            ret = self.get_config('email')
+            if not ret:
+                ret = input("Synack Email: ")
+                self.email = ret
+            return ret
+        else:
+            return self.state.email
+
+    @email.setter
+    def email(self, value):
+        self.state.email = value
+        self.set_config('email', value)
+
+    def find_ips(self, ip=None, **kwargs):
+        session = self.Session()
+        query = session.query(IP)
+
+        if ip:
+            query = query.filter_by(ip=ip)
+
+        query = query.join(Target)
+        if kwargs:
+            query = query.filter_by(**kwargs)
+
+        ips = query.all()
+
         session.expunge_all()
         session.close()
-        return targets
+
+        ret = list()
+        for ip in ips:
+            ret.append({
+                "ip": ip.ip,
+                "target": ip.target
+            })
+
+        return ret
 
     def find_ports(self, port=None, protocol=None, source=None, ip=None, **kwargs):
         session = self.Session()
@@ -232,30 +293,12 @@ class Db(Plugin):
         session.close()
         return ret
 
-    def find_ips(self, ip=None, **kwargs):
+    def find_targets(self, **kwargs):
         session = self.Session()
-        query = session.query(IP)
-
-        if ip:
-            query = query.filter_by(ip=ip)
-
-        query = query.join(Target)
-        if kwargs:
-            query = query.filter_by(**kwargs)
-
-        ips = query.all()
-
+        targets = session.query(Target).filter_by(**kwargs).all()
         session.expunge_all()
         session.close()
-
-        ret = list()
-        for ip in ips:
-            ret.append({
-                "ip": ip.ip,
-                "target": ip.target
-            })
-
-        return ret
+        return targets
 
     def find_urls(self, url=None, ip=None, **kwargs):
         session = self.Session()
@@ -303,185 +346,6 @@ class Db(Plugin):
         session.close()
         return getattr(config, name) if name else config
 
-    def remove_targets(self, **kwargs):
-        session = self.Session()
-        session.query(Target).filter_by(**kwargs).delete()
-        session.commit()
-        session.close()
-
-    def set_config(self, name, value):
-        session = self.Session()
-        config = session.query(Config).filter_by(id=1).first()
-        if not config:
-            config = Config()
-            session.add(config)
-        setattr(config, name, value)
-        session.commit()
-        session.close()
-
-    def set_migration(self):
-        db_folder = Path(__file__).parent.parent / 'db'
-
-        config = alembic.config.Config()
-        config.set_main_option('script_location', str(db_folder / 'alembic'))
-        config.set_main_option('version_locations',
-                               str(db_folder / 'alembic/versions'))
-        config.set_main_option('sqlalchemy.url',
-                               f'sqlite:///{str(self.sqlite_db)}')
-        alembic.command.upgrade(config, 'head')
-
-    @property
-    def categories(self):
-        session = self.Session()
-        categories = session.query(Category).all()
-        session.close()
-        return categories
-
-    @property
-    def proxies(self):
-        if self.state.http_proxy is None:
-            http_proxy = self.get_config('http_proxy')
-        else:
-            http_proxy = self.state.http_proxy
-
-        if self.state.https_proxy is None:
-            https_proxy = self.get_config('https_proxy')
-        else:
-            https_proxy = self.state.https_proxy
-
-        return {
-            'http': http_proxy,
-            'https': https_proxy
-        }
-
-    @property
-    def targets(self):
-        session = self.Session()
-        targets = session.query(Target).all()
-        session.close()
-        return targets
-
-    @property
-    def ports(self):
-        session = self.Session()
-        ports = session.query(Port).all()
-        session.close()
-        return ports
-
-    @property
-    def ips(self):
-        session = self.Session()
-        ips = session.query(IP).all()
-        session.close()
-        return ips
-
-    @property
-    def urls(self):
-        session = self.Session()
-        urls = session.query(Url).all()
-        session.close()
-        return urls
-
-    @property
-    def api_token(self):
-        return self.get_config('api_token')
-
-    @api_token.setter
-    def api_token(self, value):
-        self.set_config('api_token', value)
-
-    @property
-    def debug(self):
-        if self.state.debug is None:
-            return self.get_config('debug')
-        else:
-            return self.state.debug
-
-    @debug.setter
-    def debug(self, value):
-        self.state.debug = value
-        self.set_config('debug', value)
-
-    @property
-    def email(self):
-        if self.state.email is None:
-            ret = self.get_config('email')
-            if not ret:
-                ret = input("Synack Email: ")
-                self.email = ret
-            return ret
-        else:
-            return self.state.email
-
-    @email.setter
-    def email(self, value):
-        self.state.email = value
-        self.set_config('email', value)
-
-    @property
-    def slack_url(self):
-        return self.get_config('slack_url')
-
-    @slack_url.setter
-    def slack_url(self, value):
-        self.set_config('slack_url', value)
-
-    @property
-    def smtp_email_from(self):
-        return self.get_config('smtp_email_from')
-
-    @smtp_email_from.setter
-    def smtp_email_from(self, value):
-        self.set_config('smtp_email_from', value)
-
-    @property
-    def smtp_password(self):
-        return self.get_config('smtp_password')
-
-    @smtp_password.setter
-    def smtp_password(self, value):
-        self.set_config('smtp_password', value)
-
-    @property
-    def smtp_port(self):
-        return self.get_config('smtp_port')
-
-    @smtp_port.setter
-    def smtp_port(self, value):
-        self.set_config('smtp_port', value)
-
-    @property
-    def smtp_server(self):
-        return self.get_config('smtp_server')
-
-    @smtp_server.setter
-    def smtp_server(self, value):
-        self.set_config('smtp_server', value)
-
-    @property
-    def smtp_email_to(self):
-        return self.get_config('smtp_email_to')
-
-    @smtp_email_to.setter
-    def smtp_email_to(self, value):
-        self.set_config('smtp_email_to', value)
-
-    @property
-    def smtp_starttls(self):
-        return self.get_config('smtp_starttls')
-
-    @smtp_starttls.setter
-    def smtp_starttls(self, value):
-        self.set_config('smtp_starttls', value)
-
-    @property
-    def smtp_username(self):
-        return self.get_config('smtp_username')
-
-    @smtp_username.setter
-    def smtp_username(self, value):
-        self.set_config('smtp_username', value)
-
     @property
     def http_proxy(self):
         return self.get_config('http_proxy')
@@ -497,6 +361,13 @@ class Db(Plugin):
     @https_proxy.setter
     def https_proxy(self, value):
         self.set_config('https_proxy', value)
+
+    @property
+    def ips(self):
+        session = self.Session()
+        ips = session.query(IP).all()
+        session.close()
+        return ips
 
     @property
     def notifications_token(self):
@@ -540,17 +411,34 @@ class Db(Plugin):
         self.set_config('password', value)
 
     @property
-    def template_dir(self):
-        if self.state.template_dir is None:
-            ret = Path(self.get_config('template_dir')).expanduser().resolve()
-            self.state.template_dir = ret
-        else:
-            ret = self.state.template_dir
-        return ret
+    def ports(self):
+        session = self.Session()
+        ports = session.query(Port).all()
+        session.close()
+        return ports
 
-    @template_dir.setter
-    def template_dir(self, value):
-        self.set_config('template_dir', value)
+    @property
+    def proxies(self):
+        if self.state.http_proxy is None:
+            http_proxy = self.get_config('http_proxy')
+        else:
+            http_proxy = self.state.http_proxy
+
+        if self.state.https_proxy is None:
+            https_proxy = self.get_config('https_proxy')
+        else:
+            https_proxy = self.state.https_proxy
+
+        return {
+            'http': http_proxy,
+            'https': https_proxy
+        }
+
+    def remove_targets(self, **kwargs):
+        session = self.Session()
+        session.query(Target).filter_by(**kwargs).delete()
+        session.commit()
+        session.close()
 
     @property
     def scratchspace_dir(self):
@@ -565,6 +453,118 @@ class Db(Plugin):
     def scratchspace_dir(self, value):
         self.set_config('scratchspace_dir', value)
 
+    def set_config(self, name, value):
+        session = self.Session()
+        config = session.query(Config).filter_by(id=1).first()
+        if not config:
+            config = Config()
+            session.add(config)
+        setattr(config, name, value)
+        session.commit()
+        session.close()
+
+    def set_migration(self):
+        db_folder = Path(__file__).parent.parent / 'db'
+
+        config = alembic.config.Config()
+        config.set_main_option('script_location', str(db_folder / 'alembic'))
+        config.set_main_option('version_locations',
+                               str(db_folder / 'alembic/versions'))
+        config.set_main_option('sqlalchemy.url',
+                               f'sqlite:///{str(self.sqlite_db)}')
+        alembic.command.upgrade(config, 'head')
+
+    @property
+    def slack_url(self):
+        return self.get_config('slack_url')
+
+    @slack_url.setter
+    def slack_url(self, value):
+        self.set_config('slack_url', value)
+
+    @property
+    def smtp_email_from(self):
+        return self.get_config('smtp_email_from')
+
+    @smtp_email_from.setter
+    def smtp_email_from(self, value):
+        self.set_config('smtp_email_from', value)
+
+    @property
+    def smtp_email_to(self):
+        return self.get_config('smtp_email_to')
+
+    @smtp_email_to.setter
+    def smtp_email_to(self, value):
+        self.set_config('smtp_email_to', value)
+
+    @property
+    def smtp_password(self):
+        return self.get_config('smtp_password')
+
+    @smtp_password.setter
+    def smtp_password(self, value):
+        self.set_config('smtp_password', value)
+
+    @property
+    def smtp_port(self):
+        return self.get_config('smtp_port')
+
+    @smtp_port.setter
+    def smtp_port(self, value):
+        self.set_config('smtp_port', value)
+
+    @property
+    def smtp_server(self):
+        return self.get_config('smtp_server')
+
+    @smtp_server.setter
+    def smtp_server(self, value):
+        self.set_config('smtp_server', value)
+
+    @property
+    def smtp_starttls(self):
+        return self.get_config('smtp_starttls')
+
+    @smtp_starttls.setter
+    def smtp_starttls(self, value):
+        self.set_config('smtp_starttls', value)
+
+    @property
+    def smtp_username(self):
+        return self.get_config('smtp_username')
+
+    @smtp_username.setter
+    def smtp_username(self, value):
+        self.set_config('smtp_username', value)
+
+    @property
+    def targets(self):
+        session = self.Session()
+        targets = session.query(Target).all()
+        session.close()
+        return targets
+
+    @property
+    def template_dir(self):
+        if self.state.template_dir is None:
+            ret = Path(self.get_config('template_dir')).expanduser().resolve()
+            self.state.template_dir = ret
+        else:
+            ret = self.state.template_dir
+        return ret
+
+    @template_dir.setter
+    def template_dir(self, value):
+        self.set_config('template_dir', value)
+
+    @property
+    def urls(self):
+        session = self.Session()
+        urls = session.query(Url).all()
+        session.close()
+        return urls
+
     @property
     def use_proxies(self):
         if self.state.use_proxies is None:
@@ -578,6 +578,14 @@ class Db(Plugin):
         self.set_config('use_proxies', value)
 
     @property
+    def user_id(self):
+        return self.get_config('user_id')
+
+    @user_id.setter
+    def user_id(self, value):
+        self.set_config('user_id', value)
+
+    @property
     def use_scratchspace(self):
         if self.state.use_scratchspace is None:
             return self.get_config('use_scratchspace')
@@ -588,11 +596,3 @@ class Db(Plugin):
     def use_scratchspace(self, value):
         self.state.use_scratchspace = value
         self.set_config('use_scratchspace', value)
-
-    @property
-    def user_id(self):
-        return self.get_config('user_id')
-
-    @user_id.setter
-    def user_id(self, value):
-        self.set_config('user_id', value)

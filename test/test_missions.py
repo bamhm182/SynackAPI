@@ -25,13 +25,104 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.targets = MagicMock()
         self.missions.templates = MagicMock()
 
-    def test_get_available(self):
-        """Should request PUBLISHED missions"""
-        self.missions.get = MagicMock()
-        self.missions.get.return_value = ['one', 'two']
-        self.assertEqual(['one', 'two'],
-                         self.missions.get_available())
-        self.missions.get.assert_called_with("PUBLISHED")
+    def test_build_order(self):
+        """Should sort by payout high (default)"""
+        m = [
+            {"payout": {"amount": 10}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 50}},
+        ]
+        ret = [
+            {"payout": {"amount": 50}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 10}},
+        ]
+
+        self.assertEqual(ret, self.missions.build_order(m))
+
+    def test_build_order_payout_low(self):
+        """Should sort by payout low"""
+        m = [
+            {"payout": {"amount": 10}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 50}},
+        ]
+        ret = [
+            {"payout": {"amount": 10}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 50}},
+        ]
+
+        self.assertEqual(ret, self.missions.build_order(m, "payout-low"))
+
+    def test_build_order_reverse(self):
+        """Should sort by payout low"""
+        m = [
+            {"payout": {"amount": 10}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 50}},
+        ]
+        ret = [
+            {"payout": {"amount": 50}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 10}},
+        ]
+
+        self.assertEqual(ret, self.missions.build_order(m, "reverse"))
+
+    def test_build_order_shuffle(self):
+        """Should sort by payout low"""
+        m = [
+            {"payout": {"amount": 10}},
+            {"payout": {"amount": 40}},
+            {"payout": {"amount": 30}},
+            {"payout": {"amount": 20}},
+            {"payout": {"amount": 50}},
+        ]
+        random.shuffle = MagicMock()
+        self.missions.build_order(m, "shuffle")
+        random.shuffle.assert_called_with(m)
+
+    def test_build_summary(self):
+        """Should summarize a list of missions"""
+        ret = {
+            "count": 2,
+            "value": 75,
+            "time": 79200
+        }
+        now = datetime.datetime.utcnow()
+        t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
+                                        "%Y-%m-%dT%H:%M:%S.%fZ")
+        t2 = datetime.datetime.strftime(now-datetime.timedelta(hours=1),
+                                        "%Y-%m-%dT%H:%M:%S.%fZ")
+        m = [
+            {
+                "status": "CLAIMED",
+                "maxCompletionTimeInSecs": 86400,
+                "payout": {"amount": 50},
+                "claimedOn": t1
+            },
+            {
+                "status": "CLAIMED",
+                "maxCompletionTimeInSecs": 86400,
+                "payout": {"amount": 25},
+                "claimedOn": t2
+            }
+        ]
+
+        self.assertEqual(ret, self.missions.build_summary(m))
 
     def test_get_approved(self):
         """Should request APPROVED missions"""
@@ -40,40 +131,20 @@ class MissionsTestCase(unittest.TestCase):
         self.assertEqual(['one', 'two'], self.missions.get_approved())
         self.missions.get.assert_called_with("APPROVED")
 
+    def test_get_available(self):
+        """Should request PUBLISHED missions"""
+        self.missions.get = MagicMock()
+        self.missions.get.return_value = ['one', 'two']
+        self.assertEqual(['one', 'two'],
+                         self.missions.get_available())
+        self.missions.get.assert_called_with("PUBLISHED")
+
     def test_get_claimed(self):
         """Should request CLAIMED missions"""
         self.missions.get = MagicMock()
         self.missions.get.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'], self.missions.get_claimed())
         self.missions.get.assert_called_with("CLAIMED")
-
-    def test_get_in_review(self):
-        """Should request FOR_REVIEW missions"""
-        self.missions.get = MagicMock()
-        self.missions.get.return_value = ['one', 'two']
-        self.assertEqual(['one', 'two'],
-                         self.missions.get_in_review())
-        self.missions.get.assert_called_with("FOR_REVIEW")
-
-    def test_get_wallet_claimed(self):
-        """Should report the Mission Wallet Claimed Amount"""
-        self.missions.api.request.return_value.status_code = 200
-        self.missions.api.request.return_value.json.return_value = {
-            "claimedAmount": "20"
-        }
-        self.assertEqual(20, self.missions.get_wallet_claimed())
-        self.missions.api.request.assert_called_with('GET',
-                                                     'tasks/v2/researcher/claimed_amount')
-
-    def test_get_wallet_limit(self):
-        """Should report the Mission Wallet Limit Amount"""
-        self.missions.api.request.return_value.status_code = 200
-        self.missions.api.request.return_value.json.return_value = {
-            "claim_limit": "20"
-        }
-        self.assertEqual(20, self.missions.get_wallet_limit())
-        self.missions.api.request.assert_called_with('GET',
-                                                     'profiles/me')
 
     def test_get_count(self):
         """Should get the current number of published missions"""
@@ -107,35 +178,6 @@ class MissionsTestCase(unittest.TestCase):
                                                      "tasks/v1/tasks",
                                                      query=query)
 
-    def test_build_summary(self):
-        """Should summarize a list of missions"""
-        ret = {
-            "count": 2,
-            "value": 75,
-            "time": 79200
-        }
-        now = datetime.datetime.utcnow()
-        t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
-                                        "%Y-%m-%dT%H:%M:%S.%fZ")
-        t2 = datetime.datetime.strftime(now-datetime.timedelta(hours=1),
-                                        "%Y-%m-%dT%H:%M:%S.%fZ")
-        m = [
-            {
-                "status": "CLAIMED",
-                "maxCompletionTimeInSecs": 86400,
-                "payout": {"amount": 50},
-                "claimedOn": t1
-            },
-            {
-                "status": "CLAIMED",
-                "maxCompletionTimeInSecs": 86400,
-                "payout": {"amount": 25},
-                "claimedOn": t2
-            }
-        ]
-
-        self.assertEqual(ret, self.missions.build_summary(m))
-
     def test_get_defaults(self):
         """Should get a list of published missions"""
         query = {
@@ -154,6 +196,36 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.api.request.assert_called_with("GET",
                                                      "tasks/v2/tasks",
                                                      query=query)
+
+    def test_get_evidences(self):
+        """Should get evidences from a mission"""
+        m = {
+            "id": "eugtgowery8t",
+            "title": "Some Mission",
+            "assetTypes": ["web"],
+            "taskType": "MISSION",
+            "validResponses": [{}, {"value": "uieth8rgyub"}],
+        }
+        ret = {
+            "title": m["title"],
+            "asset": "web",
+            "taskType": "MISSION",
+            "structuredResponse": "uieth8rgyub"
+        }
+        self.missions.api.request = MagicMock()
+        self.missions.api.request.return_value.status_code = 200
+        self.missions.api.request.return_value.json.return_value = {}
+        path = "tasks/v2/tasks/eugtgowery8t/evidences"
+        self.assertEqual(ret, self.missions.get_evidences(m))
+        self.missions.api.request.assert_called_with("GET", path)
+
+    def test_get_in_review(self):
+        """Should request FOR_REVIEW missions"""
+        self.missions.get = MagicMock()
+        self.missions.get.return_value = ['one', 'two']
+        self.assertEqual(['one', 'two'],
+                         self.missions.get_in_review())
+        self.missions.get.assert_called_with("FOR_REVIEW")
 
     def test_get_mixup(self):
         """Should get a list of specific missions"""
@@ -203,115 +275,25 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.api.request.has_calls(calls)
         self.assertEqual(2, self.missions.api.request.call_count)
 
-    def test_set_status(self):
-        """Should interact with a mission"""
-        m = {
-            "organizationUid": "24re7yuf",
-            "listingUid": "4wr7egtu",
-            "campaignUid": "27493fe8r",
-            "id": "4i3eg86fyu",
-            "payout": {"amount": 10},
-            "title": "Some Mission"
+    def test_get_wallet_claimed(self):
+        """Should report the Mission Wallet Claimed Amount"""
+        self.missions.api.request.return_value.status_code = 200
+        self.missions.api.request.return_value.json.return_value = {
+            "claimedAmount": "20"
         }
-        ret = {
-            "target": "4wr7egtu",
-            "title": "Some Mission",
-            "payout": "10",
-            "status": "CLAIM",
-            "success": True
+        self.assertEqual(20, self.missions.get_wallet_claimed())
+        self.missions.api.request.assert_called_with('GET',
+                                                     'tasks/v2/researcher/claimed_amount')
+
+    def test_get_wallet_limit(self):
+        """Should report the Mission Wallet Limit Amount"""
+        self.missions.api.request.return_value.status_code = 200
+        self.missions.api.request.return_value.json.return_value = {
+            "claim_limit": "20"
         }
-        self.missions.api.request.return_value.status_code = 201
-        self.assertEqual(ret, self.missions.set_status(m, "CLAIM"))
-        data = {"type": "CLAIM"}
-        calls = [
-            unittest.mock.call('POST',
-                               'tasks/v1' +
-                               '/organizations/24re7yuf' +
-                               '/listings/4wr7egtu' +
-                               '/campaigns/27493fe8r' +
-                               '/tasks/4i3eg86fyu' +
-                               '/transitions',
-                               data=data),
-            unittest.mock.call('POST',
-                               'tasks/v1' +
-                               '/organizations/98y4ehru' +
-                               '/listings/4298y3rehi' +
-                               '/campaigns/27493fe8r' +
-                               '/tasks/984yrehi' +
-                               '/transitions',
-                               data=data)
-        ]
-        self.missions.api.request.has_calls(calls)
-
-    def test_build_order(self):
-        """Should sort by payout high (default)"""
-        m = [
-            {"payout": {"amount": 10}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 50}},
-        ]
-        ret = [
-            {"payout": {"amount": 50}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 10}},
-        ]
-
-        self.assertEqual(ret, self.missions.build_order(m))
-
-    def test_build_order_payout_low(self):
-        """Should sort by payout low"""
-        m = [
-            {"payout": {"amount": 10}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 50}},
-        ]
-        ret = [
-            {"payout": {"amount": 10}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 50}},
-        ]
-
-        self.assertEqual(ret, self.missions.build_order(m, "payout-low"))
-
-    def test_build_order_shuffle(self):
-        """Should sort by payout low"""
-        m = [
-            {"payout": {"amount": 10}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 50}},
-        ]
-        random.shuffle = MagicMock()
-        self.missions.build_order(m, "shuffle")
-        random.shuffle.assert_called_with(m)
-
-    def test_build_order_reverse(self):
-        """Should sort by payout low"""
-        m = [
-            {"payout": {"amount": 10}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 50}},
-        ]
-        ret = [
-            {"payout": {"amount": 50}},
-            {"payout": {"amount": 20}},
-            {"payout": {"amount": 30}},
-            {"payout": {"amount": 40}},
-            {"payout": {"amount": 10}},
-        ]
-
-        self.assertEqual(ret, self.missions.build_order(m, "reverse"))
+        self.assertEqual(20, self.missions.get_wallet_limit())
+        self.missions.api.request.assert_called_with('GET',
+                                                     'profiles/me')
 
     def test_set_claimed(self):
         """Should send a CLAIM to set_status"""
@@ -392,24 +374,42 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.set_evidences(mission)
         self.missions.api.request.assert_not_called()
 
-    def test_get_evidences(self):
-        """Should get evidences from a mission"""
+    def test_set_status(self):
+        """Should interact with a mission"""
         m = {
-            "id": "eugtgowery8t",
-            "title": "Some Mission",
-            "assetTypes": ["web"],
-            "taskType": "MISSION",
-            "validResponses": [{}, {"value": "uieth8rgyub"}],
+            "organizationUid": "24re7yuf",
+            "listingUid": "4wr7egtu",
+            "campaignUid": "27493fe8r",
+            "id": "4i3eg86fyu",
+            "payout": {"amount": 10},
+            "title": "Some Mission"
         }
         ret = {
-            "title": m["title"],
-            "asset": "web",
-            "taskType": "MISSION",
-            "structuredResponse": "uieth8rgyub"
+            "target": "4wr7egtu",
+            "title": "Some Mission",
+            "payout": "10",
+            "status": "CLAIM",
+            "success": True
         }
-        self.missions.api.request = MagicMock()
-        self.missions.api.request.return_value.status_code = 200
-        self.missions.api.request.return_value.json.return_value = {}
-        path = "tasks/v2/tasks/eugtgowery8t/evidences"
-        self.assertEqual(ret, self.missions.get_evidences(m))
-        self.missions.api.request.assert_called_with("GET", path)
+        self.missions.api.request.return_value.status_code = 201
+        self.assertEqual(ret, self.missions.set_status(m, "CLAIM"))
+        data = {"type": "CLAIM"}
+        calls = [
+            unittest.mock.call('POST',
+                               'tasks/v1' +
+                               '/organizations/24re7yuf' +
+                               '/listings/4wr7egtu' +
+                               '/campaigns/27493fe8r' +
+                               '/tasks/4i3eg86fyu' +
+                               '/transitions',
+                               data=data),
+            unittest.mock.call('POST',
+                               'tasks/v1' +
+                               '/organizations/98y4ehru' +
+                               '/listings/4298y3rehi' +
+                               '/campaigns/27493fe8r' +
+                               '/tasks/984yrehi' +
+                               '/transitions',
+                               data=data)
+        ]
+        self.missions.api.request.has_calls(calls)

@@ -76,4 +76,3 @@ class ScratchspaceTestCase(unittest.TestCase):
             self.assertEqual('/tmp/TIREDTURKEY/hosts.txt', ret)
             m.return_value.write.assert_called_with('1\n2\n3')
             m.assert_called_with('/tmp/TIREDTURKEY/hosts.txt', 'w')
-

@@ -35,50 +35,6 @@ class AuthTestCase(unittest.TestCase):
         pyotp.TOTP.assert_called_with('123')
         pyotp.TOTP.return_value.now.assert_called_with()
 
-    def test_get_login_progress_token(self):
-        """Should get the progress token from valid creds"""
-        self.auth.api.login.return_value.status_code = 200
-        self.auth.api.login.return_value.json.return_value = {
-            "progress_token": "qwfars"
-        }
-        data = {
-            "email": "bob@bob.com",
-            "password": "123456"
-        }
-        headers = {
-              "X-CSRF-Token": "abcde"
-        }
-        self.auth.db.email = "bob@bob.com"
-        self.auth.db.password = "123456"
-        returned_pt = self.auth.get_login_progress_token('abcde')
-        self.assertEqual("qwfars", returned_pt)
-        self.auth.api.login.assert_called_with("POST",
-                                               "authenticate",
-                                               headers=headers,
-                                               data=data)
-
-    def test_get_login_grant_token(self):
-        """Should get the grant token from valid authy TOTP"""
-        self.auth.build_otp = MagicMock(return_value="12345")
-        self.auth.api.login.return_value.status_code = 200
-        self.auth.api.login.return_value.json.return_value = {
-            "grant_token": "qwfars"
-        }
-        headers = {
-                      "X-Csrf-Token": "abcde"
-        }
-        data = {
-            "authy_token": "12345",
-            "progress_token": "789456123"
-        }
-
-        returned_gt = self.auth.get_login_grant_token('abcde', '789456123')
-        self.assertEqual("qwfars", returned_gt)
-        self.auth.api.login.assert_called_with("POST",
-                                               "authenticate",
-                                               headers=headers,
-                                               data=data)
-
     def test_get_api_token(self):
         """Should complete the login workflow when check fails"""
         self.auth.db.api_token = ""
@@ -107,6 +63,50 @@ class AuthTestCase(unittest.TestCase):
         self.auth.users.get_profile = MagicMock()
         self.auth.users.get_profile.return_value = {"user_id": "john"}
         self.assertEqual("qweqweqwe", self.auth.get_api_token())
+
+    def test_get_login_grant_token(self):
+        """Should get the grant token from valid authy TOTP"""
+        self.auth.build_otp = MagicMock(return_value="12345")
+        self.auth.api.login.return_value.status_code = 200
+        self.auth.api.login.return_value.json.return_value = {
+            "grant_token": "qwfars"
+        }
+        headers = {
+                      "X-Csrf-Token": "abcde"
+        }
+        data = {
+            "authy_token": "12345",
+            "progress_token": "789456123"
+        }
+
+        returned_gt = self.auth.get_login_grant_token('abcde', '789456123')
+        self.assertEqual("qwfars", returned_gt)
+        self.auth.api.login.assert_called_with("POST",
+                                               "authenticate",
+                                               headers=headers,
+                                               data=data)
+
+    def test_get_login_progress_token(self):
+        """Should get the progress token from valid creds"""
+        self.auth.api.login.return_value.status_code = 200
+        self.auth.api.login.return_value.json.return_value = {
+            "progress_token": "qwfars"
+        }
+        data = {
+            "email": "bob@bob.com",
+            "password": "123456"
+        }
+        headers = {
+              "X-CSRF-Token": "abcde"
+        }
+        self.auth.db.email = "bob@bob.com"
+        self.auth.db.password = "123456"
+        returned_pt = self.auth.get_login_progress_token('abcde')
+        self.assertEqual("qwfars", returned_pt)
+        self.auth.api.login.assert_called_with("POST",
+                                               "authenticate",
+                                               headers=headers,
+                                               data=data)
 
     def test_get_notifications_token(self):
         """Should get the notifications token"""

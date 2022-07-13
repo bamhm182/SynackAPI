@@ -56,4 +56,3 @@ class AlertsTestCase(unittest.TestCase):
             mock_post.assert_called_with('https://slack.com',
                                          data='{"text": "this is a test"}',
                                          headers={'Content-Type': 'application/json'})
-
