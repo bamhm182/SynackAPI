@@ -140,21 +140,6 @@
                         <h1 id="alerts"><a class="header" href="#alerts">Alerts</a></h1>
 <p>The Alerts Plugin is used to send alerts to various external services.</p>
 <p>The functions within this plugin don't follow the standard naming convention.</p>
-<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
-<blockquote>
-<p>This function makes a POST request to Slack in order to post a message.
-This function expects <code>h.db.slack_url</code> to be set.</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
-&gt;&gt;&gt; h.alerts.slack('Something important happened!')
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="alertsemailsubject-message"><a class="header" href="#alertsemailsubject-message">alerts.email(subject, message)</a></h2>
 <blockquote>
 <blockquote>
@@ -176,6 +161,21 @@ This function expects <code>h.db.smtp_x</code> attributes to have been set.</p>
 &gt;&gt;&gt; h.db.smtp_email_to = 'you@email.com'
 &gt;&gt;&gt; h.db.smtp_email_from = 'me@email.com'
 &gt;&gt;&gt; h.alerts.email('Look out!', 'Some other important thing happened!')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
+<blockquote>
+<p>This function makes a POST request to Slack in order to post a message.
+This function expects <code>h.db.slack_url</code> to be set.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
+&gt;&gt;&gt; h.alerts.slack('Something important happened!')
 </code></pre>
 </blockquote>
 </blockquote>

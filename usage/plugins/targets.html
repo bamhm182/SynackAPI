@@ -153,20 +153,6 @@
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
-<blockquote>
-<p>Returns a Target's slug given its codename.</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
-'uwfpmfpgjlum'
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="targetsbuild_scope_host_dbslug-scope"><a class="header" href="#targetsbuild_scope_host_dbslug-scope">targets.build_scope_host_db(slug, scope)</a></h2>
 <blockquote>
 <p>Prints a list of IPs ready to ingest into the Database</p>
@@ -245,6 +231,20 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
+<blockquote>
+<p>Returns a Target's slug given its codename.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
+'uwfpmfpgjlum'
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
 <blockquote>
 <p>Pull back a list of assessments and whether you have passed them.</p>
@@ -253,6 +253,16 @@
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
 [{&quot;id&quot;: 1, ...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
+<blockquote>
+<p>Return minimal information about your currently connected Target</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.get_connected()
+{&quot;slug&quot;: &quot;ulmpupflgm&quot;, &quot;codename&quot;: &quot;GOOFYGOPHER&quot;, &quot;status&quot;: &quot;Connected&quot;}
 </code></pre>
 </blockquote>
 </blockquote>
@@ -272,13 +282,31 @@
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
+<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
 <blockquote>
-<p>Return minimal information about your currently connected Target</p>
+<p>The Registered Summary is a short list of information about every target you have registered.
+The endpoint used by this function is hit every time you refresh a page on the platform, so
+eventhough it sounds like a lot, it isn't bad.</p>
+<p>Information from this function is cached in the Database</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.get_connected()
-{&quot;slug&quot;: &quot;ulmpupflgm&quot;, &quot;codename&quot;: &quot;GOOFYGOPHER&quot;, &quot;status&quot;: &quot;Connected&quot;}
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered_summary()
+{&quot;pflupm&quot;: {&quot;id&quot;: &quot;pflupm&quot;,...},...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
+<blockquote>
+<p>Returns scope information for web or host targets when given target identifiers.
+If no kwargs are provided, the scope of your currently connected target will be retrieved.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
+['1.1.1.1/32', '10.0.0.0/8', ...]
 </code></pre>
 </blockquote>
 </blockquote>
@@ -300,44 +328,6 @@
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
-<blockquote>
-<p>The Registered Summary is a short list of information about every target you have registered.
-The endpoint used by this function is hit every time you refresh a page on the platform, so
-eventhough it sounds like a lot, it isn't bad.</p>
-<p>Information from this function is cached in the Database</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered_summary()
-{&quot;pflupm&quot;: {&quot;id&quot;: &quot;pflupm&quot;,...},...}
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
-<blockquote>
-<p>Returns scope information for web or host targets when given target identifiers</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
-['1.1.1.1/32', '10.0.0.0/8', ...]
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
-<blockquote>
-<p>Gets a list of unregistered Targets from the Synack API.</p>
-<p>Only Targets in Categories you have passed will be returned.</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
-[{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
 <blockquote>
 <p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
@@ -353,6 +343,17 @@ eventhough it sounds like a lot, it isn't bad.</p>
   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 }, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
+<blockquote>
+<p>Gets a list of unregistered Targets from the Synack API.</p>
+<p>Only Targets in Categories you have passed will be returned.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
+[{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>

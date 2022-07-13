@@ -138,21 +138,19 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="scratchspace"><a class="header" href="#scratchspace">Scratchspace</a></h1>
-<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
+<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
-If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
+<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
 </div>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
-&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
-'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/test.txt'
 </code></pre>
 </blockquote>
 </blockquote>
@@ -174,19 +172,21 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
+<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
 </div>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
-'/tmp/Scratchspace/ADAMANTANT/test.txt'
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
+&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
+'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
 </code></pre>
 </blockquote>
 </blockquote>

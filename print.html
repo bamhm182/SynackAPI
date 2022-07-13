@@ -556,21 +556,6 @@ In other words, consider the function name <code>missions.get_missions()</code>.
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alerts"><a class="header" href="#alerts">Alerts</a></h1>
 <p>The Alerts Plugin is used to send alerts to various external services.</p>
 <p>The functions within this plugin don't follow the standard naming convention.</p>
-<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
-<blockquote>
-<p>This function makes a POST request to Slack in order to post a message.
-This function expects <code>h.db.slack_url</code> to be set.</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
-&gt;&gt;&gt; h.alerts.slack('Something important happened!')
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="alertsemailsubject-message"><a class="header" href="#alertsemailsubject-message">alerts.email(subject, message)</a></h2>
 <blockquote>
 <blockquote>
@@ -592,6 +577,21 @@ This function expects <code>h.db.smtp_x</code> attributes to have been set.</p>
 &gt;&gt;&gt; h.db.smtp_email_to = 'you@email.com'
 &gt;&gt;&gt; h.db.smtp_email_from = 'me@email.com'
 &gt;&gt;&gt; h.alerts.email('Look out!', 'Some other important thing happened!')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
+<blockquote>
+<p>This function makes a POST request to Slack in order to post a message.
+This function expects <code>h.db.slack_url</code> to be set.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
+&gt;&gt;&gt; h.alerts.slack('Something important happened!')
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1058,24 +1058,6 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
 </blockquote>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="hydra"><a class="header" href="#hydra">Hydra</a></h1>
-<h2 id="hydraget_hydrapage-max_page-update_db-kwargs"><a class="header" href="#hydraget_hydrapage-max_page-update_db-kwargs">hydra.get_hydra(page, max_page, update_db, **kwargs)</a></h2>
-<blockquote>
-<p>Returns information from Synack Hydra Service</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>page</code></td><td>int</td><td>Page of the Hydra Service to start on (Default: 1)</td></tr>
-<tr><td><code>max_page</code></td><td>int</td><td>Highest page that should be queried (Default: 5)</td></tr>
-<tr><td><code>update_db</code></td><td>bool</td><td>Store the results in the database</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.hydra.get_hydra(codename='SLEEPYPUPPY')
-[{'host_plugins': {}, 'ip': '1.2.3.4', 'last_changed_dt': '2022-01-01T01:02:03Z', ... }, ... ]
-&gt;&gt;&gt; h.hydra.get_hydra(codename='SLEEPYPUPPY', page=3, max_page=5, update_db=False)
-[{'host_plugins': {}, 'ip': '3.4.5.6', 'last_changed_dt': '2022-01-01T01:02:03Z', ... }, ... ]
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="hydrabuild_db_input"><a class="header" href="#hydrabuild_db_input">hydra.build_db_input()</a></h2>
 <blockquote>
 <p>Builds a list of ports ready to be ingested by the Database from Hydra output</p>
@@ -1092,6 +1074,24 @@ This may need to be run manually when SynackAPI is updated until I can figure ou
   },
   ...
 ]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="hydraget_hydrapage-max_page-update_db-kwargs"><a class="header" href="#hydraget_hydrapage-max_page-update_db-kwargs">hydra.get_hydra(page, max_page, update_db, **kwargs)</a></h2>
+<blockquote>
+<p>Returns information from Synack Hydra Service</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>page</code></td><td>int</td><td>Page of the Hydra Service to start on (Default: 1)</td></tr>
+<tr><td><code>max_page</code></td><td>int</td><td>Highest page that should be queried (Default: 5)</td></tr>
+<tr><td><code>update_db</code></td><td>bool</td><td>Store the results in the database</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.hydra.get_hydra(codename='SLEEPYPUPPY')
+[{'host_plugins': {}, 'ip': '1.2.3.4', 'last_changed_dt': '2022-01-01T01:02:03Z', ... }, ... ]
+&gt;&gt;&gt; h.hydra.get_hydra(codename='SLEEPYPUPPY', page=3, max_page=5, update_db=False)
+[{'host_plugins': {}, 'ip': '3.4.5.6', 'last_changed_dt': '2022-01-01T01:02:03Z', ... }, ... ]
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1336,21 +1336,19 @@ Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission
 </blockquote>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="scratchspace"><a class="header" href="#scratchspace">Scratchspace</a></h1>
-<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
+<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
-If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
+<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
 </div>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
-&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
-'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/test.txt'
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1372,19 +1370,21 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
+<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
 </div>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
-'/tmp/Scratchspace/ADAMANTANT/test.txt'
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
+&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
+'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1401,20 +1401,6 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_codename_from_slug('uwfpmfpgjlum')
 'DAPPERDINGO'
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
-<blockquote>
-<p>Returns a Target's slug given its codename.</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
-'uwfpmfpgjlum'
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1496,6 +1482,20 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
+<blockquote>
+<p>Returns a Target's slug given its codename.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
+'uwfpmfpgjlum'
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
 <blockquote>
 <p>Pull back a list of assessments and whether you have passed them.</p>
@@ -1504,6 +1504,16 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
 [{&quot;id&quot;: 1, ...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
+<blockquote>
+<p>Return minimal information about your currently connected Target</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.get_connected()
+{&quot;slug&quot;: &quot;ulmpupflgm&quot;, &quot;codename&quot;: &quot;GOOFYGOPHER&quot;, &quot;status&quot;: &quot;Connected&quot;}
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1523,13 +1533,31 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
+<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
 <blockquote>
-<p>Return minimal information about your currently connected Target</p>
+<p>The Registered Summary is a short list of information about every target you have registered.
+The endpoint used by this function is hit every time you refresh a page on the platform, so
+eventhough it sounds like a lot, it isn't bad.</p>
+<p>Information from this function is cached in the Database</p>
 <blockquote>
 <p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.get_connected()
-{&quot;slug&quot;: &quot;ulmpupflgm&quot;, &quot;codename&quot;: &quot;GOOFYGOPHER&quot;, &quot;status&quot;: &quot;Connected&quot;}
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered_summary()
+{&quot;pflupm&quot;: {&quot;id&quot;: &quot;pflupm&quot;,...},...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
+<blockquote>
+<p>Returns scope information for web or host targets when given target identifiers.
+If no kwargs are provided, the scope of your currently connected target will be retrieved.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
+['1.1.1.1/32', '10.0.0.0/8', ...]
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1551,44 +1579,6 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
-<blockquote>
-<p>The Registered Summary is a short list of information about every target you have registered.
-The endpoint used by this function is hit every time you refresh a page on the platform, so
-eventhough it sounds like a lot, it isn't bad.</p>
-<p>Information from this function is cached in the Database</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered_summary()
-{&quot;pflupm&quot;: {&quot;id&quot;: &quot;pflupm&quot;,...},...}
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
-<blockquote>
-<p>Returns scope information for web or host targets when given target identifiers</p>
-<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
-</tbody></table>
-</div>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
-['1.1.1.1/32', '10.0.0.0/8', ...]
-</code></pre>
-</blockquote>
-</blockquote>
-<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
-<blockquote>
-<p>Gets a list of unregistered Targets from the Synack API.</p>
-<p>Only Targets in Categories you have passed will be returned.</p>
-<blockquote>
-<p>Examples</p>
-<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
-[{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
-</code></pre>
-</blockquote>
-</blockquote>
 <h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
 <blockquote>
 <p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
@@ -1604,6 +1594,17 @@ eventhough it sounds like a lot, it isn't bad.</p>
   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 }, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
+<blockquote>
+<p>Gets a list of unregistered Targets from the Synack API.</p>
+<p>Only Targets in Categories you have passed will be returned.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
+[{&quot;slug&quot;: &quot;lfjpgmk&quot;,...},...]
 </code></pre>
 </blockquote>
 </blockquote>
