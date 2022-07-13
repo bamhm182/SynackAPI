@@ -20,14 +20,16 @@ class AlertsTestCase(unittest.TestCase):
         self.alerts = synack.plugins.Alerts(self.state)
         self.alerts.db = MagicMock()
 
-    def test_slack(self):
-        """Should POST a message to slack"""
-        with patch('requests.post') as mock_post:
-            self.alerts.db.slack_url = 'https://slack.com'
-            self.alerts.slack('this is a test')
-            mock_post.assert_called_with('https://slack.com',
-                                         data='{"text": "this is a test"}',
-                                         headers={'Content-Type': 'application/json'})
+    def test_email_no_tls(self):
+        """Should send a non-TLS encrypted email"""
+        self.alerts.db.smtp_starttls = False
+        self.alerts.db.smtp_server = 'smtp.email.com'
+        self.alerts.db.smtp_port = 587
+        self.alerts.db.smtp_username = 'user5'
+        self.alerts.db.smtp_password = 'password123'
+        with patch('smtplib.SMTP') as mock_smtp:
+            self.alerts.email('subject', 'body')
+            mock_smtp.assert_called_with('smtp.email.com', 587)
 
     def test_email_tls(self):
         """Should send a TLS encrypted email"""
@@ -46,13 +48,11 @@ class AlertsTestCase(unittest.TestCase):
                     mock_smtp.return_value.login.assert_called_with('user5', 'password123')
                     mock_smtp.return_value.send_message.assert_called_with(mock_msg.return_value)
 
-    def test_email_no_tls(self):
-        """Should send a non-TLS encrypted email"""
-        self.alerts.db.smtp_starttls = False
-        self.alerts.db.smtp_server = 'smtp.email.com'
-        self.alerts.db.smtp_port = 587
-        self.alerts.db.smtp_username = 'user5'
-        self.alerts.db.smtp_password = 'password123'
-        with patch('smtplib.SMTP') as mock_smtp:
-            self.alerts.email('subject', 'body')
-            mock_smtp.assert_called_with('smtp.email.com', 587)
+    def test_slack(self):
+        """Should POST a message to slack"""
+        with patch('requests.post') as mock_post:
+            self.alerts.db.slack_url = 'https://slack.com'
+            self.alerts.slack('this is a test')
+            mock_post.assert_called_with('https://slack.com',
+                                         data='{"text": "this is a test"}',
+                                         headers={'Content-Type': 'application/json'})

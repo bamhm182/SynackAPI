@@ -20,11 +20,6 @@ class Alerts(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def slack(self, message='This is a test'):
-        requests.post(self.db.slack_url,
-                      data=json.dumps({'text': message}),
-                      headers={'Content-Type': 'application/json'})
-
     def email(self, subject='Test Alert', message='This is a test'):
         message += f'\nTime: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
         msg = email.message.EmailMessage()
@@ -40,3 +35,8 @@ class Alerts(Plugin):
 
         server.login(self.db.smtp_username, self.db.smtp_password)
         server.send_message(msg)
+
+    def slack(self, message='This is a test'):
+        requests.post(self.db.slack_url,
+                      data=json.dumps({'text': message}),
+                      headers={'Content-Type': 'application/json'})

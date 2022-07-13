@@ -16,19 +16,6 @@
 >> 'DAPPERDINGO'
 >> ```
 
-## targets.build_slug_from_codename(codename)
-
-> Returns a Target's slug given its codename.
->
-> | Arguments | Type | Description
-> | --- | --- | ---
-> | `codename` | str | The codename of a Target
->
->> Examples
->> ```python3
->> >>> h.targets.build_slug_from_codename('DAPPERDINGO')
->> 'uwfpmfpgjlum'
->> ```
 
 ## targets.build_scope_host_db(slug, scope)
 
@@ -108,6 +95,20 @@
 >> {'in': ['good.monkey.com'], 'out': ['bad.monkey.com']}
 >> ```
 
+## targets.build_slug_from_codename(codename)
+
+> Returns a Target's slug given its codename.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `codename` | str | The codename of a Target
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.build_slug_from_codename('DAPPERDINGO')
+>> 'uwfpmfpgjlum'
+>> ```
+
 ## targets.get_assessments()
 
 > Pull back a list of assessments and whether you have passed them.
@@ -118,6 +119,16 @@
 >> ```python3
 >> >>> h.targets.get_assessments()
 >> [{"id": 1, ...},...]
+>> ```
+
+## targets.get_connected()
+
+> Return minimal information about your currently connected Target
+>
+>> Examples
+>> ```python3
+>> >>> h.get_connected()
+>> {"slug": "ulmpupflgm", "codename": "GOOFYGOPHER", "status": "Connected"}
 >> ```
 
 ## targets.get_credentials(**kwargs)
@@ -136,14 +147,33 @@
 >> [{"credentials": [{...},...],...}]
 >> ```
 
-## targets.get_connected()
+## targets.get_registered_summary()
 
-> Return minimal information about your currently connected Target
+> The Registered Summary is a short list of information about every target you have registered.
+> The endpoint used by this function is hit every time you refresh a page on the platform, so
+> eventhough it sounds like a lot, it isn't bad.
+>
+> Information from this function is cached in the Database
 >
 >> Examples
 >> ```python3
->> >>> h.get_connected()
->> {"slug": "ulmpupflgm", "codename": "GOOFYGOPHER", "status": "Connected"}
+>> >>> h.targets.get_unregistered_summary()
+>> {"pflupm": {"id": "pflupm",...},...}
+>> ```
+
+## targets.get_scope(**kwargs)
+
+> Returns scope information for web or host targets when given target identifiers.
+> If no kwargs are provided, the scope of your currently connected target will be retrieved.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_scope(codename='SILLYFILLY')
+>> ['1.1.1.1/32', '10.0.0.0/8', ...]
 >> ```
 
 ## targets.get_scope_host(target, **kwargs)
@@ -164,46 +194,6 @@
 >> ['9,9,9,9/32', ...]
 >> ```
 
-## targets.get_registered_summary()
-
-> The Registered Summary is a short list of information about every target you have registered.
-> The endpoint used by this function is hit every time you refresh a page on the platform, so
-> eventhough it sounds like a lot, it isn't bad.
->
-> Information from this function is cached in the Database
->
->> Examples
->> ```python3
->> >>> h.targets.get_unregistered_summary()
->> {"pflupm": {"id": "pflupm",...},...}
->> ```
-
-## targets.get_scope(**kwargs)
-
-> Returns scope information for web or host targets when given target identifiers
->
-> | Arguments | Type | Description
-> | --- | --- | ---
-> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
->
->> Examples
->> ```python3
->> >>> h.targets.get_scope(codename='SILLYFILLY')
->> ['1.1.1.1/32', '10.0.0.0/8', ...]
->> ```
-
-## targets.get_unregistered()
-
-> Gets a list of unregistered Targets from the Synack API.
->
-> Only Targets in Categories you have passed will be returned.
->
->> Examples
->> ```python3
->> >>> h.targets.get_unregistered()
->> [{"slug": "lfjpgmk",...},...]
->> ```
-
 ## targets.get_scope_web(target, **kwargs)
 
 > Returns a ton of information about a web target's scope given a Target or target identifiers
@@ -220,6 +210,18 @@
 >>   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
 >>   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 >> }, ...]
+
+## targets.get_unregistered()
+
+> Gets a list of unregistered Targets from the Synack API.
+>
+> Only Targets in Categories you have passed will be returned.
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_unregistered()
+>> [{"slug": "lfjpgmk",...},...]
+>> ```
 
 ## targets.set_connected(target, **kwargs)
 
