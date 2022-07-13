@@ -29,12 +29,12 @@ class HandlerTestCase(unittest.TestCase):
         for p in plugins:
             self.assertTrue(hasattr(self.handler, p))
 
-    def test_state_kwargs(self):
-        handler = synack.Handler(login=True, debug=False)
-        self.assertTrue(handler.state.login)
-        self.assertFalse(handler.state.debug)
-
     def test_login(self):
         self.handler.state.login = True
         self.handler.login()
         self.handler.auth.get_api_token.assert_called_with()
+
+    def test_state_kwargs(self):
+        handler = synack.Handler(login=True, debug=False)
+        self.assertTrue(handler.state.login)
+        self.assertFalse(handler.state.debug)
