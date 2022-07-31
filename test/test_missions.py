@@ -124,6 +124,35 @@ class MissionsTestCase(unittest.TestCase):
 
         self.assertEqual(ret, self.missions.build_summary(m))
 
+    def test_build_summary_no_milliseconds(self):
+        """Should be able to handle claimedOn time without milliseconds"""
+        ret = {
+            "count": 2,
+            "value": 75,
+            "time": 79200
+        }
+        now = datetime.datetime.utcnow()
+        t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
+                                        "%Y-%m-%dT%H:%M:%SZ")
+        t2 = datetime.datetime.strftime(now-datetime.timedelta(hours=1),
+                                        "%Y-%m-%dT%H:%M:%SZ")
+        m = [
+            {
+                "status": "CLAIMED",
+                "maxCompletionTimeInSecs": 86400,
+                "payout": {"amount": 50},
+                "claimedOn": t1
+            },
+            {
+                "status": "CLAIMED",
+                "maxCompletionTimeInSecs": 86400,
+                "payout": {"amount": 25},
+                "claimedOn": t2
+            }
+        ]
+
+        self.assertEqual(ret, self.missions.build_summary(m))
+
     def test_get_approved(self):
         """Should request APPROVED missions"""
         self.missions.get = MagicMock()
