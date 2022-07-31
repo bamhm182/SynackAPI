@@ -56,8 +56,12 @@ class Missions(Plugin):
         for m in missions:
             if m.get("status") == "CLAIMED":
                 utc = datetime.utcnow()
-                claimed_on = datetime.strptime(m['claimedOn'],
-                                               "%Y-%m-%dT%H:%M:%S.%fZ")
+                try:
+                    claimed_on = datetime.strptime(m['claimedOn'],
+                                                   "%Y-%m-%dT%H:%M:%S.%fZ")
+                except ValueError:
+                    claimed_on = datetime.strptime(m['claimedOn'],
+                                                   "%Y-%m-%dT%H:%M:%SZ")
                 elapsed = int((utc - claimed_on).total_seconds())
                 time = m['maxCompletionTimeInSecs'] - elapsed
                 if time < ret['time'] or ret['time'] == 0:
