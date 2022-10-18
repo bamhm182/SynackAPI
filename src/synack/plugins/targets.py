@@ -109,15 +109,12 @@ class Targets(Plugin):
         res = self.api.request('GET', 'launchpoint')
         if res.status_code == 200:
             j = res.json()
-            if j['pending_slug'] != '-1':
-                slug = j['pending_slug']
-                status = "Connecting"
-            else:
-                slug = j['slug']
-                status = "Connected"
+            slug = j.get('slug')
 
             if slug == '':
                 status = 'Not Connected'
+            else:
+                status = "Connected"
 
             ret = {
                 "slug": slug,
