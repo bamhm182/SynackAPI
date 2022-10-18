@@ -227,7 +227,6 @@ class TargetsTestCase(unittest.TestCase):
         """Should make a request to get the currently selected target"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
-            "pending_slug": "-1",
             "slug": "qwfars",
             "status": "connected"
         }
@@ -244,7 +243,6 @@ class TargetsTestCase(unittest.TestCase):
         """Should report Not Connected when not connected to a target"""
         self.targets.api.request.return_value.status_code = 200
         self.targets.api.request.return_value.json.return_value = {
-            "pending_slug": "-1",
             "slug": "",
             "status": "connected"
         }
@@ -254,23 +252,6 @@ class TargetsTestCase(unittest.TestCase):
             "slug": "",
             "codename": "NONE",
             "status": "Not Connected"
-        }
-        self.assertEqual(out, self.targets.get_connected())
-
-    def test_get_connected_pending(self):
-        """Should return the pending target if one is pending"""
-        self.targets.api.request.return_value.status_code = 200
-        self.targets.api.request.return_value.json.return_value = {
-            "pending_slug": "qwfars",
-            "slug": "",
-            "status": ""
-        }
-        self.targets.build_codename_from_slug = MagicMock()
-        self.targets.build_codename_from_slug.return_value = "SLOPPYSLUG"
-        out = {
-            "slug": "qwfars",
-            "codename": "SLOPPYSLUG",
-            "status": "Connecting"
         }
         self.assertEqual(out, self.targets.get_connected())
 

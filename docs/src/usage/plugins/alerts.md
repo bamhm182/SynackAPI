@@ -37,6 +37,6 @@ The functions within this plugin don't follow the standard naming convention.
 >
 >> Examples
 >> ```python3
->> >>> h.db.synack_url = 'https://hooks.slack.com/services/x/y/z'
+>> >>> h.db.slack_url = 'https://hooks.slack.com/services/x/y/z'
 >> >>> h.alerts.slack('Something important happened!')
 >> ```
