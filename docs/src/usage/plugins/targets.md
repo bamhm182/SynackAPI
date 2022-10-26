@@ -127,7 +127,7 @@
 >
 >> Examples
 >> ```python3
->> >>> h.get_connected()
+>> >>> h.targets.get_connected()
 >> {"slug": "ulmpupflgm", "codename": "GOOFYGOPHER", "status": "Connected"}
 >> ```
 
