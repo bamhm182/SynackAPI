@@ -1643,11 +1643,12 @@ h.targets.set_connected(slug='12083y9')
 </blockquote>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="templates"><a class="header" href="#templates">Templates</a></h1>
-<h2 id="templatesbuild_filepathmission"><a class="header" href="#templatesbuild_filepathmission">templates.build_filepath(mission)</a></h2>
+<h2 id="templatesbuild_filepathmission-generic_okfalse"><a class="header" href="#templatesbuild_filepathmission-generic_okfalse">templates.build_filepath(mission, generic_ok=False)</a></h2>
 <blockquote>
-<p>Builds a safe filepath for the template to exist at</p>
+<p>Builds a safe filepath for the template to exist at.</p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>mission</code></td><td>dict</td><td>A mission dict returned from the Synack API</td></tr>
+<tr><td><code>generic_ok</code></td><td>bool</td><td>Return the default mission template if the specified template doesn't exist (Default: False)</td></tr>
 </tbody></table>
 </div>
 <blockquote>
@@ -1666,6 +1667,11 @@ h.targets.set_connected(slug='12083y9')
 ... }
 &gt;&gt;&gt; h.templates.build_filepath(msn)
 '/home/user/Templates/mission/web/some_horr_bl3_m_0n.txt'
+&gt;&gt;&gt; msn[&quot;title&quot;] = &quot;Mission Without A Template&quot;
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=True)
+'/home/user/Templates/mission/web/generic.txt'
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=False)
+'/home/user/Templates/mission/web/mission_without_a_template.txt'
 </code></pre>
 </blockquote>
 </blockquote>
