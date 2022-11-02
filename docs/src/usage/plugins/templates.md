@@ -1,12 +1,13 @@
 # Templates
 
-## templates.build_filepath(mission)
+## templates.build_filepath(mission, generic_ok=False)
 
-> Builds a safe filepath for the template to exist at
+> Builds a safe filepath for the template to exist at.
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
 > | `mission` | dict | A mission dict returned from the Synack API
+> | `generic_ok` | bool | Return the default mission template if the specified template doesn't exist (Default: False)
 >
 >> Examples
 >> ```python3
@@ -24,6 +25,11 @@
 >> ... }
 >> >>> h.templates.build_filepath(msn)
 >> '/home/user/Templates/mission/web/some_horr_bl3_m_0n.txt'
+>> >>> msn["title"] = "Mission Without A Template"
+>> >>> h.templates.build_filepath(msn, generic_ok=True)
+>> '/home/user/Templates/mission/web/generic.txt'
+>> >>> h.templates.build_filepath(msn, generic_ok=False)
+>> '/home/user/Templates/mission/web/mission_without_a_template.txt'
 >> ```
 
 ## templates.build_safe_name(name)

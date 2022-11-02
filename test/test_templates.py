@@ -57,6 +57,27 @@ class TemplatesTestCase(unittest.TestCase):
         self.assertEqual('/tmp/mission/web/mission.txt',
                          self.templates.build_filepath(mission))
 
+    def test_build_filepath_non_exist_and_generic_ok(self):
+        """Should return generic template path if the desired template doesn't exist"""
+        self.templates.build_safe_name = MagicMock()
+        self.templates.build_safe_name.side_effect = [
+            'mission',
+            'web',
+            'mission'
+        ]
+        mission = {
+            'taskType': 'MISSION',
+            'assetTypes': [
+                'Web'
+            ],
+            'title': 'Mission'
+        }
+        with patch('pathlib.Path.exists') as mock_exists:
+            mock_exists.side_effect = [False, True]
+            self.templates.db.template_dir = pathlib.Path('/tmp')
+            self.assertEqual('/tmp/mission/web/generic.txt',
+                             self.templates.build_filepath(mission, generic_ok=True))
+
     def test_build_safe_name(self):
         """Should convert complex missions names to something simpler"""
         one = self.templates.build_safe_name("S!oME_RaNdOm___MISSION!")
@@ -98,7 +119,7 @@ class TemplatesTestCase(unittest.TestCase):
         with patch.object(pathlib.Path, 'exists') as mock_exists:
             mock_exists.return_value = True
             self.templates.get_file(mission)
-            self.templates.build_filepath.assert_called_with(mission)
+            self.templates.build_filepath.assert_called_with(mission, generic_ok=True)
             self.templates.build_sections.assert_called_with('/tmp/mission.txt')
 
     def test_set_file(self):

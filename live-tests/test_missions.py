@@ -90,7 +90,7 @@ class MissionsTestCase(unittest.TestCase):
 
     def test_mission_parameters(self):
         """Should have the same mission parameters"""
-        ret = self.h.missions.get_approved_missions()
+        ret = self.h.missions.get_approved()
         for m in ret:
             pp = pprint.pformat(m)
             for k in m.keys():

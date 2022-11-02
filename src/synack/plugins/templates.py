@@ -17,7 +17,7 @@ class Templates(Plugin):
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
 
-    def build_filepath(self, mission):
+    def build_filepath(self, mission, generic_ok=False):
         f = self.db.template_dir
         f = f / self.build_safe_name(mission['taskType'])
         if mission.get('asset'):
@@ -25,8 +25,11 @@ class Templates(Plugin):
         else:
             f = f / self.build_safe_name(mission['assetTypes'][0])
         f.mkdir(parents=True, exist_ok=True)
-        f = f / self.build_safe_name(mission['title'])
-        return str(f) + '.txt'
+        generic = f / 'generic.txt'
+        specific = f / (self.build_safe_name(mission['title']) + '.txt')
+        if not specific.exists() and generic.exists() and generic_ok:
+            return str(generic)
+        return str(specific)
 
     @staticmethod
     def build_safe_name(name):
@@ -47,7 +50,7 @@ class Templates(Plugin):
 
     def get_file(self, mission):
         """Get a template file from disk and return its sections"""
-        path = self.build_filepath(mission)
+        path = self.build_filepath(mission, generic_ok=True)
         if Path(path).exists():
             return self.build_sections(path)
 
