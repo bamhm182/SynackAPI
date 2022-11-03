@@ -204,6 +204,14 @@ For example:</p>
 <p>I am not going to provide you with a ton of awesome scripts that will leverage the SynackAPI package.
 That is on you.</p>
 <p>With that in mind, I would highly recommend you become familiar with the <a href="usage/./plugins/index.html">Plugins</a> provided and apply your own ingenuity to come up with your own scripts.</p>
+<h2 id="authentication"><a class="header" href="#authentication">Authentication</a></h2>
+<p>The first time you try to do anything which requires authentication, you will be automatically prompted for your credentials.
+This prompt will expect the <code>Synack Email</code> and <code>Synack Password</code>, which are fairly self explanitory, but it also asks for the <code>Synack OTP Secret</code>.</p>
+<p>The <code>Synack OTP Secret</code> is NOT the 8 digit code you pull out of Authy.
+Instead, it is a string that you must extract from Authy via a method similar to the one found <a href="https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93">here</a>.</p>
+<p>Use the above instructions at your own discression.
+I TAKE NO RESPONSIBILITY IF SOMETHING BAD HAPPENS AS A RESULT.</p>
+<p>Once you complete these steps, your credentials are stored in a SQLiteDB at <code>~/.config/synack/synackapi.db</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <p>These subpages here will provide a couple of very simple examples of how you can use the SynackAPI.
 These are going to help you get started, but are definitely not intended to be the best of the best.
