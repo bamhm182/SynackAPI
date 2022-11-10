@@ -173,7 +173,8 @@ for m in msns:
 <p>It is important to understand the file structure of your mission templates.</p>
 <p>The default location for templates is <code>~/Templates</code>, but this could be overridden by setting <code>template_dir</code> in the <a href="../main-components/state.html">State</a>.</p>
 <p>Each mission from the Synack API has a couple of attributes I use to build the file structure.
-There is the <code>taskType</code> (<code>MISSION</code>, <code>SV2M</code>, etc), the <code>asset</code>/<code>assetTypes</code> (<code>host', 'web', 'ios', 'android', etc.), and the </code>title<code>(Name of the mission). Each of these attributes are run thorough</code>templates.build_safe_name()`, which makes everything lowercase and removes special characters to make sure there are no issuer with the name of the file.</p>
+There is the <code>taskType</code> (<code>MISSION</code>, <code>SV2M</code>, etc), the <code>asset</code>/<code>assetTypes</code> ('host', 'web', 'ios', 'android', etc.), and the <code>title</code> (Name of the mission).
+Each of these attributes are run thorough <code>templates.build_safe_name()</code>, which makes everything lowercase and removes special characters to make sure there are no issuer with the name of the file.</p>
 <p>As an example, the following mission will turn into the following filepath:</p>
 <pre><code>&gt;&gt;&gt; mission = {
 ...     &quot;taskType&quot;: &quot;MISSION&quot;,
