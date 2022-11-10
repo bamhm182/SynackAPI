@@ -44,7 +44,7 @@ It is important to understand the file structure of your mission templates.
 The default location for templates is `~/Templates`, but this could be overridden by setting `template_dir` in the [State](../main-components/state.md).
 
 Each mission from the Synack API has a couple of attributes I use to build the file structure.
-There is the `taskType` (`MISSION`, `SV2M`, etc), the `asset`/`assetTypes` (`host', 'web', 'ios', 'android', etc.), and the `title` (Name of the mission).
+There is the `taskType` (`MISSION`, `SV2M`, etc), the `asset`/`assetTypes` ('host', 'web', 'ios', 'android', etc.), and the `title` (Name of the mission).
 Each of these attributes are run thorough `templates.build_safe_name()`, which makes everything lowercase and removes special characters to make sure there are no issuer with the name of the file.
 
 As an example, the following mission will turn into the following filepath:

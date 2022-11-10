@@ -14,19 +14,28 @@ All plugins are a part of the handler, which allows us to use `h.missions.get_co
 import time
 import synack
 
-h = synack.Handler()
+h = synack.Handler(login=True)
+print("I just logged in and if it was the first time I logged in, I successfully filled out my credentials!")
 
 known_missions = 0
+print("Since I just started looking, I don't know about any missions!")
 
 while True:
+    print("I had better sleep for a while so that I don't blow up the API, get everyone mad at me, and get myself banned!")
     time.sleep(30)
     curr_missions = h.missions.get_count()
+    print(f"There are {curr_missions} missions")
     if curr_missions and curr_missions > known_missions:
+        print("There are new missions I didn't know about!")
         known_missions = curr_missions
         missions = h.missions.get_available()
+        print(f"I grabbed a list of {len(missions)} missions!")
         for m in missions:
+            print("I had better sleep for a while so that I don't blow up the API, get everyone mad at me, and get myself banned!")
             time.sleep(1)
-            h.missions.set_claimed(m)
+            outcome = h.missions.set_claimed(m)
+            print(f"I tried to claim a mission. You can see the outcome here: {outcome}")
     elif curr_missions == 0:
+        print("There are currently no missions, I'd better remember that!")
         known_missions = 0
 ```
