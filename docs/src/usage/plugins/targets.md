@@ -223,6 +223,16 @@
 >> [{"slug": "lfjpgmk",...},...]
 >> ```
 
+## targets.get_upcoming()
+
+> Gets a list of upcoming Targets from the Synack API.
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_upcoming()
+>> [{'codename': 'SLEEPYSLUG', 'slug': '1o2h8o', 'category_name': 'Web Application', 'organization_name': 'SLEEPY Orgnization', 'upcoming_start_date': 1668430800}, ...]
+>> ```
+
 ## targets.set_connected(target, **kwargs)
 
 > Connect to a specified target

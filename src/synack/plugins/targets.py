@@ -219,6 +219,26 @@ class Targets(Plugin):
                 ret.append({'codename': t['codename'], 'slug': t['slug']})
         return ret
 
+    def get_upcoming(self):
+        """Get slugs and upcoming start dates of all upcoming targets"""
+        query = {
+                'filter[primary]': 'upcoming',
+                'filter[secondary]': 'all',
+                'filter[industry]': 'all',
+                'sorting[field]': 'upcomingStartDate',
+                'sorting[direction]': 'asc'
+        }
+        res = self.api.request('GET', 'targets', query=query)
+        ret = []
+        if res.status_code == 200:
+            for t in res.json():
+                ret.append({'codename': t['codename'],
+                            'slug': t['slug'],
+                            'category_name': t['category']['name'],
+                            'organization_name': t['organization']['name'],
+                            'upcoming_start_date': t['upcoming_start_date']})
+        return ret
+
     def set_connected(self, target=None, **kwargs):
         """Connect to a target"""
         slug = None
