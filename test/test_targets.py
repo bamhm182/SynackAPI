@@ -389,6 +389,31 @@ class TargetsTestCase(unittest.TestCase):
                                                     "targets",
                                                     query=query)
 
+    def test_get_upcoming(self):
+        """Should get a list upcoming targets"""
+        query = {
+            'filter[primary]': 'upcoming',
+            'filter[secondary]': 'all',
+            'filter[industry]': 'all',
+            'sorting[field]': 'upcomingStartDate',
+            'sorting[direction]': 'asc'
+        }
+        self.targets.api.request.return_value.status_code = 200
+        upcoming = [
+            {
+                "codename": "SLEEPYSLUG",
+                "slug": "1o2h8o",
+                'category_name': 'Web Application',
+                'organization_name': 'SLEEPY Orgnization',
+                'upcoming_start_date': 1668430800
+            }
+        ]
+        self.targets.api.request.return_value.json.return_value = upcoming
+        self.assertEqual(upcoming, self.targets.get_upcoming())
+        self.targets.api.request.assert_called_with("GET",
+                                                    "targets",
+                                                    query=query)
+
     def test_get_unregistered_assessments_empty(self):
         """Should get a list of unregistered targets"""
         self.targets.get_assessments = MagicMock()
