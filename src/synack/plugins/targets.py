@@ -181,7 +181,7 @@ class Targets(Plugin):
                 categories[category.id] = category.name
             if categories[target.category].lower() == 'host':
                 return self.get_scope_host(target)
-            elif categories[target.category].lower() == 'web application':
+            elif categories[target.category].lower() in ['web application', 'mobile']:
                 return self.get_scope_web(target)
 
     def get_scope_host(self, target=None, **kwargs):
@@ -200,7 +200,7 @@ class Targets(Plugin):
                 return scope
 
     def get_scope_web(self, target=None, **kwargs):
-        """Get the scope of a Web target"""
+        """Get the web scpope of a Web or Mobile target"""
         if target is None:
             target = self.db.find_targets(**kwargs)
             if target:
