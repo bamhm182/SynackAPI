@@ -282,3 +282,20 @@
 >> >>> h.targets.set_unregistered()
 >> [{"id": "pwjlgmf",...},...]
 >> ```
+
+## targets.get_attachments(target, **kwargs)
+
+> Gets the attachments of a specific target.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_attachments(codename='SLAPPYFROG')
+>> [{
+>>   'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248, 'filename': 'FrogApp.apk',
+>>   'url': 'https://storage.googleapis.com/...'}, ...]
+>> }, ...]
