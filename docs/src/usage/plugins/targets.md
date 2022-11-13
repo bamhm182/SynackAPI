@@ -296,6 +296,6 @@
 >> ```python3
 >> >>> h.targets.get_attachments(codename='SLAPPYFROG')
 >> [{
->>   'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248, 'filename': 'FrogApp.apk',
->>   'url': 'https://storage.googleapis.com/...'}, ...]
+>> >>> 'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248,
+>> >>> 'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...' 
 >> }, ...]
