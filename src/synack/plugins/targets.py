@@ -261,3 +261,14 @@ class Targets(Plugin):
         if len(targets) >= 15:
             ret.extend(self.set_registered())
         return ret
+
+    def get_attachments(self, target=None, **kwargs):
+        """Get the attachments of a target."""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        res = self.api.request('GET', f'targets/{target.slug}/resources')
+        if res.status_code == 200:
+            resources = res.json()
+            return resources
