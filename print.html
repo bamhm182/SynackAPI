@@ -1551,6 +1551,21 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_querystatusregistered-query_changes"><a class="header" href="#targetsget_querystatusregistered-query_changes">targets.get_query(status='registered', query_changes={})</a></h2>
+<blockquote>
+<p>Pulls back a list of targets matching the specified query</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>string</td><td>The type of targets to pull back. (Ex: <code>registered</code>, <code>unregistered</code>, <code>upcoming</code>, <code>all</code>)</td></tr>
+<tr><td><code>query_changes</code></td><td>dict()</td><td>Changes to make to the standard query. (Ex: <code>{&quot;sorting['field']&quot;: &quot;dateUploaded&quot;}</code></td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_query(status='unregistered')
+[{&quot;codename&quot;: &quot;SLEEPYSLUG&quot;, ...}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
 <blockquote>
 <p>The Registered Summary is a short list of information about every target you have registered.
@@ -1632,7 +1647,7 @@ If no kwargs are provided, the scope of your currently connected target will be 
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_upcoming()
-[{'codename': 'SLEEPYSLUG', 'slug': '1o2h8o', 'category_name': 'Web Application', 'organization_name': 'SLEEPY Orgnization', 'upcoming_start_date': 1668430800}, ...]
+[{'codename': 'SLEEPYSLUG', 'upcoming_start_date': 1668430800, ...}, ...]
 </code></pre>
 </blockquote>
 </blockquote>
