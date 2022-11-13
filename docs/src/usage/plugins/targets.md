@@ -16,7 +16,6 @@
 >> 'DAPPERDINGO'
 >> ```
 
-
 ## targets.build_scope_host_db(slug, scope)
 
 > Prints a list of IPs ready to ingest into the Database
@@ -147,6 +146,21 @@
 >> [{"credentials": [{...},...],...}]
 >> ```
 
+## targets.get_query(status='registered', query_changes={})
+
+> Pulls back a list of targets matching the specified query
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `status` | string | The type of targets to pull back. (Ex: `registered`, `unregistered`, `upcoming`, `all`)
+> | `query_changes` | dict() | Changes to make to the standard query. (Ex: `{"sorting['field']": "dateUploaded"}`
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_query(status='unregistered')
+>> [{"codename": "SLEEPYSLUG", ...}, ...]
+>> ```
+
 ## targets.get_registered_summary()
 
 > The Registered Summary is a short list of information about every target you have registered.
@@ -230,7 +244,7 @@
 >> Examples
 >> ```python3
 >> >>> h.targets.get_upcoming()
->> [{'codename': 'SLEEPYSLUG', 'slug': '1o2h8o', 'category_name': 'Web Application', 'organization_name': 'SLEEPY Orgnization', 'upcoming_start_date': 1668430800}, ...]
+>> [{'codename': 'SLEEPYSLUG', 'upcoming_start_date': 1668430800, ...}, ...]
 >> ```
 
 ## targets.set_connected(target, **kwargs)

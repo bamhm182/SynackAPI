@@ -135,6 +135,26 @@ class Targets(Plugin):
             if res.status_code == 200:
                 return res.json()
 
+    def get_query(self, status='registered', query_changes={}):
+        """Get information about targets returned from a query"""
+        if not self.db.categories:
+            self.get_assessments()
+        categories = []
+        for category in self.db.categories:
+            if category.passed_practical and category.passed_written:
+                categories.append(category.id)
+        query = {
+            'filter[primary]': status,
+            'filter[secondary]': 'all',
+            'filter[industry]': 'all',
+            'filter[category][]': categories
+        }
+        query.update(query_changes)
+        res = self.api.request('GET', 'targets', query=query)
+        if res.status_code == 200:
+            self.db.add_targets(res.json(), is_registered=True)
+            return res.json()
+
     def get_registered_summary(self):
         """Get information on your registered targets"""
         res = self.api.request('GET', 'targets/registered_summary')
@@ -199,45 +219,15 @@ class Targets(Plugin):
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
-        if not self.db.categories:
-            self.get_assessments()
-        categories = []
-        for c in self.db.categories:
-            if c.passed_practical and c.passed_practical:
-                categories.append(c.id)
-        query = {
-                'filter[primary]': 'unregistered',
-                'filter[secondary]': 'all',
-                'filter[industry]': 'all',
-                'filter[category][]': categories
-        }
-        res = self.api.request('GET', 'targets', query=query)
-        ret = []
-        if res.status_code == 200:
-            self.db.add_targets(res.json(), is_registered=True)
-            for t in res.json():
-                ret.append({'codename': t['codename'], 'slug': t['slug']})
-        return ret
+        return self.get_query(status='unregistered')
 
     def get_upcoming(self):
         """Get slugs and upcoming start dates of all upcoming targets"""
-        query = {
-                'filter[primary]': 'upcoming',
-                'filter[secondary]': 'all',
-                'filter[industry]': 'all',
-                'sorting[field]': 'upcomingStartDate',
-                'sorting[direction]': 'asc'
+        query_changes = {
+            'sorting[field]': 'upcomingStartDate',
+            'sorting[direction]': 'asc'
         }
-        res = self.api.request('GET', 'targets', query=query)
-        ret = []
-        if res.status_code == 200:
-            for t in res.json():
-                ret.append({'codename': t['codename'],
-                            'slug': t['slug'],
-                            'category_name': t['category']['name'],
-                            'organization_name': t['organization']['name'],
-                            'upcoming_start_date': t['upcoming_start_date']})
-        return ret
+        return self.get_query(status='upcoming', query_changes=query_changes)
 
     def set_connected(self, target=None, **kwargs):
         """Connect to a target"""
