@@ -62,7 +62,14 @@ class Missions(Plugin):
                 except ValueError:
                     claimed_on = datetime.strptime(m['claimedOn'],
                                                    "%Y-%m-%dT%H:%M:%SZ")
-                elapsed = int((utc - claimed_on).total_seconds())
+                try:
+                    modified_on = datetime.strptime(m['modifiedOn'],
+                                                    "%Y-%m-%dT%H:%M:%S.%fZ")
+                except ValueError:
+                    modified_on = datetime.strptime(m['modifiedOn'],
+                                                    "%Y-%m-%dT%H:%M:%SZ")
+                report_time = claimed_on if claimed_on > modified_on else modified_on
+                elapsed = int((utc - report_time).total_seconds())
                 time = m['maxCompletionTimeInSecs'] - elapsed
                 if time < ret['time'] or ret['time'] == 0:
                     ret['time'] = time

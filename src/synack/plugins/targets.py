@@ -104,6 +104,18 @@ class Targets(Plugin):
             self.db.add_categories(res.json())
             return self.db.categories
 
+    def get_attachments(self, target=None, **kwargs):
+        """Get the attachments of a target."""
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        res = self.api.request('GET', f'targets/{target.slug}/resources')
+        if res.status_code == 200:
+            return res.json()
+
     def get_connected(self):
         """Return information about the currenly selected target"""
         res = self.api.request('GET', 'launchpoint')
@@ -166,7 +178,7 @@ class Targets(Plugin):
                 ret[t['id']] = t
         return ret
 
-    def get_scope(self, **kwargs):
+    def get_scope(self, add_to_db=False, **kwargs):
         """Get the scope of a target"""
         if len(kwargs) > 0:
             target = self.db.find_targets(**kwargs)
@@ -180,11 +192,11 @@ class Targets(Plugin):
             for category in self.db.categories:
                 categories[category.id] = category.name
             if categories[target.category].lower() == 'host':
-                return self.get_scope_host(target)
+                return self.get_scope_host(target, add_to_db=add_to_db)
             elif categories[target.category].lower() in ['web application', 'mobile']:
-                return self.get_scope_web(target)
+                return self.get_scope_web(target, add_to_db=add_to_db)
 
-    def get_scope_host(self, target=None, **kwargs):
+    def get_scope_host(self, target=None, add_to_db=False, **kwargs):
         """Get the scope of a Host target"""
         if target is None:
             target = self.db.find_targets(**kwargs)
@@ -194,12 +206,13 @@ class Targets(Plugin):
             res = self.api.request('GET', f'targets/{target.slug}/cidrs?page=all')
             if res.status_code == 200:
                 scope = res.json()['cidrs']
-                self.db.add_ips(self.build_scope_host_db(target.slug, scope))
+                if add_to_db:
+                    self.db.add_ips(self.build_scope_host_db(target.slug, scope))
                 if self.db.use_scratchspace:
                     self.scratchspace.set_hosts_file(scope, target=target)
                 return scope
 
-    def get_scope_web(self, target=None, **kwargs):
+    def get_scope_web(self, target=None, add_to_db=False, **kwargs):
         """Get the web scpope of a Web or Mobile target"""
         if target is None:
             target = self.db.find_targets(**kwargs)
@@ -212,7 +225,8 @@ class Targets(Plugin):
             for asset in res.json():
                 if target.slug in [o['owner_uid'] for o in asset['owners']]:
                     scope.append(asset)
-            self.db.add_urls(self.build_scope_web_db(scope))
+            if add_to_db:
+                self.db.add_urls(self.build_scope_web_db(scope))
             if self.db.use_scratchspace:
                 self.scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
             return scope

@@ -12,7 +12,7 @@ from .base import Plugin
 class Templates(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Db']:
+        for plugin in ['Alerts', 'Db', 'Targets']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -31,9 +31,20 @@ class Templates(Plugin):
             return str(generic)
         return str(specific)
 
-    @staticmethod
-    def build_safe_name(name):
+    def build_replace_variables(self, text, target=None, **kwargs):
+        """Replaces known variables within text"""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+
+        if target:
+            text = text.replace("{{ TARGET_CODENAME }}", str(target.codename))
+        return text
+
+    def build_safe_name(self, name):
         """Simplify a name to use for a file path"""
+        name = self.alerts.sanitize(name)
         name = name.lower()
         name = re.sub('[^a-z0-9]', '_', name)
         return re.sub('_+', '_', name)
