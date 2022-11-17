@@ -13,6 +13,7 @@ from unittest.mock import MagicMock, mock_open, patch
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
 import synack  # noqa: E402
+from synack.db.models import Target  # noqa: E402
 
 
 class TemplatesTestCase(unittest.TestCase):
@@ -104,6 +105,25 @@ class TemplatesTestCase(unittest.TestCase):
             ret = self.templates.build_sections('/tmp/mission.txt')
             self.assertEqual(sections, ret)
             m.assert_called_with('/tmp/mission.txt', 'r')
+
+    def test_build_text_replaced_variables(self):
+        """Should replace variables in text given text and Target info"""
+        self.templates.db.find_targets = MagicMock()
+        tgts = [Target(codename='SNEAKYSASQUATCH', slug='38h24iu')]
+        self.templates.db.find_targets.return_value = tgts
+        input_text = "The target is {{ TARGET_CODENAME }}"
+        expected_output = "The target is SNEAKYSASQUATCH"
+        self.assertEquals(self.templates.build_replace_variables(input_text, target=tgts[0]), expected_output)
+
+    def test_build_text_replaced_variables_codename(self):
+        """Should replace variables in text given text and codename"""
+        self.templates.db.find_targets = MagicMock()
+        tgts = [Target(codename='SNEAKYSASQUATCH', slug='38h24iu')]
+        self.templates.db.find_targets.return_value = tgts
+        input_text = "The target is {{ TARGET_CODENAME }}"
+        expected_output = "The target is SNEAKYSASQUATCH"
+        actual_output = self.templates.build_replace_variables(input_text, codename='SLEEPYSASQUATCH')
+        self.assertEquals(actual_output, expected_output)
 
     def test_get_file(self):
         self.templates.build_filepath = MagicMock()

@@ -12,7 +12,7 @@ from .base import Plugin
 class Templates(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Db']:
+        for plugin in ['Db', 'Targets']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -30,6 +30,17 @@ class Templates(Plugin):
         if not specific.exists() and generic.exists() and generic_ok:
             return str(generic)
         return str(specific)
+
+    def build_replace_variables(self, text, target=None, **kwargs):
+        """Replaces known variables within text"""
+        if target is None:
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+
+        if target:
+            text = text.replace("{{ TARGET_CODENAME }}", str(target.codename))
+        return text
 
     @staticmethod
     def build_safe_name(name):

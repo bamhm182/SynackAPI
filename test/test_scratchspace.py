@@ -23,15 +23,15 @@ class ScratchspaceTestCase(unittest.TestCase):
     def test_build_filepath_codename(self):
         """Should build the appropriate scratchspace filepath given a codename"""
         self.scratchspace.db.scratchspace_dir = pathlib.Path('/tmp')
-        ret = self.scratchspace.build_filepath('test', codename='TIREDTURKEY')
-        self.assertEqual('/tmp/TIREDTURKEY/test.txt', ret)
+        ret = self.scratchspace.build_filepath('test.txt', codename='TIREDTURKEY')
+        self.assertEqual(pathlib.Path('/tmp/TIREDTURKEY/test.txt'), ret)
 
     def test_build_filepath_target(self):
         """Should build the appropriate scratchspace filepath given a filepath"""
         self.scratchspace.db.scratchspace_dir = pathlib.Path('/tmp')
         target = synack.db.models.Target(codename='TIREDTURKEY')
-        ret = self.scratchspace.build_filepath('test', target=target)
-        self.assertEqual('/tmp/TIREDTURKEY/test.txt', ret)
+        ret = self.scratchspace.build_filepath('test.txt', target=target)
+        self.assertEqual(pathlib.Path('/tmp/TIREDTURKEY/test.txt'), ret)
 
     def test_set_burp_file(self):
         """Should create a burp file within the correct directory"""
@@ -54,6 +54,47 @@ class ScratchspaceTestCase(unittest.TestCase):
             self.assertEqual('/tmp/TIREDTURKEY/burp.txt', ret)
             m.return_value.write.assert_called_with('{"test": "test"}')
             m.assert_called_with('/tmp/TIREDTURKEY/burp.txt', 'w')
+
+    def test_set_download_attachments_codename(self):
+        """Should download files give a list of attachments"""
+        dest_path = pathlib.Path('/tmp/TIREDTURKEY/burp.txt')
+        self.scratchspace.build_filepath = MagicMock()
+        self.scratchspace.build_filepath.return_value = dest_path
+        self.scratchspace.api.request = MagicMock()
+        self.scratchspace.api.request.return_value.status_code = 200
+        self.scratchspace.api.request.return_value.content = b'file_content'
+        m = mock_open()
+        attachments = [
+            {'slug': '43i7h', 'filename': 'file1.txt', 'url': 'https://downloads.com/xyzf'}
+        ]
+        with patch('builtins.open', m, create=True):
+            ret = self.scratchspace.set_download_attachments(attachments, codename='TIREDTIGER')
+            self.assertEqual([dest_path], ret)
+            m.return_value.write.assert_called_with(b'file_content')
+            m.assert_called_with(dest_path, 'wb')
+
+    @patch('builtins.input', side_effect=['yes'])
+    def test_set_download_attachments_prompt_overwrite(self, input_mock):
+        """Should prompt to overwrite if file exists"""
+        dest_path = pathlib.Path('/tmp/TIREDTURKEY/burp.txt')
+        self.scratchspace.build_filepath = MagicMock()
+        self.scratchspace.build_filepath.return_value = dest_path
+        self.scratchspace.api.request = MagicMock()
+        self.scratchspace.api.request.return_value.status_code = 200
+        self.scratchspace.api.request.return_value.content = b'file_content'
+        attachments = [
+            {'slug': '43i7h', 'filename': 'file1.txt', 'url': 'https://downloads.com/xyzf'}
+        ]
+        open_mock = mock_open()
+
+        with patch('pathlib.Path.exists') as exists_mock:
+            with patch('builtins.open', open_mock, create=True):
+                exists_mock.return_value = True
+                ret = self.scratchspace.set_download_attachments(attachments, codename='TIREDTIGER')
+                self.assertEqual([dest_path], ret)
+                open_mock.return_value.write.assert_called_with(b'file_content')
+                open_mock.assert_called_with(dest_path, 'wb')
+                input_mock.assert_called_with('file1.txt exists. Overwrite? [y/N]: ')
 
     def test_set_hosts_file(self):
         """Should create a host file within the correct directory"""

@@ -34,9 +34,39 @@
 >> '/tmp/Scratchspace/ADAMANTANT/burp.txt'
 >> ```
 
+## scratchspace.set_download_attachments(attachments, target=None, codename=None, prompt_overwrite=True):
+
+> This function will take a list of attachments from `h.targets.get_attachments()` and download them to the `codename` folder wthin the `self.db.scratchspace_dir` folder.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `attachments` | list(dict) | A list of attachments from `h.targets.get_attachments()`
+> | `target` | db.models.Target | A Target Database Object
+> | `codename` | str | Codename of a Target
+> | `prompt_overwrite` | bool | Boolean to determine if you should be prompted before overwriting an existing file
+>
+>> Examples
+>> ```python3
+>> >>> attachments = h.targets.get_attachments()
+>> >>> slug = attachments[0].get('listing_id')
+>> >>> codename = h.targets.build_codename_from_slug(slug)
+>> >>> h.scratchspace.set_download_attachments(attachments, codename=codename)
+>> [PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+>> ```
+>> ```python3
+>> >>> h.scratchspace.set_download_attachments(attachments, codename=codename)
+>> file1.txt exists. Overwrite? [y/N]: Y
+>> [PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+>> >>> h.scratchspace.set_download_attachments(attachments, codename=codename)
+>> file1.txt exists. Overwrite? [y/N]: N
+>> []
+>> >>> h.scratchspace.set_download_attachments(attachments, codename=codename, prompt_overwrite=False)
+>> [PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+>> ```
+
 ## scratchspace.set_hosts_file(content, target=None, codename=None)
 
-> This function will save a `hosts.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder
+> This function will save a `hosts.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder.
 > If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `self.targets.get_scope()` or `self.targets.get_scope_host()`
 >
 > | Arguments | Type | Description
@@ -51,3 +81,4 @@
 >> >>> h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
 >> '/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
 >> ```
+

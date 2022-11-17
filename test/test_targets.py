@@ -223,6 +223,60 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.add_categories.assert_called_with(assessments)
 
+    def test_get_attachments_current(self):
+        """Should return a list of attachments based on currently selected target"""
+        attachments = [
+            {
+                "listing_id": "12uib",
+                "url": "https://www.download.com/uh1g23ri",
+                "filename": "file1.txt",
+                "created_at": 1667840052,
+                "updated_at": 1667849178,
+            }
+        ]
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'codename': 'TASTYTACO', 'slug': 'u2ire'}
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = attachments
+        self.assertEquals(self.targets.get_attachments(), attachments)
+        self.targets.api.request.assert_called_with('GET', 'targets/u2ire/resources')
+
+    def test_get_attachments_slug(self):
+        """Should return a list of attachments given a slug"""
+        attachments = [
+            {
+                "listing_id": "12uib",
+                "url": "https://www.download.com/uh1g23ri",
+                "filename": "file1.txt",
+                "created_at": 1667840052,
+                "updated_at": 1667849178,
+            }
+        ]
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = attachments
+        self.assertEquals(self.targets.get_attachments(slug='u2ire'), attachments)
+        self.targets.api.request.assert_called_with('GET', 'targets/u2ire/resources')
+
+    def test_get_attachments_target(self):
+        """Should return a list of attachments given a Target"""
+        attachments = [
+            {
+                "listing_id": "12uib",
+                "url": "https://www.download.com/uh1g23ri",
+                "filename": "file1.txt",
+                "created_at": 1667840052,
+                "updated_at": 1667849178,
+            }
+        ]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = attachments
+        self.assertEquals(self.targets.get_attachments(target=Target(slug='u2ire')), attachments)
+        self.targets.api.request.assert_called_with('GET', 'targets/u2ire/resources')
+
     def test_get_connected(self):
         """Should make a request to get the currently selected target"""
         self.targets.api.request.return_value.status_code = 200
