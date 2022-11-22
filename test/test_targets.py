@@ -403,7 +403,19 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.categories = [Category(id=1, name='Host')]
         out = self.targets.get_scope(slug='1392g78yr')
         self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
-        self.targets.get_scope_host.assert_called_with(tgt)
+        self.targets.get_scope_host.assert_called_with(tgt, add_to_db=False)
+        self.assertEquals(out, 'HostScope')
+
+    def test_get_scope_for_host_add_to_db(self):
+        """Should get the scope for a Host when given Host information"""
+        self.targets.get_scope_host = MagicMock()
+        self.targets.get_scope_host.return_value = 'HostScope'
+        tgt = Target(category=1)
+        self.targets.db.find_targets.return_value = [tgt]
+        self.targets.db.categories = [Category(id=1, name='Host')]
+        out = self.targets.get_scope(slug='1392g78yr', add_to_db=True)
+        self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
+        self.targets.get_scope_host.assert_called_with(tgt, add_to_db=True)
         self.assertEquals(out, 'HostScope')
 
     def test_get_scope_for_web(self):
@@ -415,7 +427,19 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.categories = [Category(id=2, name='Web Application')]
         out = self.targets.get_scope(slug='1392g78yr')
         self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
-        self.targets.get_scope_web.assert_called_with(tgt)
+        self.targets.get_scope_web.assert_called_with(tgt, add_to_db=False)
+        self.assertEquals(out, 'WebScope')
+
+    def test_get_scope_for_web_add_to_db(self):
+        """Should get the scope for a Host when given Web information"""
+        self.targets.get_scope_web = MagicMock()
+        self.targets.get_scope_web.return_value = 'WebScope'
+        tgt = Target(category=2)
+        self.targets.db.find_targets.return_value = [tgt]
+        self.targets.db.categories = [Category(id=2, name='Web Application')]
+        out = self.targets.get_scope(slug='1392g78yr', add_to_db=True)
+        self.targets.db.find_targets.assert_called_with(slug='1392g78yr')
+        self.targets.get_scope_web.assert_called_with(tgt, add_to_db=True)
         self.assertEquals(out, 'WebScope')
 
     def test_get_scope_host(self):
@@ -431,6 +455,22 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
         self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
         self.targets.api.request.return_value.json.assert_called()
+
+    def test_get_scope_host_add_to_db(self):
+        """Should get the scope for a Host"""
+        ips = ['1.1.1.1/32', '2.2.2.2/32']
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = {
+            'cidrs': ips
+        }
+        self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
+        out = self.targets.get_scope_host(codename='SASSYSQUIRREL', add_to_db=True)
+        self.assertEqual(ips, out)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
+        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
+        self.targets.api.request.return_value.json.assert_called()
+        self.targets.db.add_ips.assert_called_with([{'target': '213h89h3', 'ip': '1.1.1.1'},
+                                                    {'target': '213h89h3', 'ip': '2.2.2.2'}])
 
     def test_get_scope_no_provided(self):
         """Should get the scope for the currently connected target if none is specified"""
@@ -461,6 +501,29 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with('GET',
                                                     'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')
         self.targets.api.request.return_value.json.assert_called()
+
+    def test_get_scope_web_add_to_db(self):
+        """Should get the scope for a Web Application"""
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.build_scope_web_burp = MagicMock()
+        self.targets.build_scope_web_db = MagicMock()
+        web_results = [{
+            'web_results': 'yup these them!',
+            'owners': [{
+                'owner_uid': '213h89h3'
+            }],
+        }]
+        self.targets.api.request.return_value.json.return_value = web_results
+        tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
+        self.targets.db.find_targets.return_value = [tgt]
+        out = self.targets.get_scope_web(codename='SASSYSQUIRREL', add_to_db=True)
+        self.assertEqual(web_results, out)
+        self.targets.build_scope_web_burp.assert_called_with(web_results)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')
+        self.targets.api.request.return_value.json.assert_called()
+        self.targets.db.add_urls.assert_called_with(self.targets.build_scope_web_db.return_value)
 
     def test_get_unregistered(self):
         """Should query for unregistered targets"""
