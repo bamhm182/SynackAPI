@@ -81,7 +81,10 @@ class TemplatesTestCase(unittest.TestCase):
 
     def test_build_safe_name(self):
         """Should convert complex missions names to something simpler"""
+        self.templates.alerts = MagicMock()
+        self.templates.alerts.sanitize.return_value = "S!oME_RaNdOm___MISSION!"
         one = self.templates.build_safe_name("S!oME_RaNdOm___MISSION!")
+        self.templates.alerts.sanitize.assert_called_with("S!oME_RaNdOm___MISSION!")
         one_out = "s_ome_random_mission_"
         self.assertEqual(one_out, one)
 

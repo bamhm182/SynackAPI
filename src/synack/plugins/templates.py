@@ -12,7 +12,7 @@ from .base import Plugin
 class Templates(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Db', 'Targets']:
+        for plugin in ['Alerts', 'Db', 'Targets']:
             setattr(self,
                     plugin.lower(),
                     self.registry.get(plugin)(self.state))
@@ -42,9 +42,9 @@ class Templates(Plugin):
             text = text.replace("{{ TARGET_CODENAME }}", str(target.codename))
         return text
 
-    @staticmethod
-    def build_safe_name(name):
+    def build_safe_name(self, name):
         """Simplify a name to use for a file path"""
+        name = self.alerts.sanitize(name)
         name = name.lower()
         name = re.sub('[^a-z0-9]', '_', name)
         return re.sub('_+', '_', name)
