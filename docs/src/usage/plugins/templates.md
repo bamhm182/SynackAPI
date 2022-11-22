@@ -32,6 +32,23 @@
 >> '/home/user/Templates/mission/web/mission_without_a_template.txt'
 >> ```
 
+## templates.build_replace_variables(text, target=None, **kwargs)
+
+> Replaces some variables within a given piece of text based on the target provided
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `text` | str | String to replace variables within
+> | `target` | db.models.Target | Target to use for variables
+> | `kwargs` | kwargs | Key word arguments to use for finding a target (codename, slug, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> target = h.db.find_targets(slug='2oh3ui')[0]
+>> >>> h.templates.build_replace_variables("This mission is for {{ TARGET_CODENAME }}", target=target)
+>> This mission is for TRANSFORMERTURKEY
+>> ```
+
 ## templates.build_safe_name(name)
 
 > Takes a name and converts it into something that is definitely safe for a filepath 
