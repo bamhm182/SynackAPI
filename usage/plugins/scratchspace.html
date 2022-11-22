@@ -172,9 +172,38 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue"><a class="header" href="#scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue">scratchspace.set_download_attachments(attachments, target=None, codename=None, prompt_overwrite=True):</a></h2>
+<blockquote>
+<p>This function will take a list of attachments from <code>h.targets.get_attachments()</code> and download them to the <code>codename</code> folder wthin the <code>self.db.scratchspace_dir</code> folder.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>attachments</code></td><td>list(dict)</td><td>A list of attachments from <code>h.targets.get_attachments()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+<tr><td><code>prompt_overwrite</code></td><td>bool</td><td>Boolean to determine if you should be prompted before overwriting an existing file</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; attachments = h.targets.get_attachments()
+&gt;&gt;&gt; slug = attachments[0].get('listing_id')
+&gt;&gt;&gt; codename = h.targets.build_codename_from_slug(slug)
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: Y
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: N
+[]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename, prompt_overwrite=False)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder.
 If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>

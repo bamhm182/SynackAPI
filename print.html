@@ -598,6 +598,30 @@ This function expects <code>h.db.smtp_x</code> attributes to have been set.</p>
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="alertssanitizemessage"><a class="header" href="#alertssanitizemessage">alerts.sanitize(message):</a></h2>
+<blockquote>
+<p>This function aims to remove URLs, IPv4, and IPv6 content from a given message.
+Sometimes Synack puts sensitive URLs and IP addresses in content like Mission Titles,
+so if you are sending these through 3rd party networks (Slack, Discord, Email, SMS, etc.),
+please make sure that you do you due dilligence to ensure you aren't sending client information.</p>
+<p>This function has been tested to ensure a wide variety of sensitive data is stripped, but it might
+not be all inclusive. If you find sensitive data that it doesn't properly sanitize, please let me
+know and we'll get it addressed.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to sanitize</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.alerts.sanitize('This is an IPv4: 1.2.3.4')
+This is an IP: [IPv4]
+&gt;&gt;&gt; h.alerts.sanitize('This is an IP: 1234:1d8::4567:2345')
+This is an IPv6: [IPv6]
+&gt;&gt;&gt; h.alerts.sanitize('This is a URL: https://something.com')
+This is a URL: [URL]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
 <blockquote>
 <p>This function makes a POST request to Slack in order to post a message.
@@ -1388,9 +1412,38 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue"><a class="header" href="#scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue">scratchspace.set_download_attachments(attachments, target=None, codename=None, prompt_overwrite=True):</a></h2>
+<blockquote>
+<p>This function will take a list of attachments from <code>h.targets.get_attachments()</code> and download them to the <code>codename</code> folder wthin the <code>self.db.scratchspace_dir</code> folder.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>attachments</code></td><td>list(dict)</td><td>A list of attachments from <code>h.targets.get_attachments()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+<tr><td><code>prompt_overwrite</code></td><td>bool</td><td>Boolean to determine if you should be prompted before overwriting an existing file</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; attachments = h.targets.get_attachments()
+&gt;&gt;&gt; slug = attachments[0].get('listing_id')
+&gt;&gt;&gt; codename = h.targets.build_codename_from_slug(slug)
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: Y
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: N
+[]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename, prompt_overwrite=False)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder.
 If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
@@ -1522,6 +1575,24 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
 [{&quot;id&quot;: 1, ...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_attachmentstarget-kwargs"><a class="header" href="#targetsget_attachmentstarget-kwargs">targets.get_attachments(target, **kwargs)</a></h2>
+<blockquote>
+<p>Gets the attachments of a specific target.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_attachments(codename='SLAPPYFROG')
+[{
+  'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248,
+  'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...' 
+}, ...]
 </code></pre>
 </blockquote>
 </blockquote>
@@ -1715,6 +1786,23 @@ h.targets.set_connected(slug='12083y9')
 '/home/user/Templates/mission/web/generic.txt'
 &gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=False)
 '/home/user/Templates/mission/web/mission_without_a_template.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_replace_variablestext-targetnone-kwargs"><a class="header" href="#templatesbuild_replace_variablestext-targetnone-kwargs">templates.build_replace_variables(text, target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Replaces some variables within a given piece of text based on the target provided</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td>str</td><td>String to replace variables within</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>Target to use for variables</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Key word arguments to use for finding a target (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; target = h.db.find_targets(slug='2oh3ui')[0]
+&gt;&gt;&gt; h.templates.build_replace_variables(&quot;This mission is for {{ TARGET_CODENAME }}&quot;, target=target)
+This mission is for TRANSFORMERTURKEY
 </code></pre>
 </blockquote>
 </blockquote>

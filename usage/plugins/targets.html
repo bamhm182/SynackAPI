@@ -256,6 +256,24 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_attachmentstarget-kwargs"><a class="header" href="#targetsget_attachmentstarget-kwargs">targets.get_attachments(target, **kwargs)</a></h2>
+<blockquote>
+<p>Gets the attachments of a specific target.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_attachments(codename='SLAPPYFROG')
+[{
+  'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248,
+  'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...' 
+}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
 <blockquote>
 <p>Return minimal information about your currently connected Target</p>

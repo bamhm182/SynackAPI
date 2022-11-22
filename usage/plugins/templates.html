@@ -170,6 +170,23 @@
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="templatesbuild_replace_variablestext-targetnone-kwargs"><a class="header" href="#templatesbuild_replace_variablestext-targetnone-kwargs">templates.build_replace_variables(text, target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Replaces some variables within a given piece of text based on the target provided</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td>str</td><td>String to replace variables within</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>Target to use for variables</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Key word arguments to use for finding a target (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; target = h.db.find_targets(slug='2oh3ui')[0]
+&gt;&gt;&gt; h.templates.build_replace_variables(&quot;This mission is for {{ TARGET_CODENAME }}&quot;, target=target)
+This mission is for TRANSFORMERTURKEY
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="templatesbuild_safe_namename"><a class="header" href="#templatesbuild_safe_namename">templates.build_safe_name(name)</a></h2>
 <blockquote>
 <p>Takes a name and converts it into something that is definitely safe for a filepath </p>
