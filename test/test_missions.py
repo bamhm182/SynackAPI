@@ -112,13 +112,15 @@ class MissionsTestCase(unittest.TestCase):
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 50},
-                "claimedOn": t1
+                "claimedOn": t1,
+                "modifiedOn": t1
             },
             {
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 25},
-                "claimedOn": t2
+                "claimedOn": t2,
+                "modifiedOn": t2
             }
         ]
 
@@ -141,13 +143,15 @@ class MissionsTestCase(unittest.TestCase):
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 50},
-                "claimedOn": t1
+                "claimedOn": t1,
+                "modifiedOn": t1
             },
             {
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 25},
-                "claimedOn": t2
+                "claimedOn": t2,
+                "modifiedOn": t2
             }
         ]
 
