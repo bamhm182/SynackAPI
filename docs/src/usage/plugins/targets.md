@@ -269,6 +269,7 @@
 > Connect to a specified target
 >
 > | Argments | Type | Description
+> | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
 >
@@ -305,6 +306,7 @@
 > Get the connection details of a target
 >
 > | Argments | Type | Description
+> | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
 >
@@ -319,6 +321,7 @@
 > Get a summary of the submission analytics of a target
 >
 > | Argments | Type | Description
+> | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `hours_ago` | int | The amount of hours since the current time to query the analytics for. (ex: `hours_ago=48` will query how many submissions were made in the last `48` hours. Defaults to lifetime when not set.)
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
@@ -337,6 +340,7 @@
 > Get the details of previously submitted vulnerabilities from the analytics of a target
 >
 > | Argments | Type | Description
+> | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `status` | str | Query either `accepted`, `rejected` or `in_queue` vulnerabilities
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
@@ -353,7 +357,7 @@
 >>      ]
 >>    }, ...
 >> ]
->>  
+>> >>>
 >> >>> h.targets.get_submissions(status="in_queue", codename='BLINKYBABOON')
 >> [
 >>    {
