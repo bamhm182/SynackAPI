@@ -620,3 +620,98 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.get_unregistered.side_effect = [unreg, [t, t]]
         self.targets.api.request.return_value.status_code = 200
         self.assertEqual(17, len(self.targets.set_registered()))
+
+    def test_get_connections(self):
+        """Should return a summary of the lifetime and current connections given a slug"""
+        connections = {
+            "lifetime_connections": 200,
+            "current_connections": 5
+        }
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "connections",
+            "value": {
+                "lifetime_connections": 200,
+                "current_connections": 5
+            }
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_connections(slug='u2ire'), connections)
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/connections', query={"listing_id":"u2ire"})
+
+    def test_get_submissions_summary(self):
+        """Should return the amount of lifetime submissions given a slug"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "submissions",
+            "value": 35
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions_summary(slug='u2ire'), 35)
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/submissions', query={"listing_id":"u2ire"})
+
+    def test_get_submissions_summary_hours(self):
+        """Should return the amount of submissions in the last x hours given a slug"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "submissions",
+            "value": 5
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions_summary(hours_ago=48,slug='u2ire'), 5)
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/submissions', query={"listing_id":"u2ire","period":"48h"})
+
+    def test_get_submissions(self):
+        """Should return the accepted vulnerabilities for a target given a slug"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "categories",
+            "value": [{
+                "categories": ["Authorization/Permissions", "Access/Privacy Control Violation"],
+                "exploitable_locations": [{
+                        "type": "url",
+                        "value": "https://example.com/index.html",
+                        "created_at": 1625643431,
+                        "status": "fixed"
+                    }
+                ]
+            }]
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions(slug='u2ire'), return_data["value"])
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/categories', query={"listing_id":"u2ire","status":"accepted"})
+
+    def test_get_submissions_rejected(self):
+        """Should return the accepted vulnerabilities for a target given a slug"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "categories",
+            "value": [{
+                "categories": ["Authorization/Permissions", "Access/Privacy Control Violation"],
+                "exploitable_locations": [{
+                        "type": "url",
+                        "value": "https://example.com/index.html",
+                        "created_at": 1625643431,
+                        "status": "pending"
+                    }
+                ]
+            }]
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions(status="rejected", slug='u2ire'), return_data["value"])
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/categories', query={"listing_id":"u2ire","status":"rejected"})

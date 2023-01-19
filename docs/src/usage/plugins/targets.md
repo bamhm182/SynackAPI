@@ -269,6 +269,7 @@
 > Connect to a specified target
 >
 > | Argments | Type | Description
+> | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
 >
@@ -298,4 +299,73 @@
 >> >>>
 >> >>> h.targets.set_unregistered()
 >> [{"id": "pwjlgmf",...},...]
+>> ```
+
+## targets.get_connections(target, **kwargs)
+
+> Get the connection details of a target
+>
+> | Argments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_connections(codename='BLINKYBABOON')
+>> {"lifetime_connections":200,"current_connections":0}
+>> ```
+
+## targets.get_submissions_summary(target, hours_ago=None, **kwargs)
+
+> Get a summary of the submission analytics of a target
+>
+> | Argments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `hours_ago` | int | The amount of hours since the current time to query the analytics for. (ex: `hours_ago=48` will query how many submissions were made in the last `48` hours. Defaults to lifetime when not set.)
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_submissions_summary(codename='BLINKYBABOON')
+>> 35
+>> >>> 
+>> >>> h.targets.get_submissions_summary(hours_ago=48, codename='BLINKYBABOON')
+>> 5
+>> ```
+
+## targets.get_submissions(target, status="accepted", **kwargs)
+
+> Get the details of previously submitted vulnerabilities from the analytics of a target
+>
+> | Argments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `status` | str | Query either `accepted`, `rejected` or `in_queue` vulnerabilities
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_submissions(codename='BLINKYBABOON')
+>> [
+>>    {
+>>      "categories": ["Authorization/Permissions","SSRF"],
+>>      "exploitable_locations":[
+>>        {"type":"url","value":"https://example.com/index.html","created_at":1625646235,"status":"fixed"},
+>>        ...
+>>      ]
+>>    }, ...
+>> ]
+>> >>>
+>> >>> h.targets.get_submissions(status="in_queue", codename='BLINKYBABOON')
+>> [
+>>    {
+>>      "categories": ["Authorization/Permissions","SSRF"],
+>>      "exploitable_locations":[
+>>        {"type":"url","value":"https://example.com/login.html","created_at":1625646235,"status":"pending"},
+>>        ...
+>>      ]
+>>    }, ...
+>> ]
 >> ```
