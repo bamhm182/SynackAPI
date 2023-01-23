@@ -5,10 +5,12 @@ flake8 src test live-tests
 diff_arrays() {
     local -n _one=$1
     local -n _two=$2
+    echo "Alphabetical Order                                Current Order"
+    echo "---------------------------------------------------------------"
     for ((i=0; i<${#_one[@]}; i++)); do
-        if [[ "${_one[$i]}" != "${_two[$i]}" ]]; then
-            echo -e "${_two[$i]}\t${_one[$i]}"
-        fi
+        _two[$i]="${_two[$i]}                                                   "
+        #echo -e "${t:0:50}${_one[$i]}"
+        echo -e "${_two[$i]:0:50}${_one[$i]}"
     done
 }
 
@@ -41,7 +43,7 @@ for test in ./test/test_*.py; do
     readarray -t a_defs < <(printf '%s\n' "${defs[@]}" | sort)
     # Check Alphabetical
     if [[ "${defs[@]}" != "${a_defs[@]}" ]]; then
-        echo ${test} is not in alphabetical order
+        echo -e "${test} is not in alphabetical order"
         diff_arrays defs a_defs
     fi
 done
