@@ -135,6 +135,18 @@ class Targets(Plugin):
             }
             return ret
 
+    def get_connections(self, target=None, **kwargs):
+        """Get the connection details of a target."""
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        res = self.api.request('GET', "listing_analytics/connections", query={"listing_id": target.slug})
+        if res.status_code == 200:
+            return res.json()["value"]
+
     def get_credentials(self, **kwargs):
         """Get Credentials for a target"""
         target = self.db.find_targets(**kwargs)[0]
@@ -230,6 +242,36 @@ class Targets(Plugin):
             if self.db.use_scratchspace:
                 self.scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
             return scope
+
+    def get_submissions(self, target=None, status="accepted", **kwargs):
+        """Get the details of previously submitted vulnerabilities from the analytics of a target."""
+        if status not in ["accepted", "rejected", "in_queue"]:
+            return []
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        query = {"listing_id": target.slug, "status": status}
+        res = self.api.request('GET', "listing_analytics/categories", query=query)
+        if res.status_code == 200:
+            return res.json()["value"]
+
+    def get_submissions_summary(self, target=None, hours_ago=None, **kwargs):
+        """Get a summary of the submission analytics of a target."""
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self.db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+        query = {"listing_id": target.slug}
+        if hours_ago:
+            query["period"] = f"{hours_ago}h"
+        res = self.api.request('GET', "listing_analytics/submissions", query=query)
+        if res.status_code == 200:
+            return res.json()["value"]
 
     def get_unregistered(self):
         """Get slugs of all unregistered targets"""
