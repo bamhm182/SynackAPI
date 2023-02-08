@@ -331,6 +331,31 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with('GET', 'listing_analytics/connections',
                                                     query={"listing_id": "u2ire"})
 
+    def test_get_connections_no_args(self):
+        """Should return a summary of the lifetime and current connections if no args provided"""
+        connections = {
+            "lifetime_connections": 200,
+            "current_connections": 5
+        }
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "connections",
+            "value": {
+                "lifetime_connections": 200,
+                "current_connections": 5
+            }
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'codename': 'TIREDTIGER', 'slug': 'u2ire'}
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_connections(), connections)
+        self.targets.get_connected.assert_called_with()
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/connections',
+                                                    query={"listing_id": "u2ire"})
+
     def test_get_credentials(self):
         """Should get credentials for a given target"""
         target = Target(organization="qwewqe", slug="asdasd")
@@ -571,6 +596,54 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with('GET', 'listing_analytics/categories',
                                                     query={"listing_id": "u2ire", "status": "accepted"})
 
+    def test_get_submissions_invalid_status(self):
+        """Should return an empty dictionary if status is invalid"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "categories",
+            "value": [{
+                "categories": ["Authorization/Permissions", "Access/Privacy Control Violation"],
+                "exploitable_locations": [{
+                        "type": "url",
+                        "value": "https://example.com/index.html",
+                        "created_at": 1625643431,
+                        "status": "fixed"
+                    }
+                ]
+            }]
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions(slug='u2ire', status="bad_status"), [])
+
+    def test_get_submissions_no_slug(self):
+        """Should return info on currently connected target if slug not provided"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "categories",
+            "value": [{
+                "categories": ["Authorization/Permissions", "Access/Privacy Control Violation"],
+                "exploitable_locations": [{
+                        "type": "url",
+                        "value": "https://example.com/index.html",
+                        "created_at": 1625643431,
+                        "status": "fixed"
+                    }
+                ]
+            }]
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {"slug": "u2ire"}
+        self.assertEquals(self.targets.get_submissions(), return_data["value"])
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/categories',
+                                                    query={"listing_id": "u2ire", "status": "accepted"})
+
     def test_get_submissions_rejected(self):
         """Should return the accepted vulnerabilities for a target given a slug"""
         return_data = {
@@ -624,6 +697,23 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEquals(self.targets.get_submissions_summary(hours_ago=48, slug='u2ire'), 5)
         self.targets.api.request.assert_called_with('GET', 'listing_analytics/submissions',
                                                     query={"listing_id": "u2ire", "period": "48h"})
+
+    def test_get_submissions_summary_no_slug(self):
+        """Should return the amount of lifetime submissions for current connected when no slug"""
+        return_data = {
+            "listing_id": "u2ire",
+            "type": "submissions",
+            "value": 35
+        }
+        self.targets.db.find_targets = MagicMock()
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'slug': 'u2ire'}
+        self.targets.db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.json.return_value = return_data
+        self.assertEquals(self.targets.get_submissions_summary(), 35)
+        self.targets.api.request.assert_called_with('GET', 'listing_analytics/submissions',
+                                                    query={"listing_id": "u2ire"})
 
     def test_get_unregistered(self):
         """Should query for unregistered targets"""
