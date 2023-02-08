@@ -5,7 +5,10 @@
         <meta charset="UTF-8">
         <title>SynackAPI</title>
         <meta name="robots" content="noindex" />
+
+
         <!-- Custom HTML head -->
+        
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -16,15 +19,18 @@
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
     </head>
     <body>
         <!-- Provide site root to javascript -->
@@ -83,7 +89,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -113,6 +119,7 @@
                         <a href="https://www.github.com/bamhm182/SynackAPI" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -126,6 +133,7 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -1605,6 +1613,21 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_connectionstarget-kwargs"><a class="header" href="#targetsget_connectionstarget-kwargs">targets.get_connections(target, **kwargs)</a></h2>
+<blockquote>
+<p>Get the connection details of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Argments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_connections(codename='BLINKYBABOON')
+{&quot;lifetime_connections&quot;:200,&quot;current_connections&quot;:0}
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_credentialskwargs"><a class="header" href="#targetsget_credentialskwargs">targets.get_credentials(**kwargs)</a></h2>
 <blockquote>
 <p>Pulls back the credentials for a Target</p>
@@ -1700,6 +1723,60 @@ If no kwargs are provided, the scope of your currently connected target will be 
 </code></pre>
 </blockquote>
 </blockquote>
+<h2 id="targetsget_submissionstarget-statusaccepted-kwargs"><a class="header" href="#targetsget_submissionstarget-statusaccepted-kwargs">targets.get_submissions(target, status=&quot;accepted&quot;, **kwargs)</a></h2>
+<blockquote>
+<p>Get the details of previously submitted vulnerabilities from the analytics of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Argments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>status</code></td><td>str</td><td>Query either <code>accepted</code>, <code>rejected</code> or <code>in_queue</code> vulnerabilities</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_submissions(codename='BLINKYBABOON')
+[
+   {
+     &quot;categories&quot;: [&quot;Authorization/Permissions&quot;,&quot;SSRF&quot;],
+     &quot;exploitable_locations&quot;:[
+       {&quot;type&quot;:&quot;url&quot;,&quot;value&quot;:&quot;https://example.com/index.html&quot;,&quot;created_at&quot;:1625646235,&quot;status&quot;:&quot;fixed&quot;},
+       ...
+     ]
+   }, ...
+]
+&gt;&gt;&gt;
+&gt;&gt;&gt; h.targets.get_submissions(status=&quot;in_queue&quot;, codename='BLINKYBABOON')
+[
+   {
+     &quot;categories&quot;: [&quot;Authorization/Permissions&quot;,&quot;SSRF&quot;],
+     &quot;exploitable_locations&quot;:[
+       {&quot;type&quot;:&quot;url&quot;,&quot;value&quot;:&quot;https://example.com/login.html&quot;,&quot;created_at&quot;:1625646235,&quot;status&quot;:&quot;pending&quot;},
+       ...
+     ]
+   }, ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_submissions_summarytarget-hours_agonone-kwargs"><a class="header" href="#targetsget_submissions_summarytarget-hours_agonone-kwargs">targets.get_submissions_summary(target, hours_ago=None, **kwargs)</a></h2>
+<blockquote>
+<p>Get a summary of the submission analytics of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Argments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>hours_ago</code></td><td>int</td><td>The amount of hours since the current time to query the analytics for. (ex: <code>hours_ago=48</code> will query how many submissions were made in the last <code>48</code> hours. Defaults to lifetime when not set.)</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_submissions_summary(codename='BLINKYBABOON')
+35
+&gt;&gt;&gt; 
+&gt;&gt;&gt; h.targets.get_submissions_summary(hours_ago=48, codename='BLINKYBABOON')
+5
+</code></pre>
+</blockquote>
+</blockquote>
 <h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
 <blockquote>
 <p>Gets a list of unregistered Targets from the Synack API.</p>
@@ -1724,9 +1801,11 @@ If no kwargs are provided, the scope of your currently connected target will be 
 <h2 id="targetsset_connectedtarget-kwargs"><a class="header" href="#targetsset_connectedtarget-kwargs">targets.set_connected(target, **kwargs)</a></h2>
 <blockquote>
 <p>Connect to a specified target</p>
-<p>| Argments | Type | Description
-| <code>target</code> | db.models.Target | A single Target returned from the database
-| <code>kwargs</code> | kwargs | Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</p>
+<div class="table-wrapper"><table><thead><tr><th>Argments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">h.targets.set_connected(codename='BLINKYBABOON')
@@ -1901,39 +1980,50 @@ This mission is for TRANSFORMERTURKEY
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
             </nav>
 
         </div>
 
+
+
         <script>
             window.playground_line_numbers = true;
         </script>
+
         <script>
             window.playground_copyable = true;
         </script>
+
         <script src="ace.js"></script>
         <script src="editor.js"></script>
         <script src="mode-rust.js"></script>
         <script src="theme-dawn.js"></script>
         <script src="theme-tomorrow_night.js"></script>
+
         <script src="elasticlunr.min.js"></script>
         <script src="mark.min.js"></script>
         <script src="searcher.js"></script>
+
         <script src="clipboard.min.js"></script>
         <script src="highlight.js"></script>
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+
         <script>
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });
         </script>
+
     </body>
 </html>
