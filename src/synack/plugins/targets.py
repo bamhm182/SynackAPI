@@ -104,6 +104,32 @@ class Targets(Plugin):
             self.db.add_categories(res.json())
             return self.db.categories
 
+    def get_assets(self, assetType=None, hostType=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=None, **kwargs):
+        """Get the assets (scope) of a target"""
+        if len(kwargs) > 0:
+            target = self.db.find_targets(**kwargs)
+        else:
+            curr = self.get_connected()
+            target = self.db.find_targets(slug=curr.get('slug'))
+
+        if target:
+            target = target[0]
+            categories = dict()
+            query_string = f'?listingUid%5B%5D={target.slug}'
+            query_string += f'&assetType%5B%5D={assetType}' if assetType else ''
+            query_string += f'&hostType%5B%5D={hostType}' if hostType else ''
+            query_string += '&scope%5B%5D=' + '&scope%5B%5D='.join([s for s in scope]) if len(scope) else ''
+            query_string += f'&sort%5B%5D={sort}' if sort else ''
+            query_string += f'&active={active}' if active else ''
+            query_string += f'&sortDir={sort_dir}' if sort_dir else ''
+            query_string += f'&page={page}' if page else ''
+
+            res = self.api.request('GET', f'asset/v2/assets{query_string}')
+            if res.status_code == 200:
+                if self.db.use_scratchspace:
+                    self.scratchspace.set_assets_file(res.text, target=target)
+                return res.json()
+
     def get_attachments(self, target=None, **kwargs):
         """Get the attachments of a target."""
         if target is None:
