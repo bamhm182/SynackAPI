@@ -104,25 +104,38 @@ class Targets(Plugin):
             self.db.add_categories(res.json())
             return self.db.categories
 
-    def get_assets(self, assetType=None, hostType=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=None, **kwargs):
+    def get_assets(self, target=None, asset_type=None, host_type=None, active='true',
+                   scope=['in', 'discovered'], sort='location', sort_dir='asc',
+                   page=None, **kwargs):
         """Get the assets (scope) of a target"""
-        if len(kwargs) > 0:
-            target = self.db.find_targets(**kwargs)
-        else:
-            curr = self.get_connected()
-            target = self.db.find_targets(slug=curr.get('slug'))
+        if target is None:
+            if len(kwargs) > 0:
+                target = self.db.find_targets(**kwargs)
+            else:
+                curr = self.get_connected()
+                target = self.db.find_targets(slug=curr.get('slug'))
+
+        if type(scope) == str:
+            scope = [scope]
 
         if target:
-            target = target[0]
-            categories = dict()
+            if type(target) is list and len(target) > 0:
+                target = target[0]
             query_string = f'?listingUid%5B%5D={target.slug}'
-            query_string += f'&assetType%5B%5D={assetType}' if assetType else ''
-            query_string += f'&hostType%5B%5D={hostType}' if hostType else ''
-            query_string += '&scope%5B%5D=' + '&scope%5B%5D='.join([s for s in scope]) if len(scope) else ''
-            query_string += f'&sort%5B%5D={sort}' if sort else ''
-            query_string += f'&active={active}' if active else ''
-            query_string += f'&sortDir={sort_dir}' if sort_dir else ''
-            query_string += f'&page={page}' if page else ''
+            if asset_type is not None:
+                query_string += f'&assetType%5B%5D={asset_type}' if asset_type else ''
+            if host_type is not None:
+                query_string += f'&hostType%5B%5D={host_type}' if host_type else ''
+            if scope is not None:
+                query_string += '&scope%5B%5D=' + '&scope%5B%5D='.join([s for s in scope]) if len(scope) else ''
+            if sort is not None:
+                query_string += f'&sort%5B%5D={sort}' if sort else ''
+            if active is not None:
+                query_string += f'&active={active}' if active else ''
+            if sort_dir is not None:
+                query_string += f'&sortDir={sort_dir}' if sort_dir else ''
+            if page is not None:
+                query_string += f'&page={page}' if page else ''
 
             res = self.api.request('GET', f'asset/v2/assets{query_string}')
             if res.status_code == 200:
@@ -240,15 +253,29 @@ class Targets(Plugin):
             target = self.db.find_targets(**kwargs)
             if target:
                 target = target[0]
+
+        scope = set()
+
         if target:
-            res = self.api.request('GET', f'targets/{target.slug}/cidrs?page=all')
-            if res.status_code == 200:
-                scope = res.json()['cidrs']
+            assets = self.get_assets(target=target, active='true', asset_type='host', host_type='cidr')
+            for asset in assets:
+                if asset.get('active'):
+                    try:
+                        ipaddress.IPv4Network(asset.get('location'))
+                        scope.add(asset.get('location'))
+                    except ipaddress.AddressValueError:
+                        # Not actually an IP
+                        pass
+
+            scope.discard(None)
+
+            if len(scope) > 0:
                 if add_to_db:
                     self.db.add_ips(self.build_scope_host_db(target.slug, scope))
                 if self.db.use_scratchspace:
                     self.scratchspace.set_hosts_file(scope, target=target)
-                return scope
+
+        return scope
 
     def get_scope_web(self, target=None, add_to_db=False, **kwargs):
         """Get the web scpope of a Web or Mobile target"""

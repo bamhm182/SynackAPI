@@ -491,33 +491,45 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_get_scope_host(self):
         """Should get the scope for a Host"""
-        ips = ['1.1.1.1/32', '2.2.2.2/32']
-        self.targets.api.request.return_value.status_code = 200
-        self.targets.api.request.return_value.json.return_value = {
-            'cidrs': ips
-        }
+        ips = {'1.1.1.1/32', '2.2.2.2/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '2.2.2.2/32'
+            }
+        ]
         self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
         out = self.targets.get_scope_host(codename='SASSYSQUIRREL')
         self.assertEqual(ips, out)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
-        self.targets.api.request.return_value.json.assert_called()
 
     def test_get_scope_host_add_to_db(self):
         """Should get the scope for a Host"""
-        ips = ['1.1.1.1/32', '2.2.2.2/32']
-        self.targets.api.request.return_value.status_code = 200
-        self.targets.api.request.return_value.json.return_value = {
-            'cidrs': ips
-        }
+        ips = {'1.1.1.1/32', '2.2.2.2/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '2.2.2.2/32'
+            }
+        ]
+        self.targets.build_scope_host_db = MagicMock()
+        self.targets.build_scope_host_db.return_value = 'host_db_return_value'
         self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
         out = self.targets.get_scope_host(codename='SASSYSQUIRREL', add_to_db=True)
         self.assertEqual(ips, out)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
-        self.targets.api.request.return_value.json.assert_called()
-        self.targets.db.add_ips.assert_called_with([{'target': '213h89h3', 'ip': '1.1.1.1'},
-                                                    {'target': '213h89h3', 'ip': '2.2.2.2'}])
+        self.targets.build_scope_host_db.assert_called_with('213h89h3', ips)
+        self.targets.db.add_ips.assert_called_with('host_db_return_value')
 
     def test_get_scope_no_provided(self):
         """Should get the scope for the currently connected target if none is specified"""
