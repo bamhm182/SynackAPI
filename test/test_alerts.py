@@ -70,11 +70,13 @@ class AlertsTestCase(unittest.TestCase):
         self.assertEqual(self.alerts.sanitize('This is fine!'), 'This is fine!')
         self.assertEqual(self.alerts.sanitize('This is: fine'), 'This is: fine')
         self.assertEqual(self.alerts.sanitize('This is fine?'), 'This is fine?')
+        self.assertEqual(self.alerts.sanitize('24.0'), '24.0')
 
     def test_sanitize_urls(self):
         """Should sanitize URLs"""
         self.assertEqual(self.alerts.sanitize('test.cc'), '[URL]')
         self.assertEqual(self.alerts.sanitize('http://1.2.ewufg.4.test.cc'), '[URL]')
+        self.assertEqual(self.alerts.sanitize('hxxp://1.2.ewufg.4.test.cc'), '[URL]')
         self.assertEqual(self.alerts.sanitize('http://1.2.ewufg.4.test.cc:8081'), '[URL]')
         self.assertEqual(self.alerts.sanitize('http://1.2.ewufg.4.test.cc:8081/tacos/are/number/1'), '[URL]')
         self.assertEqual(self.alerts.sanitize('URL: https://www.test.com/1/2/3/air'), 'URL: [URL]')

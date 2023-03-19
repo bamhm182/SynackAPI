@@ -39,11 +39,11 @@ class Alerts(Plugin):
 
     def sanitize(self, message):
         message = re.sub(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}.[0-9]{1,3}', '[IPv4]', message)
-        message = re.sub(r'(?:https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}' +
+        message = re.sub(r'(?:h[tx]{1,2}ps?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}' +
                          r'\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\\/=]*)', '[URL]', message)
-        message = re.sub(r'(?:https?:\/\/)?(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}' +
-                         r'\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', '[URL]', message)
-        message = re.sub(r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b' +
+        message = re.sub(r'(?:h[xt]{1,2}ps?:\/\/)?(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}' +
+                         r'\\.[a-zA-Z0-9()]{2,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)', '[URL]', message)
+        message = re.sub(r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b' +
                          r'(?:[-a-zA-Z0-9()@:%_\+.~#?&\\/=]*)', '[URL]', message)
         message = re.sub(r'(?:^|(?<=\s))(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|' +
                          r'([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|' +

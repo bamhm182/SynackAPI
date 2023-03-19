@@ -16,21 +16,39 @@
 >> '/tmp/Scratchspace/ADAMANTANT/test.txt'
 >> ```
 
-## scratchspace.set_burp_file(content, target=None, codename=None)
+## scratchspace.set_assets_file(content, target=None, codename=None)
 
-> This function will save a `burp.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder
-> If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `self.targets.get_scope()` or `self.targets.get_scope_web()`
+> This function will save a `assets.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder
+> If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `targets.get_scope()` or `targets.get_scope_web()`
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `content` | str,list(str) | Either a preformatted string or (more likely) the return of `self.targets.get_scope_host()`
+> | `content` | str,list(str) | Either a preformatted string or (more likely) the return of `targets.get_scope()`
 > | `target` | db.models.Target | A Target Database Object
 > | `codename` | str | Codename of a Target
 >
 >> Examples
 >> ```python3
 >> >>> scope = h.targets.get_scope_web(codename='ADAMANTANT')
->> >>> h.scratchspace.set_hosts_file(scope, codename='ADAMANTANT')
+>> >>> h.scratchspace.set_assets_file(scope, codename='ADAMANTANT')
+>> '/tmp/Scratchspace/ADAMANTANT/assets.txt'
+>> ```
+
+## scratchspace.set_burp_file(content, target=None, codename=None)
+
+> This function will save a `burp.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder
+> If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `targets.get_scope()` or `targets.get_scope_web()`
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `content` | str,list(str) | Either a preformatted string or (more likely) the return of `targets.get_scope()`
+> | `target` | db.models.Target | A Target Database Object
+> | `codename` | str | Codename of a Target
+>
+>> Examples
+>> ```python3
+>> >>> scope = h.targets.get_scope_web(codename='ADAMANTANT')
+>> >>> h.scratchspace.set_burp_file(scope, codename='ADAMANTANT')
 >> '/tmp/Scratchspace/ADAMANTANT/burp.txt'
 >> ```
 
@@ -67,11 +85,11 @@
 ## scratchspace.set_hosts_file(content, target=None, codename=None)
 
 > This function will save a `hosts.txt` scope file within a `codename` folder in within the `self.db.scratchspace_dir` folder.
-> If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `self.targets.get_scope()` or `self.targets.get_scope_host()`
+> If `self.db.use_scratchspace` is `True`, this function is automatically run when you do `targets.get_scope()` or `targets.get_scope_host()`
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `content` | str,list(str) | Either a preformatted string or (more likely) the return of `self.targets.get_scope_host()`
+> | `content` | str,list(str) | Either a preformatted string or (more likely) the return of `targets.get_scope_host()`
 > | `target` | db.models.Target | A Target Database Object
 > | `codename` | str | Codename of a Target
 >

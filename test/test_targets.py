@@ -73,19 +73,22 @@ class TargetsTestCase(unittest.TestCase):
         """Should build a Burp Suite Scope given a Synack API Scope"""
         scope = [
             {
-                'raw_url': 'https://good.stuff.com',
+                'listing': 'uqwheiuqwhe',
+                'location': 'https://good.stuff.com',
                 'status': 'in',
-                'rules': [
-                    {'rule': '*.stuff.com/*'},
-                    {'rule': 'https://super.stuff.com/'},
-                ]
+                'rule': '*.stuff.com/*',
             },
             {
-                'raw_url': 'http://evil.stuff.com',
+                'listing': 'uqwheiuqwhe',
+                'location': 'https://good.stuff.com',
+                'status': 'in',
+                'rule': 'https://super.stuff.com/'
+            },
+            {
+                'listing': 'uqwheiuqwhe',
+                'location': 'http://evil.stuff.com',
                 'status': 'out',
-                'rules': [
-                    {'rule': '*.evil.stuff.com/login/*'},
-                ]
+                'rule': '*.evil.stuff.com/login/*'
             }
         ]
         expected = {
@@ -123,49 +126,39 @@ class TargetsTestCase(unittest.TestCase):
         """Should build a web scope that can be ingested into the Database"""
         scope = [
             {
-                'raw_url': 'https://good.stuff.com',
-                'owners': [{'owner_uid': '12345'}, {'owner_uid': '67890'}],
-                'status': 'in'
+                'listing': 'uqwheiuq',
+                'location': 'https://good.stuff.com',
+                'status': 'in',
+                'rule': '*.good.stuff.com/*'
             },
             {
-                'raw_url': 'https://bad.stuff.com',
-                'owners': [{'owner_uid': 'abcde'}],
-                'status': 'out'
+                'listing': 'uqwheiuq',
+                'location': 'https://bad.stuff.com',
+                'status': 'out',
+                'rule': '*.bad.stuff.com/*'
+            },
+            {
+                'listing': '21ye78r3hwe',
+                'location': 'https://good.things.com',
+                'status': 'in',
+                'rule': '*.good.things.com/*'
             }
         ]
         expected = [
             {
-                'target': '12345',
+                'target': 'uqwheiuq',
                 'urls': [{
                     'url': 'https://good.stuff.com'
                 }]
             },
             {
-                'target': '67890',
+                'target': '21ye78r3hwe',
                 'urls': [{
-                    'url': 'https://good.stuff.com'
+                    'url': 'https://good.things.com'
                 }]
             }
         ]
         self.assertEqual(expected, self.targets.build_scope_web_db(scope))
-
-    def test_build_scope_web_urls(self):
-        """Should build dictionaries of Web Application URLs given a Synack API Scope"""
-        scope = [
-            {
-                'raw_url': 'https://good.stuff.com',
-                'status': 'in'
-            },
-            {
-                'raw_url': 'https://bad.stuff.com',
-                'status': 'out'
-            }
-        ]
-        expected = {
-            'in': ['https://good.stuff.com'],
-            'out': ['https://bad.stuff.com']
-        }
-        self.assertEqual(expected, self.targets.build_scope_web_urls(scope))
 
     def test_build_slug_from_codename(self):
         """Should return a slug for a given codename"""
@@ -222,6 +215,41 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.categories = [cat1]
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.add_categories.assert_called_with(assessments)
+
+    def test_get_assets(self):
+        """Should return a list of assets for a currently connected target"""
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'codename': 'TURBULENTTORTOISE', 'slug': '327h8iw'}
+        self.targets.db.find_targets.return_value = [Target(slug='327h8iw')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.text = 'rettext'
+        self.targets.api.request.return_value.json.return_value = 'retjson'
+        self.assertEqual('retjson', self.targets.get_assets())
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v2/assets?listingUid%5B%5D=327h8iw&scope%5B%5D=in' +
+                                                    '&scope%5B%5D=discovered&sort%5B%5D=location&active=true' +
+                                                    '&sortDir=asc')
+
+    def test_get_assets_non_defaults(self):
+        """Should return a list of assets given information to query"""
+        self.targets.db.find_targets.return_value = [Target(codename='TURBULENTTORTOISE', slug='327h8iw')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.text = 'rettext'
+        self.targets.api.request.return_value.json.return_value = 'retjson'
+        self.assertEqual('retjson', self.targets.get_assets(codename='TURBULENTTORTOISE',
+                                                            asset_type='blah',
+                                                            host_type='applecidr',
+                                                            active='false',
+                                                            scope='secret',
+                                                            sort='vulnerable',
+                                                            sort_dir='desc',
+                                                            page=3,
+                                                            organization_uid='uiehqw'))
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v2/assets?listingUid%5B%5D=327h8iw' +
+                                                    '&organizationUid%5B%5D=uiehqw&assetType%5B%5D=blah' +
+                                                    '&hostType%5B%5D=applecidr&scope%5B%5D=secret' +
+                                                    '&sort%5B%5D=vulnerable&active=false&sortDir=desc&page=3')
 
     def test_get_attachments_current(self):
         """Should return a list of attachments based on currently selected target"""
@@ -491,33 +519,64 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_get_scope_host(self):
         """Should get the scope for a Host"""
-        ips = ['1.1.1.1/32', '2.2.2.2/32']
-        self.targets.api.request.return_value.status_code = 200
-        self.targets.api.request.return_value.json.return_value = {
-            'cidrs': ips
-        }
+        ips = {'1.1.1.1/32', '2.2.2.2/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '2.2.2.2/32'
+            }
+        ]
         self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
         out = self.targets.get_scope_host(codename='SASSYSQUIRREL')
         self.assertEqual(ips, out)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
-        self.targets.api.request.return_value.json.assert_called()
 
     def test_get_scope_host_add_to_db(self):
         """Should get the scope for a Host"""
-        ips = ['1.1.1.1/32', '2.2.2.2/32']
-        self.targets.api.request.return_value.status_code = 200
-        self.targets.api.request.return_value.json.return_value = {
-            'cidrs': ips
-        }
+        ips = {'1.1.1.1/32', '2.2.2.2/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '2.2.2.2/32'
+            }
+        ]
+        self.targets.build_scope_host_db = MagicMock()
+        self.targets.build_scope_host_db.return_value = 'host_db_return_value'
         self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
         out = self.targets.get_scope_host(codename='SASSYSQUIRREL', add_to_db=True)
         self.assertEqual(ips, out)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET', 'targets/213h89h3/cidrs?page=all')
-        self.targets.api.request.return_value.json.assert_called()
-        self.targets.db.add_ips.assert_called_with([{'target': '213h89h3', 'ip': '1.1.1.1'},
-                                                    {'target': '213h89h3', 'ip': '2.2.2.2'}])
+        self.targets.build_scope_host_db.assert_called_with('213h89h3', ips)
+        self.targets.db.add_ips.assert_called_with('host_db_return_value')
+
+    def test_get_scope_host_not_ip(self):
+        """Should get the scope for a Host"""
+        ips = {'1.1.1.1/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '8675309'
+            }
+        ]
+        self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
+        out = self.targets.get_scope_host(codename='SASSYSQUIRREL')
+        self.assertEqual(ips, out)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
 
     def test_get_scope_no_provided(self):
         """Should get the scope for the currently connected target if none is specified"""
@@ -530,46 +589,60 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_get_scope_web(self):
         """Should get the scope for a Web Application"""
-        self.targets.api.request.return_value.status_code = 200
         self.targets.build_scope_web_burp = MagicMock()
-        web_results = [{
-            'web_results': 'yup these them!',
-            'owners': [{
-                'owner_uid': '213h89h3'
-            }],
+        scope = [{
+            'listing': 'uewqhuiewq',
+            'location': 'https://good.things.com',
+            'rule': '*.good.things.com/*',
+            'status': 'in'
         }]
-        self.targets.api.request.return_value.json.return_value = web_results
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'listings': [{'listingUid': 'uewqhuiewq', 'scope': 'in'}],
+                'location': 'https://good.things.com (https://good.things.com)',
+                'scopeRules': [
+                    {'rule': '*.good.things.com/*'}
+                ]
+            }
+        ]
         tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
         self.targets.db.find_targets.return_value = [tgt]
         out = self.targets.get_scope_web(codename='SASSYSQUIRREL')
-        self.assertEqual(web_results, out)
-        self.targets.build_scope_web_burp.assert_called_with(web_results)
+        self.assertEqual(scope, out)
+        self.targets.build_scope_web_burp.assert_called_with(scope)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET',
-                                                    'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')
-        self.targets.api.request.return_value.json.assert_called()
+        self.targets.get_assets.assert_called_with(target=tgt, active='true', asset_type='webapp')
 
     def test_get_scope_web_add_to_db(self):
-        """Should get the scope for a Web Application"""
-        self.targets.api.request.return_value.status_code = 200
+        """Should get the scope for a Web Application and add it to the database"""
         self.targets.build_scope_web_burp = MagicMock()
         self.targets.build_scope_web_db = MagicMock()
-        web_results = [{
-            'web_results': 'yup these them!',
-            'owners': [{
-                'owner_uid': '213h89h3'
-            }],
+        self.targets.get_assets = MagicMock()
+        scope = [{
+            'listing': 'uewqhuiewq',
+            'location': 'https://good.things.com',
+            'rule': '*.good.things.com/*',
+            'status': 'in'
         }]
-        self.targets.api.request.return_value.json.return_value = web_results
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'listings': [{'listingUid': 'uewqhuiewq', 'scope': 'in'}],
+                'location': 'https://good.things.com (https://good.things.com)',
+                'scopeRules': [
+                    {'rule': '*.good.things.com/*'}
+                ]
+            }
+        ]
         tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
         self.targets.db.find_targets.return_value = [tgt]
         out = self.targets.get_scope_web(codename='SASSYSQUIRREL', add_to_db=True)
-        self.assertEqual(web_results, out)
-        self.targets.build_scope_web_burp.assert_called_with(web_results)
+        self.assertEqual(scope, out)
+        self.targets.build_scope_web_burp.assert_called_with(scope)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
-        self.targets.api.request.assert_called_with('GET',
-                                                    'asset/v1/organizations/93g8eh8/owners/listings/213h89h3/webapps')
-        self.targets.api.request.return_value.json.assert_called()
         self.targets.db.add_urls.assert_called_with(self.targets.build_scope_web_db.return_value)
 
     def test_get_submissions(self):

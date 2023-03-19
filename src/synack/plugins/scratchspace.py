@@ -27,6 +27,15 @@ class Scratchspace(Plugin):
             f = f / filename
             return f
 
+    def set_assets_file(self, content, target=None, codename=None):
+        if target or codename:
+            if type(content) in [list, set]:
+                content = '\n'.join(content)
+            dest_file = self.build_filepath('assets.txt', target=target, codename=codename)
+            with open(dest_file, 'w') as fp:
+                fp.write(content)
+                return dest_file
+
     def set_burp_file(self, content, target=None, codename=None):
         if target or codename:
             if type(content) == dict:
@@ -55,7 +64,7 @@ class Scratchspace(Plugin):
 
     def set_hosts_file(self, content, target=None, codename=None):
         if target or codename:
-            if type(content) == list:
+            if type(content) in [list, set]:
                 content = '\n'.join(content)
             dest_file = self.build_filepath('hosts.txt', target=target, codename=codename)
             with open(dest_file, 'w') as fp:

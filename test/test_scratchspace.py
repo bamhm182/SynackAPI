@@ -33,6 +33,28 @@ class ScratchspaceTestCase(unittest.TestCase):
         ret = self.scratchspace.build_filepath('test.txt', target=target)
         self.assertEqual(pathlib.Path('/tmp/TIREDTURKEY/test.txt'), ret)
 
+    def test_set_asset_file(self):
+        """Shoudl create an asset file within the correct directory"""
+        self.scratchspace.build_filepath = MagicMock()
+        self.scratchspace.build_filepath.return_value = '/tmp/TIREDTURKEY/assets.txt'
+        m = mock_open()
+        with patch('builtins.open', m, create=True):
+            ret = self.scratchspace.set_assets_file('Test', codename='TIREDTURKEY')
+            self.assertEqual('/tmp/TIREDTURKEY/assets.txt', ret)
+            m.return_value.write.assert_called_with('Test')
+            m.assert_called_with('/tmp/TIREDTURKEY/assets.txt', 'w')
+
+    def test_set_asset_file_list(self):
+        """Shoudl create an asset file within the correct directory"""
+        self.scratchspace.build_filepath = MagicMock()
+        self.scratchspace.build_filepath.return_value = '/tmp/TIREDTURKEY/assets.txt'
+        m = mock_open()
+        with patch('builtins.open', m, create=True):
+            ret = self.scratchspace.set_assets_file(['one', 'two', 'three'], codename='TIREDTURKEY')
+            self.assertEqual('/tmp/TIREDTURKEY/assets.txt', ret)
+            m.return_value.write.assert_called_with('one\ntwo\nthree')
+            m.assert_called_with('/tmp/TIREDTURKEY/assets.txt', 'w')
+
     def test_set_burp_file(self):
         """Should create a burp file within the correct directory"""
         self.scratchspace.build_filepath = MagicMock()
