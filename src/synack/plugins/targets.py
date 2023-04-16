@@ -4,6 +4,7 @@ Functions related to handling and checking targets
 """
 
 import ipaddress
+import re
 
 from urllib.parse import urlparse
 from .base import Plugin
@@ -45,45 +46,41 @@ class Targets(Plugin):
 
     def build_scope_web_burp(self, scope):
         """Return a Burp Suite scope given retrieved web scope"""
-        ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': [], 'include': []}}}
+        ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': list(), 'include': list()}}}
+
         for asset in scope:
-            state = 'include' if asset['status'] == 'in' else 'exclude'
-            raw = urlparse(asset['raw_url'])
-            for item in asset['rules']:
-                item = item['rule'].strip('.*')
-                url = urlparse(item)
-                if len(url.netloc) == 0:
-                    url = urlparse(raw.scheme + '://' + item)
-                ret['target']['scope'][state].append({
-                    'enabled': True if url.hostname else False,
-                    'scheme': url.scheme if url.scheme else 'any',
-                    'host': url.hostname,
-                    'file': url.path
-                })
+            state = 'include' if asset.get('status') == 'in' else 'exclude'
+            raw = urlparse(asset.get('location', ''))
+            item = asset.get('rule', '').strip('.*')
+            url = urlparse(item)
+            if len(url.netloc) == 0:
+                url = urlparse(raw.scheme + '://' + item)
+            ret['target']['scope'][state].append({
+                'enabled': True if url.hostname else False,
+                'scheme': url.scheme if url.scheme else 'any',
+                'host': url.hostname,
+                'file': url.path
+            })
         return ret
 
     def build_scope_web_db(self, scope):
         """Return a Web Scope that can be ingested into the Database"""
-        ret = list()
-        for asset in scope:
-            if asset.get('status') == 'in':
-                for owner in asset.get('owners'):
-                    ret.append({
-                        "target": owner.get('owner_uid'),
-                        "urls": [{
-                            "url": asset.get('raw_url')
-                        }]
-                    })
-        return ret
+        sorting = dict()
 
-    def build_scope_web_urls(self, scope):
-        """Return a list of the raw urls gived a retrieved web scope"""
-        ret = {"in": list(), "out": list()}
-        for asset in scope:
-            if asset.get('status') == 'in':
-                ret["in"].append(asset["raw_url"])
-            else:
-                ret["out"].append(asset["raw_url"])
+        for item in scope:
+            if item.get('status') == 'in':
+                slug = item.get('listing')
+                sorting[slug] = sorting.get(slug, list())
+                sorting[slug].append({'url': item.get('location')})
+
+        ret = list()
+
+        for slug, urls in sorting.items():
+            ret.append({
+                'target': slug,
+                'urls': urls
+            })
+
         return ret
 
     def build_slug_from_codename(self, codename):
@@ -106,7 +103,7 @@ class Targets(Plugin):
 
     def get_assets(self, target=None, asset_type=None, host_type=None, active='true',
                    scope=['in', 'discovered'], sort='location', sort_dir='asc',
-                   page=None, **kwargs):
+                   page=None, organization_uid=None, **kwargs):
         """Get the assets (scope) of a target"""
         if target is None:
             if len(kwargs) > 0:
@@ -121,23 +118,27 @@ class Targets(Plugin):
         if target:
             if type(target) is list and len(target) > 0:
                 target = target[0]
-            query_string = f'?listingUid%5B%5D={target.slug}'
-            if asset_type is not None:
-                query_string += f'&assetType%5B%5D={asset_type}' if asset_type else ''
-            if host_type is not None:
-                query_string += f'&hostType%5B%5D={host_type}' if host_type else ''
-            if scope is not None:
-                query_string += '&scope%5B%5D=' + '&scope%5B%5D='.join([s for s in scope]) if len(scope) else ''
-            if sort is not None:
-                query_string += f'&sort%5B%5D={sort}' if sort else ''
-            if active is not None:
-                query_string += f'&active={active}' if active else ''
-            if sort_dir is not None:
-                query_string += f'&sortDir={sort_dir}' if sort_dir else ''
-            if page is not None:
-                query_string += f'&page={page}' if page else ''
+            queries = list()
 
-            res = self.api.request('GET', f'asset/v2/assets{query_string}')
+            queries.append(f'listingUid%5B%5D={target.slug}')
+            if organization_uid is not None:
+                queries.append(f'organizationUid%5B%5D={organization_uid}')
+            if asset_type is not None:
+                queries.append(f'assetType%5B%5D={asset_type}')
+            if host_type is not None:
+                queries.append(f'hostType%5B%5D={host_type}')
+            for item in scope:
+                queries.append(f'scope%5B%5D={item}')
+            if sort is not None:
+                queries.append(f'sort%5B%5D={sort}')
+            if active is not None:
+                queries.append(f'active={active}')
+            if sort_dir is not None:
+                queries.append(f'sortDir={sort_dir}')
+            if page is not None:
+                queries.append(f'page={page}')
+
+            res = self.api.request('GET', f'asset/v2/assets?{"&".join(queries)}')
             if res.status_code == 200:
                 if self.db.use_scratchspace:
                     self.scratchspace.set_assets_file(res.text, target=target)
@@ -250,9 +251,9 @@ class Targets(Plugin):
     def get_scope_host(self, target=None, add_to_db=False, **kwargs):
         """Get the scope of a Host target"""
         if target is None:
-            target = self.db.find_targets(**kwargs)
-            if target:
-                target = target[0]
+            targets = self.db.find_targets(**kwargs)
+            if targets:
+                target = next(iter(targets), None)
 
         scope = set()
 
@@ -278,23 +279,37 @@ class Targets(Plugin):
         return scope
 
     def get_scope_web(self, target=None, add_to_db=False, **kwargs):
-        """Get the web scpope of a Web or Mobile target"""
+        """Get the scope of a Web target"""
         if target is None:
-            target = self.db.find_targets(**kwargs)
-            if target:
-                target = target[0]
-        res = self.api.request('GET', f'asset/v1/organizations/{target.organization}' +
-                                      f'/owners/listings/{target.slug}/webapps')
-        if res.status_code == 200:
-            scope = list()
-            for asset in res.json():
-                if target.slug in [o['owner_uid'] for o in asset['owners']]:
-                    scope.append(asset)
-            if add_to_db:
-                self.db.add_urls(self.build_scope_web_db(scope))
-            if self.db.use_scratchspace:
-                self.scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
-            return scope
+            targets = self.db.find_targets(**kwargs)
+            if targets:
+                target = next(iter(targets), None)
+
+        scope = list()
+
+        if target:
+            assets = self.get_assets(target=target, active='true', asset_type='webapp')
+            for asset in assets:
+                if asset.get('active'):
+                    location = next(iter(re.split(r' \(', asset.get('location', ''))))
+                    for listing in asset.get('listings', []):
+                        status = listing.get('scope')
+                        listing = listing.get('listingUid')
+                        for rule in asset.get('scopeRules', []):
+                            scope.append({
+                                'status': status,
+                                'listing': listing,
+                                'location': location,
+                                'rule': rule.get('rule')
+                            })
+
+            if len(scope) > 0:
+                if add_to_db:
+                    self.db.add_urls(self.build_scope_web_db(scope))
+                if self.db.use_scratchspace:
+                    self.scratchspace.set_web_file(self.build_scope_web_burp(scope), target=target)
+
+        return scope
 
     def get_submissions(self, target=None, status="accepted", **kwargs):
         """Get the details of previously submitted vulnerabilities from the analytics of a target."""
