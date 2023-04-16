@@ -103,7 +103,7 @@ class Targets(Plugin):
 
     def get_assets(self, target=None, asset_type=None, host_type=None, active='true',
                    scope=['in', 'discovered'], sort='location', sort_dir='asc',
-                   page=1, perPage=500, organization_uid=None, **kwargs):
+                   page=1, perPage=5000, organization_uid=None, **kwargs):
         """Get the assets (scope) of a target"""
         if target is None:
             if len(kwargs) > 0:
