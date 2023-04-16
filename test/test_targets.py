@@ -228,7 +228,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.api.request.assert_called_with('GET',
                                                     'asset/v2/assets?listingUid%5B%5D=327h8iw&scope%5B%5D=in' +
                                                     '&scope%5B%5D=discovered&sort%5B%5D=location&active=true' +
-                                                    '&sortDir=asc&page=1&perPage=500')
+                                                    '&sortDir=asc&page=1&perPage=5000')
 
     def test_get_assets_non_defaults(self):
         """Should return a list of assets given information to query"""
@@ -244,13 +244,13 @@ class TargetsTestCase(unittest.TestCase):
                                                             sort='loc',
                                                             sort_dir='desc',
                                                             page=3,
-                                                            perPage=5000,
+                                                            perPage=50,
                                                             organization_uid='uiehqw'))
         self.targets.api.request.assert_called_with('GET',
                                                     'asset/v2/assets?listingUid%5B%5D=327h8iw' +
                                                     '&organizationUid%5B%5D=uiehqw&assetType%5B%5D=blah' +
                                                     '&hostType%5B%5D=cidr&scope%5B%5D=secret' +
-                                                    '&sort%5B%5D=loc&active=false&sortDir=desc&page=3&perPage=5000')
+                                                    '&sort%5B%5D=loc&active=false&sortDir=desc&page=3&perPage=50')
 
     def test_get_attachments_current(self):
         """Should return a list of attachments based on currently selected target"""
