@@ -103,7 +103,7 @@ class Targets(Plugin):
 
     def get_assets(self, target=None, asset_type=None, host_type=None, active='true',
                    scope=['in', 'discovered'], sort='location', sort_dir='asc',
-                   page=None, organization_uid=None, **kwargs):
+                   page=1, perPage=500, organization_uid=None, **kwargs):
         """Get the assets (scope) of a target"""
         if target is None:
             if len(kwargs) > 0:
@@ -137,6 +137,8 @@ class Targets(Plugin):
                 queries.append(f'sortDir={sort_dir}')
             if page is not None:
                 queries.append(f'page={page}')
+            if perPage is not None:
+                queries.append(f'perPage={perPage}')
 
             res = self.api.request('GET', f'asset/v2/assets?{"&".join(queries)}')
             if res.status_code == 200:
