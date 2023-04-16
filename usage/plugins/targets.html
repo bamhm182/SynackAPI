@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../../";
@@ -69,10 +70,12 @@
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             var html = document.querySelector('html');
-            var sidebar = 'hidden';
+            var sidebar = null;
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
             html.classList.remove('sidebar-visible');
             html.classList.add("sidebar-" + sidebar);
@@ -215,7 +218,7 @@
 [
   {
     'target': '94hw8ier',
-    'urls': [{'url': https://good.monkey.com'}]
+    'urls': [{'url': 'https://good.monkey.com'}]
   },
   ...
 ]
@@ -260,6 +263,37 @@
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
 [{&quot;id&quot;: 1, ...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_assetsself-targetnone-asset_typenone-host_typenone-activetrue-scopein-discovered-sortlocation-sort_dirasc-pagenone-organization_uidnone-kwargs"><a class="header" href="#targetsget_assetsself-targetnone-asset_typenone-host_typenone-activetrue-scopein-discovered-sortlocation-sort_dirasc-pagenone-organization_uidnone-kwargs">targets.get_assets(self, target=None, asset_type=None, host_type=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=None, organization_uid=None, **kwargs)</a></h2>
+<blockquote>
+<p>Pull back a list of assets related to a target.</p>
+<p>If no arguments are provided, whatever target you are currently connected to will be queried with the default paramters.
+You can use the following arguments to specify a target/organization or override default parameters.</p>
+<p>Note that <code>scopeRules</code> and <code>listings</code> both have a <code>scope</code> field, which is confusing.
+From the best I can tell, the one in <code>listings</code> is the one that matters.
+PLEASE double check my math before trusting it blindly and let me know if I'm wrong.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>asset_type</code></td><td>str</td><td>Type of target ('host', 'webapp', etc.)</td></tr>
+<tr><td><code>host_type</code></td><td>str</td><td>Type of information to get back ('cidr')</td></tr>
+<tr><td><code>active</code></td><td>str</td><td>This field appears to specify whether the asset is an active item in the target's scope</td></tr>
+<tr><td><code>scope</code></td><td>str</td><td>I'm honestly not entirely sure what this field is, but the default is ['in', 'discovered'] when made officially.</td></tr>
+<tr><td><code>sort_dir</code></td><td>str</td><td>SQL-type sort direction (<code>asc</code>, <code>desc</code>)</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>The page of assets to return</td></tr>
+<tr><td><code>organization_uid</code></td><td>str</td><td>slug of the organization that owns the target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assets()
+[{
+'listings': [{'listingUid': 'iuqwehuh4', 'scope': 'in'}, ...],
+'location': 'https://www.something.com (https://www.something.com)',
+'scopeRules': [{'appliesTo': 'both', 'rule': '*.www.something.com/*', 'uid': 'qiuwe'}, ...],
+...
+}, ...]
 </code></pre>
 </blockquote>
 </blockquote>
@@ -569,5 +603,6 @@ h.targets.set_connected(slug='12083y9')
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>

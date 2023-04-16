@@ -32,6 +32,7 @@
 
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../../";
@@ -69,10 +70,12 @@
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             var html = document.querySelector('html');
-            var sidebar = 'hidden';
+            var sidebar = null;
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
             html.classList.remove('sidebar-visible');
             html.classList.add("sidebar-" + sidebar);
@@ -161,12 +164,12 @@
 </code></pre>
 </blockquote>
 </blockquote>
-<h2 id="scratchspaceset_burp_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_burp_filecontent-targetnone-codenamenone">scratchspace.set_burp_file(content, target=None, codename=None)</a></h2>
+<h2 id="scratchspaceset_assets_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_assets_filecontent-targetnone-codenamenone">scratchspace.set_assets_file(content, target=None, codename=None)</a></h2>
 <blockquote>
-<p>This function will save a <code>burp.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
-If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_web()</code></p>
+<p>This function will save a <code>assets.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_web()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope()</code></td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
@@ -174,7 +177,25 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
 <blockquote>
 <p>Examples</p>
 <pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_web(codename='ADAMANTANT')
-&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTANT')
+&gt;&gt;&gt; h.scratchspace.set_assets_file(scope, codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/assets.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_burp_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_burp_filecontent-targetnone-codenamenone">scratchspace.set_burp_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>burp.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_web()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_web(codename='ADAMANTANT')
+&gt;&gt;&gt; h.scratchspace.set_burp_file(scope, codename='ADAMANTANT')
 '/tmp/Scratchspace/ADAMANTANT/burp.txt'
 </code></pre>
 </blockquote>
@@ -211,9 +232,9 @@ file1.txt exists. Overwrite? [y/N]: N
 <h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
 <blockquote>
 <p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder in within the <code>self.db.scratchspace_dir</code> folder.
-If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>self.targets.get_scope()</code> or <code>self.targets.get_scope_host()</code></p>
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_host()</code></p>
 <div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>self.targets.get_scope_host()</code></td></tr>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope_host()</code></td></tr>
 <tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
 <tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
 </tbody></table>
@@ -283,5 +304,6 @@ If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is 
         <!-- Custom JS scripts -->
 
 
+    </div>
     </body>
 </html>
