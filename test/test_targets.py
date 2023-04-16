@@ -216,6 +216,41 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets.db.add_categories.assert_called_with(assessments)
 
+    def test_get_assets(self):
+        """Should return a list of assets for a currently connected target"""
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'codename': 'TURBULENTTORTOISE', 'slug': '327h8iw'}
+        self.targets.db.find_targets.return_value = [Target(slug='327h8iw')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.text = 'rettext'
+        self.targets.api.request.return_value.json.return_value = 'retjson'
+        self.assertEqual('retjson', self.targets.get_assets())
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v2/assets?listingUid%5B%5D=327h8iw&scope%5B%5D=in' +
+                                                    '&scope%5B%5D=discovered&sort%5B%5D=location&active=true' +
+                                                    '&sortDir=asc')
+
+    def test_get_assets_non_defaults(self):
+        """Should return a list of assets given information to query"""
+        self.targets.db.find_targets.return_value = [Target(codename='TURBULENTTORTOISE', slug='327h8iw')]
+        self.targets.api.request.return_value.status_code = 200
+        self.targets.api.request.return_value.text = 'rettext'
+        self.targets.api.request.return_value.json.return_value = 'retjson'
+        self.assertEqual('retjson', self.targets.get_assets(codename='TURBULENTTORTOISE',
+                                                            asset_type='blah',
+                                                            host_type='applecidr',
+                                                            active='false',
+                                                            scope='secret',
+                                                            sort='vulnerable',
+                                                            sort_dir='desc',
+                                                            page=3,
+                                                            organization_uid='uiehqw'))
+        self.targets.api.request.assert_called_with('GET',
+                                                    'asset/v2/assets?listingUid%5B%5D=327h8iw' +
+                                                    '&organizationUid%5B%5D=uiehqw&assetType%5B%5D=blah' +
+                                                    '&hostType%5B%5D=applecidr&scope%5B%5D=secret' +
+                                                    '&sort%5B%5D=vulnerable&active=false&sortDir=desc&page=3')
+
     def test_get_attachments_current(self):
         """Should return a list of attachments based on currently selected target"""
         attachments = [
@@ -523,6 +558,25 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
         self.targets.build_scope_host_db.assert_called_with('213h89h3', ips)
         self.targets.db.add_ips.assert_called_with('host_db_return_value')
+
+    def test_get_scope_host_not_ip(self):
+        """Should get the scope for a Host"""
+        ips = {'1.1.1.1/32'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '8675309'
+            }
+        ]
+        self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
+        out = self.targets.get_scope_host(codename='SASSYSQUIRREL')
+        self.assertEqual(ips, out)
+        self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
 
     def test_get_scope_no_provided(self):
         """Should get the scope for the currently connected target if none is specified"""

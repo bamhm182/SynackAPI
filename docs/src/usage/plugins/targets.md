@@ -72,7 +72,7 @@
 >> [
 >>   {
 >>     'target': '94hw8ier',
->>     'urls': [{'url': https://good.monkey.com'}]
+>>     'urls': [{'url': 'https://good.monkey.com'}]
 >>   },
 >>   ...
 >> ]
@@ -119,6 +119,38 @@
 >> >>> h.targets.get_assessments()
 >> [{"id": 1, ...},...]
 >> ```
+
+## targets.get_assets(self, target=None, asset_type=None, host_type=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=None, organization_uid=None, **kwargs)
+
+> Pull back a list of assets related to a target.
+>
+> If no arguments are provided, whatever target you are currently connected to will be queried with the default paramters.
+> You can use the following arguments to specify a target/organization or override default parameters.
+>
+> Note that `scopeRules` and `listings` both have a `scope` field, which is confusing.
+> From the best I can tell, the one in `listings` is the one that matters.
+> PLEASE double check my math before trusting it blindly and let me know if I'm wrong.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `asset_type` | str | Type of target ('host', 'webapp', etc.)
+> | `host_type` | str | Type of information to get back ('cidr')
+> | `active` | str | This field appears to specify whether the asset is an active item in the target's scope
+> | `scope` | str | I'm honestly not entirely sure what this field is, but the default is ['in', 'discovered'] when made officially.
+> | `sort_dir` | str | SQL-type sort direction (`asc`, `desc`)
+> | `page` | int | The page of assets to return
+> | `organization_uid` | str | slug of the organization that owns the target
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_assets()
+>> [{
+>> 'listings': [{'listingUid': 'iuqwehuh4', 'scope': 'in'}, ...],
+>> 'location': 'https://www.something.com (https://www.something.com)',
+>> 'scopeRules': [{'appliesTo': 'both', 'rule': '*.www.something.com/*', 'uid': 'qiuwe'}, ...],
+>> ...
+>> }, ...]
 
 ## targets.get_attachments(target, **kwargs)
 
