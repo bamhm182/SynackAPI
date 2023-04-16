@@ -251,7 +251,11 @@ class Targets(Plugin):
     def get_scope_host(self, target=None, add_to_db=False, **kwargs):
         """Get the scope of a Host target"""
         if target is None:
-            targets = self.db.find_targets(**kwargs)
+            if len(kwargs) > 0:
+                targets = self.db.find_targets(**kwargs)
+            else:
+                curr = self.get_connected()
+                targets = self.db.find_targets(slug=curr.get('slug'))
             if targets:
                 target = next(iter(targets), None)
 
@@ -281,7 +285,11 @@ class Targets(Plugin):
     def get_scope_web(self, target=None, add_to_db=False, **kwargs):
         """Get the scope of a Web target"""
         if target is None:
-            targets = self.db.find_targets(**kwargs)
+            if len(kwargs) > 0:
+                targets = self.db.find_targets(**kwargs)
+            else:
+                curr = self.get_connected()
+                targets = self.db.find_targets(slug=curr.get('slug'))
             if targets:
                 target = next(iter(targets), None)
 
@@ -307,7 +315,7 @@ class Targets(Plugin):
                 if add_to_db:
                     self.db.add_urls(self.build_scope_web_db(scope))
                 if self.db.use_scratchspace:
-                    self.scratchspace.set_web_file(self.build_scope_web_burp(scope), target=target)
+                    self.scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
 
         return scope
 

@@ -559,6 +559,28 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.build_scope_host_db.assert_called_with('213h89h3', ips)
         self.targets.db.add_ips.assert_called_with('host_db_return_value')
 
+    def test_get_scope_host_current(self):
+        """Should get the scope for the currenly connected Host if not specified"""
+        ips = {'1.1.1.1/32', '2.2.2.2/32'}
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'slug': '213h89h3'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'location': '1.1.1.1/32'
+            },
+            {
+                'active': True,
+                'location': '2.2.2.2/32'
+            }
+        ]
+        self.targets.db.find_targets.return_value = [Target(slug='213h89h3', codename='SASSYSQUIRREL')]
+        out = self.targets.get_scope_host()
+        self.assertEqual(ips, out)
+        self.targets.get_connected.assert_called_with()
+        self.targets.db.find_targets.assert_called_with(slug='213h89h3')
+
     def test_get_scope_host_not_ip(self):
         """Should get the scope for a Host"""
         ips = {'1.1.1.1/32'}
@@ -644,6 +666,37 @@ class TargetsTestCase(unittest.TestCase):
         self.targets.build_scope_web_burp.assert_called_with(scope)
         self.targets.db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
         self.targets.db.add_urls.assert_called_with(self.targets.build_scope_web_db.return_value)
+
+    def test_get_scope_web_current(self):
+        """Should get the scope for the currently connected Web Application if not specified"""
+        self.targets.build_scope_web_burp = MagicMock()
+        scope = [{
+            'listing': 'uewqhuiewq',
+            'location': 'https://good.things.com',
+            'rule': '*.good.things.com/*',
+            'status': 'in'
+        }]
+        self.targets.get_connected = MagicMock()
+        self.targets.get_connected.return_value = {'slug': '93g8eg8'}
+        self.targets.get_assets = MagicMock()
+        self.targets.get_assets.return_value = [
+            {
+                'active': True,
+                'listings': [{'listingUid': 'uewqhuiewq', 'scope': 'in'}],
+                'location': 'https://good.things.com (https://good.things.com)',
+                'scopeRules': [
+                    {'rule': '*.good.things.com/*'}
+                ]
+            }
+        ]
+        tgt = Target(slug='213h89h3', organization='93g8eh8', codename='SASSYSQUIRREL')
+        self.targets.db.find_targets.return_value = [tgt]
+        out = self.targets.get_scope_web()
+        self.assertEqual(scope, out)
+        self.targets.build_scope_web_burp.assert_called_with(scope)
+        self.targets.get_connected.assert_called_with()
+        self.targets.db.find_targets.assert_called_with(slug='93g8eg8')
+        self.targets.get_assets.assert_called_with(target=tgt, active='true', asset_type='webapp')
 
     def test_get_submissions(self):
         """Should return the accepted vulnerabilities for a target given a slug"""
