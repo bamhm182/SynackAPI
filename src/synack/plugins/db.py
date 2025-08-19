@@ -104,15 +104,24 @@ class Db(Plugin):
         for target in targets:
             if isinstance(target.get('organization'), str):
                 slug = target.get('organization')
+                name = None  # No name available in this case
             else:
-                slug = target.get('organization_id', target.get('organization', {}).get('slug'))
+                org = target.get('organization', {})
+                slug = target.get('organization_id', org.get('slug'))
+                name = org.get('name')
             if slug:
-                organizations_data.append({'slug': slug})
+                organizations_data.append({
+                    'slug': slug,
+                    'name': name
+                })
 
         if organizations_data:
             stmt = sqlite_insert(Organization).values(organizations_data)
-            stmt = stmt.on_conflict_do_nothing(
+            stmt = stmt.on_conflict_do_update(
                 index_elements=['slug'],
+                set_={
+                    'name': stmt.excluded.name
+                }
             )
             session.execute(stmt)
 
@@ -200,7 +209,11 @@ class Db(Plugin):
                     'is_active': target.get('isActive', target.get('is_active')),
                     'is_new': target.get('isNew', target.get('is_new')),
                     'is_registered': target.get('isRegistered', target.get('is_registered')),
-                    'last_submitted': target.get('lastSubmitted', target.get('last_submitted'))
+                    'last_submitted': target.get('lastSubmitted', target.get('last_submitted')),
+                    'average_payout': target.get('averagePayout'),
+                    'start_date': target.get('start_date'),
+                    'end_date': target.get('end_date'),
+                    'is_updated': target.get('isUpdated', False)
                 }
                 target_data.update(kwargs)
                 targets_data.append(target_data)
@@ -218,6 +231,10 @@ class Db(Plugin):
                     'is_new': stmt.excluded.is_new,
                     'is_registered': stmt.excluded.is_registered,
                     'last_submitted': stmt.excluded.last_submitted,
+                    'average_payout': stmt.excluded.average_payout,
+                    'start_date': stmt.excluded.start_date,
+                    'end_date': stmt.excluded.end_date,
+                    'is_updated': stmt.excluded.is_updated
                 }
             )
             session.execute(stmt)
@@ -378,7 +395,7 @@ class Db(Plugin):
                 query = query.filter(sa.or_(*filters))
             else:
                 query = query.filter(sa.and_(*filters))
-    
+
         targets = query.all()
 
         session.expunge_all()
