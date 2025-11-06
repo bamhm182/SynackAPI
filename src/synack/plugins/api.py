@@ -153,6 +153,8 @@ class Api(Plugin):
             reason_failed = 'Logged out'
         elif res.status_code == 412:
             reason_failed = 'Mission already claimed'
+        elif res.status_code == 423:
+            reason_failed = 'Locked'
         elif res.status_code == 429:
             self._debug.log('Too many requests', f'({res.status_code} - {res.reason}) {res.url}')
             if attempts < 5:
@@ -168,7 +170,7 @@ class Api(Plugin):
                 return self.request(method, path, attempts, **kwargs)
 
         # Log terminal failures (non-retryable errors)
-        if res.status_code in [400, 401, 403, 412]:
+        if res.status_code in [400, 401, 403, 412, 423]:
             self._debug.log(reason_failed, f'({res.status_code} - {res.reason}) {res.url}')
 
         return res

@@ -62,9 +62,11 @@ class Auth(Plugin):
         if res.status_code == 200:
             return res.json()
         elif res.status_code == 400:
-            csrf = self.get_login_csrf()
-            if csrf:
-                return self.get_authentication_response(csrf)
+            self._db.email = ''
+            self._db.password = ''
+            raise ValueError("Invalid email or password. Please run the script again to re-enter credentials.")
+        elif res.status_code == 423:
+            raise ValueError("Your account has been locked due to too many failed login attempts. Please wait and try again later.")
 
     def get_login_csrf(self):
         """Get the CSRF Token from the login page"""
