@@ -41,6 +41,11 @@ class State(object):
         self._use_proxies = None
         self._use_scratchspace = None
         self._user_id = None
+        self._duo_push_akey = None
+        self._duo_push_pkey = None
+        self._duo_push_host = None
+        self._duo_push_rsa_key_path = None
+        self._duo_device = None
 
     @property
     def smtp_email_from(self) -> str:
@@ -357,3 +362,58 @@ class State(object):
     @user_id.setter
     def user_id(self, value: str) -> None:
         self._user_id = value
+
+    @property
+    def duo_push_akey(self) -> str:
+        ret = self._duo_push_akey
+        if ret is None:
+            ret = self._db.duo_push_akey
+        return ret
+
+    @duo_push_akey.setter
+    def duo_push_akey(self, value: str) -> None:
+        self._duo_push_akey = value
+
+    @property
+    def duo_push_pkey(self) -> str:
+        ret = self._duo_push_pkey
+        if ret is None:
+            ret = self._db.duo_push_pkey
+        return ret
+
+    @duo_push_pkey.setter
+    def duo_push_pkey(self, value: str) -> None:
+        self._duo_push_pkey = value
+
+    @property
+    def duo_push_host(self) -> str:
+        ret = self._duo_push_host
+        if ret is None:
+            ret = self._db.duo_push_host
+        return ret
+
+    @duo_push_host.setter
+    def duo_push_host(self, value: str) -> None:
+        self._duo_push_host = value
+
+    @property
+    def duo_push_rsa_key_path(self) -> str:
+        ret = self._duo_push_rsa_key_path
+        if ret is None:
+            ret = self._db.duo_push_rsa_key_path
+        return ret
+
+    @duo_push_rsa_key_path.setter
+    def duo_push_rsa_key_path(self, value: str) -> None:
+        self._duo_push_rsa_key_path = value
+
+    @property
+    def duo_device(self) -> str:
+        ret = self._duo_device
+        if ret is None:
+            ret = self._db.duo_device
+        return ret
+
+    @duo_device.setter
+    def duo_device(self, value: str) -> None:
+        self._duo_device = value

@@ -38,3 +38,10 @@ class Config(Base):
     user_id = sa.Column(sa.VARCHAR(20), default='')
     use_proxies = sa.Column(sa.BOOLEAN, default=False)
     use_scratchspace = sa.Column(sa.BOOLEAN, default=False)
+    duo_push_akey = sa.Column(sa.VARCHAR(200), default='')
+    duo_push_pkey = sa.Column(sa.VARCHAR(200), default='')
+    duo_push_host = sa.Column(sa.VARCHAR(100), default='')
+    duo_push_rsa_key_path = sa.Column(
+        sa.VARCHAR(250), default=''
+    )
+    duo_device = sa.Column(sa.VARCHAR(50), default='')

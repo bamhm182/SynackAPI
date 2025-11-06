@@ -17,12 +17,8 @@ With that in mind, I would highly recommend you become familiar with the [Plugin
 ## Authentication
 
 The first time you try to do anything which requires authentication, you will be automatically prompted for your credentials.
-This prompt will expect the `Synack Email` and `Synack Password`, which are fairly self explanitory, but it also asks for the `Synack OTP Secret`.
+This prompt will expect the `Synack Email` and `Synack Password`, which are fairly self explanatory.
 
-The `Synack OTP Secret` is NOT the 8 digit code you pull out of Authy.
-Instead, it is a string that you must extract from Authy via a method similar to the one found [here](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93).
-
-Use the above instructions at your own discression.
-I TAKE NO RESPONSIBILITY IF SOMETHING BAD HAPPENS AS A RESULT.
+For Duo MFA setup options, see the [Duo plugin documentation](./plugins/duo.md).
 
 Once you complete these steps, your credentials are stored in a SQLiteDB at `~/.config/synack/synackapi.db`.

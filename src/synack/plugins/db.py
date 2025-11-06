@@ -480,13 +480,48 @@ class Db(Plugin):
     def otp_secret(self):
         ret = self.get_config('otp_secret')
         if not ret:
-            ret = input('Synack OTP Secret: ')
-            self.otp_secret = ret
+            # Skip prompt if automated push credentials are already configured
+            if self.duo_push_akey and self.duo_push_pkey and self.duo_push_host:
+                ret = ''
+                self.otp_secret = ret
+            # Skip prompt if user has already selected a device for manual push
+            elif self.duo_device:
+                ret = ''
+            else:
+                print("\nDuo MFA Authentication Setup:")
+                print(
+                    "1. Press Enter to use Duo Push notifications "
+                    "(you'll approve on your phone)"
+                )
+                print("2. OR enter your Duo OTP Secret for automated passcode generation")
+                print("   (Accepts hex (hotp_secret) or base32 (otpauth://) format)")
+                ret = input('\nDuo OTP Secret (or press Enter for push): ').strip()
+                self.otp_secret = ret if ret else ''
         return ret
 
     @otp_secret.setter
     def otp_secret(self, value):
+        # Auto-detect and convert hex format to base32
+        # Duo's hotp_secret is a hex string, but needs to be treated as UTF-8
+        # not as hex bytes (based on duo-hotp reference implementation)
+        if value and self._is_hex_secret(value):
+            import base64
+            # Encode the hex string as UTF-8 bytes, then base32
+            value = base64.b32encode(value.encode('utf-8')).decode('ascii').rstrip('=')
         self.set_config('otp_secret', value)
+
+    def _is_hex_secret(self, value):
+        """Check if the secret appears to be in hex format (not base32)"""
+        # Hex: 32 chars using only 0-9, a-f
+        # Base32: variable length using A-Z, 2-7
+        if len(value) != 32:
+            return False
+        try:
+            # If it can be decoded as hex, it's hex
+            bytes.fromhex(value)
+            return True
+        except ValueError:
+            return False
 
     @property
     def password(self):
@@ -499,6 +534,46 @@ class Db(Plugin):
     @password.setter
     def password(self, value):
         self.set_config('password', value)
+
+    @property
+    def duo_push_akey(self):
+        return self.get_config('duo_push_akey')
+
+    @duo_push_akey.setter
+    def duo_push_akey(self, value):
+        self.set_config('duo_push_akey', value)
+
+    @property
+    def duo_push_pkey(self):
+        return self.get_config('duo_push_pkey')
+
+    @duo_push_pkey.setter
+    def duo_push_pkey(self, value):
+        self.set_config('duo_push_pkey', value)
+
+    @property
+    def duo_push_host(self):
+        return self.get_config('duo_push_host')
+
+    @duo_push_host.setter
+    def duo_push_host(self, value):
+        self.set_config('duo_push_host', value)
+
+    @property
+    def duo_push_rsa_key_path(self):
+        return self.get_config('duo_push_rsa_key_path')
+
+    @duo_push_rsa_key_path.setter
+    def duo_push_rsa_key_path(self, value):
+        self.set_config('duo_push_rsa_key_path', value)
+
+    @property
+    def duo_device(self):
+        return self.get_config('duo_device')
+
+    @duo_device.setter
+    def duo_device(self, value):
+        self.set_config('duo_device', value)
 
     @property
     def ports(self):

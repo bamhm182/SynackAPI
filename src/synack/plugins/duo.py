@@ -9,7 +9,14 @@ import base64
 import json
 import pyotp
 import re
+import requests
 import time
+from datetime import UTC, datetime
+from pathlib import Path
+from urllib.parse import urlencode
+from Crypto.Hash import SHA512
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
 
 
 class Duo(Plugin):
@@ -33,6 +40,7 @@ class Duo(Plugin):
         self._sid = None
         self._txid = None
         self._xsrf = None
+        self._pubkey = None
 
     def _build_headers(self, overrides=None):
         headers = {
@@ -56,7 +64,35 @@ class Duo(Plugin):
         self._set_session_variables()  # Yes, this needs to be called twice...
         self._get_txid()
         if self._txid:
-            self._get_status()
+            # Priority 1: OTP (if configured)
+            if self._state.otp_secret:
+                # OTP passcode already sent in _get_txid(), just poll for status
+                self._get_status()
+            # Priority 2: Auto-approval (if configured) - HARD FAIL if broken
+            elif self.is_configured():
+                if not self.load_rsa_key():
+                    raise RuntimeError(
+                        "Duo Push auto-approval is enabled but RSA key failed to load"
+                    )
+                print("Auto-approving Duo push notification...")
+                if self._state.debug:
+                    print(f"Using device: {self._device}")
+                    print(f"Configured duo_device: {self._state.duo_device}")
+                    if self._device != self._state.duo_device:
+                        print(f"WARNING: Push sent to {self._device} but credentials are for {self._state.duo_device}")
+                # Wait 2 seconds before polling to give Duo time to register the push
+                time.sleep(2)
+                if not self.approve_pending_push(timeout=25):
+                    raise RuntimeError(
+                        "Duo Push auto-approval failed - check credentials or "
+                        "disable auto-approval. Ensure duo_device matches the device "
+                        "with extracted credentials."
+                    )
+                self._get_status()
+            # Priority 3: Manual push (fallback)
+            else:
+                print("Waiting for manual Duo push approval on your device...")
+                self._get_status()
         if self._status == 'SUCCESS':
             self._get_oidc_exit()
             if self._progress_token:
@@ -103,16 +139,69 @@ class Duo(Plugin):
             'sid': self._sid
         }
         res = self._api.request('GET', f'{self._base_url}/frame/v4/auth/prompt/data', headers=headers, query=query)
-        if res.status_code == 200:
-            for method in res.json().get('response', {}).get('auth_method_order', []):
-                if method.get('factor', '') == 'Duo Push':
-                    device_key = method.get('deviceKey', '')
-                    break
 
-            for phone in res.json().get('response', {}).get('phones', []):
-                if phone.get('key', '') == device_key:
-                    self._device = phone.get('index', '')
-                    self._factor = 'Duo Push'
+        if res.status_code == 200:
+            response_json = res.json()
+            response_data = response_json.get('response', {})
+            phones = response_data.get('phones', [])
+
+            # If auto-approval credentials are configured, find the matching device
+            if self.is_configured():
+                # Match device by pkey
+                pkey = self._state.duo_push_pkey
+                for phone in phones:
+                    if phone.get('key', '') == pkey:
+                        self._device = phone.get('index', '')
+                        self._factor = 'Duo Push'
+                        # Update stored device if it doesn't match
+                        if self._state.duo_device != self._device:
+                            print(f"Auto-correcting duo_device from {self._state.duo_device} to {self._device}")
+                            self._db.duo_device = self._device
+                        return
+                # If no match found, credentials are for wrong account
+                print(f"WARNING: duo_push_pkey {pkey} not found in available devices")
+                print("Falling back to manual device selection")
+
+            # Check if we have a stored device preference
+            if self._state.duo_device:
+                # Use the stored device
+                for phone in phones:
+                    if phone.get('index', '') == self._state.duo_device:
+                        self._device = phone.get('index', '')
+                        self._factor = 'Duo Push'
+                        return
+                # If stored device not found, fall through to prompt
+
+            # Prompt user to select a device
+            if phones:
+                print("\nAvailable Duo devices:")
+                for i, phone in enumerate(phones, 1):
+                    print(f"{i}. {phone.get('name', 'Unknown')} ({phone.get('index', '')})")
+
+                while True:
+                    try:
+                        choice = input("\nSelect device number (or press Enter for first device): ").strip()
+                        if not choice:
+                            selected_phone = phones[0]
+                            break
+                        choice_num = int(choice)
+                        if 1 <= choice_num <= len(phones):
+                            selected_phone = phones[choice_num - 1]
+                            break
+                        print(f"Please enter a number between 1 and {len(phones)}")
+                    except ValueError:
+                        print("Please enter a valid number")
+
+                self._device = selected_phone.get('index', '')
+                self._factor = 'Duo Push'
+                self._db.duo_device = self._device
+                return
+
+        if not self._device or not self._factor:
+            raise ValueError(
+                f'Failed to determine MFA device/factor from Duo API. '
+                f'HTTP {res.status_code}, device={self._device}, factor={self._factor}'
+            )
 
     def _get_oidc_exit(self):
         headers = {
@@ -204,7 +293,8 @@ class Duo(Plugin):
             'txid': self._txid,
             'sid': self._sid
         }
-        for i in range(5):
+        # Increase polling attempts from 5 to 12 (1 minute total with 5s intervals)
+        for i in range(12):
             res = self._api.request('POST', f'{self._base_url}/frame/v4/status', headers=headers, data=data)
             if res.status_code == 200:
                 status_enum = res.json().get('response', {}).get('status_enum', -1)
@@ -223,8 +313,9 @@ class Duo(Plugin):
                     break
                 elif status_enum == 13:  # Awaiting Push Notification
                     pass
-                elif status_enum == 15:  # Push Notification MFA Blocked
-                    break
+                elif status_enum == 15:  # Push sent, waiting for approval
+                    # Continue polling for both auto-approval and manual approval
+                    pass
                 elif status_enum == 44:  # Prior Code
                     self._db.otp_count += 5
                     break
@@ -297,3 +388,155 @@ class Duo(Plugin):
         res = self._api.request('POST', self._referrer, headers=headers, data=self._session_vars)
         if res.status_code == 200:
             self._referrer = res.url
+
+    # Duo Push Auto-Approval Methods
+
+    def is_configured(self):
+        """Check if Duo push auto-approval credentials are configured"""
+        return (
+            self._state.duo_push_akey and
+            self._state.duo_push_pkey and
+            self._state.duo_push_host
+        )
+
+    def load_rsa_key(self):
+        """Load RSA key from configured path"""
+        if not self.is_configured():
+            return False
+
+        key_path = Path(self._state.duo_push_rsa_key_path).expanduser()
+        if not key_path.exists():
+            print(f"Duo RSA key not found: {key_path}")
+            return False
+
+        try:
+            with open(key_path, 'rb') as f:
+                self._pubkey = RSA.import_key(f.read())
+            return True
+        except Exception as e:
+            print(f"Failed to load Duo RSA key: {e}")
+            return False
+
+    def approve_pending_push(self, timeout=30):
+        """Wait for and approve a single Duo push notification"""
+        if not self.is_configured():
+            return False
+
+        if not self._pubkey and not self.load_rsa_key():
+            print("Cannot approve push: RSA key not available")
+            return False
+
+        print("Polling for Duo push notification...")
+        start_time = time.monotonic()
+        poll_interval = 2  # Poll every 2 seconds
+
+        while time.monotonic() - start_time < timeout:
+            try:
+                # Poll for transactions
+                transactions = self._get_transactions()
+                if self._state.debug:
+                    print(f"Transactions response: {transactions}")
+                response_data = transactions.get('response', {})
+                pending = response_data.get('transactions', [])
+                current_time = response_data.get('current_time', 0)
+
+                if self._state.debug:
+                    print(f"Found {len(pending)} pending transactions")
+
+                if pending:
+                    for tx in pending:
+                        tx_id = tx.get('urgid')
+                        expiration = tx.get('expiration', 0)
+
+                        if self._state.debug:
+                            print(f"Transaction: {tx}")
+
+                        # Skip expired transactions
+                        if expiration and current_time and expiration <= current_time:
+                            if self._state.debug:
+                                print(f"Skipping expired transaction {tx_id}")
+                            continue
+
+                        if tx_id:
+                            tx_summary = tx.get('summary', 'N/A')
+                            print(f"Approving Duo push {tx_id[:12]}... ({tx_summary})")
+                            response = self._reply_transaction(tx_id, 'approve')
+                            if response.get('stat') == 'OK':
+                                print("Duo push approved successfully")
+                                return True
+                            else:
+                                print(f"Push approval returned: {response}")
+
+                time.sleep(poll_interval)
+
+            except Exception as e:
+                print(f"Error during Duo push approval: {e}")
+                return False
+
+        return False
+
+    def _generate_signature(self, method, path, time_str, data):
+        """Generate RSA signature for Duo API request"""
+        encoded_data = urlencode(sorted(data.items())) if data else ""
+        message_parts = [
+            time_str,
+            method.upper(),
+            self._state.duo_push_host.lower(),
+            path,
+            encoded_data,
+        ]
+        message = "\n".join(message_parts).encode('ascii')
+        h = SHA512.new(message)
+        signature = pkcs1_15.new(self._pubkey).sign(h)
+        auth_string = f"{self._state.duo_push_pkey}:{base64.b64encode(signature).decode('ascii')}"
+        return "Basic " + base64.b64encode(auth_string.encode('ascii')).decode('ascii')
+
+    def _make_request(self, method, path, data):
+        """Make authenticated request to Duo device API"""
+        dt = datetime.now(UTC)
+        # Format as RFC 2822 date for HTTP header (e.g., "Mon, 04 Nov 2025 12:34:56 GMT")
+        time_str = dt.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        signature = self._generate_signature(method, path, time_str, data)
+
+        url = f"https://{self._state.duo_push_host}{path}"
+        headers = {
+            'Authorization': signature,
+            'x-duo-date': time_str,
+            'Host': self._state.duo_push_host,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+
+        try:
+            if method.upper() == 'GET':
+                r = requests.get(url, params=data, headers=headers, timeout=10)
+            else:
+                r = requests.post(url, data=data, headers=headers, timeout=10)
+
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            print(f"Duo API request failed: {e}")
+            raise
+
+    def _get_transactions(self):
+        """Get pending Duo push transactions"""
+        path = "/push/v2/device/transactions"
+        params = {
+            'akey': self._state.duo_push_akey,
+            'fips_status': '1',
+            'hsm_status': 'true',
+            'pkpush': 'rsa-sha512',
+        }
+        return self._make_request('GET', path, params)
+
+    def _reply_transaction(self, transaction_id, answer):
+        """Reply to a Duo push transaction (approve/deny)"""
+        path = f"/push/v2/device/transactions/{transaction_id}"
+        data = {
+            'akey': self._state.duo_push_akey,
+            'answer': answer,
+            'fips_status': '1',
+            'hsm_status': 'true',
+            'pkpush': 'rsa-sha512',
+        }
+        return self._make_request('POST', path, data)

@@ -55,12 +55,16 @@ In the event that one of the State variables is set and is **not** constantly at
 | api_token | str | This is the Synack Access Token used to authenticate requests
 | config_dir | pathlib.Path | The location of the Database and Login script
 | debug | bool | Used to show/hide debugging messages
+| duo_push_akey | str | Duo device activation key for push auto-approval
+| duo_push_host | str | Duo API hostname for push auto-approval
+| duo_push_pkey | str | Duo device private key for push auto-approval
+| duo_push_rsa_key_path | str | Path to RSA private key for signing Duo API requests
 | email | str | Your email address used to log into Synack
 | http_proxy | str | A Web Proxy (Burp, etc.) to intercept requests
 | https_proxy | str | A Web Proxy (Burp, etc.) to intercept requests
 | login | bool | Used to enable/disable a check of the api_token upon creation of the Handler
 | notifications_token | str | Token used for authentication when dealing with Synack Notifications
-| otp_secret | str | OTP Secret held by Authy. NOT an OTP. For more information, read the Usage page
+| otp_secret | str | OTP Secret held by Duo Mobile. NOT an OTP. For more information, read the Usage page
 | password | str | Your Synack Password
 | session | requests.Session | Tracks cookies and headers across various functions
 | template_dir | pathlib.Path | The location of your Mission Templates
