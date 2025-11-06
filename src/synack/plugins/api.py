@@ -144,13 +144,15 @@ class Api(Plugin):
                         f"\n\tData: {data}" +
                         f"\n\tContent: {res.content}")
 
-        reason_failed = 'Request failed'
-        if res.status_code in [ 400, 401 ]:
-            reason_failed = 'Request failed'
+        reason_failed = None
+        if res.status_code == 400:
+            reason_failed = 'Bad request'
+        elif res.status_code == 401:
+            reason_failed = 'Unauthorized'
         elif res.status_code == 403:
             reason_failed = 'Logged out'
         elif res.status_code == 412:
-            fail_reason = 'Mission already claimed'
+            reason_failed = 'Mission already claimed'
         elif res.status_code == 429:
             self._debug.log('Too many requests', f'({res.status_code} - {res.reason}) {res.url}')
             if attempts < 5:
@@ -165,6 +167,8 @@ class Api(Plugin):
                 attempts += 1
                 return self.request(method, path, attempts, **kwargs)
 
-        self._debug.log('Mission already claimed', f'({res.status_code} - {res.reason}) {res.url}')
+        # Log terminal failures (non-retryable errors)
+        if res.status_code in [400, 401, 403, 412]:
+            self._debug.log(reason_failed, f'({res.status_code} - {res.reason}) {res.url}')
 
         return res
