@@ -297,3 +297,4 @@ class Duo(Plugin):
         res = self._api.request('POST', self._referrer, headers=headers, data=self._session_vars)
         if res.status_code == 200:
             self._referrer = res.url
+

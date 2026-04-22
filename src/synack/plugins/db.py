@@ -286,6 +286,47 @@ class Db(Plugin):
             self.email = ret
         return ret
 
+    @property
+    def duo_akey(self):
+        return self.get_config('duo_akey')
+
+    @duo_akey.setter
+    def duo_akey(self, value):
+        self.set_config('duo_akey', value)
+
+    @property
+    def duo_host(self):
+        return self.get_config('duo_host')
+
+    @duo_host.setter
+    def duo_host(self, value):
+        self.set_config('duo_host', value)
+
+    @property
+    def duo_pkey(self):
+        return self.get_config('duo_pkey')
+
+    @duo_pkey.setter
+    def duo_pkey(self, value):
+        self.set_config('duo_pkey', value)
+
+    @property
+    def duo_rsa_key(self):
+        pem = self.get_config('duo_rsa_key')
+        if rsa_key = '':
+            rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            pem = rsa_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ).decode('utf-8')
+            self.set_config('duo_rsa_key', pem)
+        return pem
+
+    @duo_rsa_key.setter
+    def duo_pubkey(self, value):
+        self.set_config('duo_pubkey', value)
+
     @email.setter
     def email(self, value):
         self.set_config('email', value)
