@@ -19,6 +19,7 @@ class AuthTestCase(unittest.TestCase):
     def setUp(self):
         self.state = synack._state.State()
         self.state._db = MagicMock()
+        self.state._synack_domain = 'synack.com'
         self.auth = synack.plugins.Auth(self.state)
         self.auth._api = MagicMock()
         self.auth._db = MagicMock()

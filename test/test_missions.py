@@ -98,11 +98,6 @@ class MissionsTestCase(unittest.TestCase):
 
     def test_build_summary(self):
         """Should summarize a list of missions"""
-        ret = {
-            "count": 2,
-            "value": 75,
-            "time": 79200
-        }
         now = datetime.datetime.utcnow()
         t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
                                         "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -114,26 +109,28 @@ class MissionsTestCase(unittest.TestCase):
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 50},
                 "claimedOn": t1,
-                "modifiedOn": t1
+                "modifiedOn": t1,
+                "title": "Mission One",
+                "listingCodename": "TARGET1"
             },
             {
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 25},
                 "claimedOn": t2,
-                "modifiedOn": t2
+                "modifiedOn": t2,
+                "title": "Mission Two",
+                "listingCodename": "TARGET1"
             }
         ]
-
+        ret = {
+            'total': {'count': 2, 'value': 75, 'time': 79200},
+            'TARGET1': {'count': 2, 'value': 75, 'time': 79200, 'titles': ['Mission One', 'Mission Two']}
+        }
         self.assertEqual(ret, self.missions.build_summary(m))
 
     def test_build_summary_no_milliseconds(self):
         """Should be able to handle claimedOn time without milliseconds"""
-        ret = {
-            "count": 2,
-            "value": 75,
-            "time": 79200
-        }
         now = datetime.datetime.utcnow()
         t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
                                         "%Y-%m-%dT%H:%M:%SZ")
@@ -145,17 +142,24 @@ class MissionsTestCase(unittest.TestCase):
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 50},
                 "claimedOn": t1,
-                "modifiedOn": t1
+                "modifiedOn": t1,
+                "title": "Mission One",
+                "listingCodename": "TARGET1"
             },
             {
                 "status": "CLAIMED",
                 "maxCompletionTimeInSecs": 86400,
                 "payout": {"amount": 25},
                 "claimedOn": t2,
-                "modifiedOn": t2
+                "modifiedOn": t2,
+                "title": "Mission Two",
+                "listingCodename": "TARGET1"
             }
         ]
-
+        ret = {
+            'total': {'count': 2, 'value': 75, 'time': 79200},
+            'TARGET1': {'count': 2, 'value': 75, 'time': 79200, 'titles': ['Mission One', 'Mission Two']}
+        }
         self.assertEqual(ret, self.missions.build_summary(m))
 
     def test_get_approved(self):
@@ -163,7 +167,7 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.get = MagicMock()
         self.missions.get.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'], self.missions.get_approved())
-        self.missions.get.assert_called_with("APPROVED")
+        self.missions.get.assert_called_with(status='APPROVED')
 
     def test_get_available(self):
         """Should request PUBLISHED missions"""
@@ -171,14 +175,14 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.get.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'],
                          self.missions.get_available())
-        self.missions.get.assert_called_with("PUBLISHED")
+        self.missions.get.assert_called_with(status='PUBLISHED')
 
     def test_get_claimed(self):
         """Should request CLAIMED missions"""
         self.missions.get = MagicMock()
         self.missions.get.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'], self.missions.get_claimed())
-        self.missions.get.assert_called_with("CLAIMED")
+        self.missions.get.assert_called_with(status='CLAIMED')
 
     def test_get_count(self):
         """Should get the current number of published missions"""
@@ -259,7 +263,7 @@ class MissionsTestCase(unittest.TestCase):
         self.missions.get.return_value = ['one', 'two']
         self.assertEqual(['one', 'two'],
                          self.missions.get_in_review())
-        self.missions.get.assert_called_with("FOR_REVIEW")
+        self.missions.get.assert_called_with(status='FOR_REVIEW')
 
     def test_get_mixup(self):
         """Should get a list of specific missions"""
@@ -285,28 +289,15 @@ class MissionsTestCase(unittest.TestCase):
 
     def test_get_multi_page(self):
         """Should get a list missions across multiple pages"""
-        q1 = {
-            "status": "CLAIMED",
-            "perPage": 5,
-            "page": 2,
-            "viewed": "true",
-            "listingUids": "49fh48g7"
-        }
         self.missions._api.request.return_value.status_code = 200
         self.missions._api.request.return_value.json.side_effect = [
             ["mission_one"],
             ["mission_two"],
             ["mission_three"]
         ]
-        calls = [
-            unittest.mock.call("GET",
-                               "tasks/v2/tasks",
-                               query=q1)
-        ]
         self.assertEqual(["mission_one", "mission_two"],
                          self.missions.get(max_pages=2,
                                            per_page=1))
-        self.missions._api.request.has_calls(calls)
         self.assertEqual(2, self.missions._api.request.call_count)
 
     def test_get_wallet_claimed(self):
@@ -427,23 +418,12 @@ class MissionsTestCase(unittest.TestCase):
         }
         self.missions._api.request.return_value.status_code = 201
         self.assertEqual(ret, self.missions.set_status(m, "CLAIM"))
-        data = {"type": "CLAIM"}
-        calls = [
-            unittest.mock.call('POST',
-                               'tasks/v1' +
-                               '/organizations/24re7yuf' +
-                               '/listings/4wr7egtu' +
-                               '/campaigns/27493fe8r' +
-                               '/tasks/4i3eg86fyu' +
-                               '/transitions',
-                               data=data),
-            unittest.mock.call('POST',
-                               'tasks/v1' +
-                               '/organizations/98y4ehru' +
-                               '/listings/4298y3rehi' +
-                               '/campaigns/27493fe8r' +
-                               '/tasks/984yrehi' +
-                               '/transitions',
-                               data=data)
-        ]
-        self.missions._api.request.has_calls(calls)
+        self.missions._api.request.assert_called_with(
+            'POST',
+            'tasks/v1' +
+            '/organizations/24re7yuf' +
+            '/listings/4wr7egtu' +
+            '/campaigns/27493fe8r' +
+            '/tasks/4i3eg86fyu' +
+            '/transitions',
+            data={"type": "CLAIM"})

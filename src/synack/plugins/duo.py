@@ -130,7 +130,7 @@ class Duo(Plugin):
             return self._grant_token
 
     def _get_mfa_details(self):
-        if self._state.otp_secret:
+        if self._state.otp_secret and not self._db.duo_akey:
             self._device = 'null'
             self._hotp = pyotp.HOTP(s=self._state.otp_secret).generate_otp(int(self._state.otp_count))
             self._factor = 'Passcode'

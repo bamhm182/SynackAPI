@@ -18,7 +18,7 @@ class Auth(Plugin):
 
     def get_api_token(self):
         """Log in to get a new API token."""
-        if self._api.request('HEAD', 'profiles/me').status_code == 200:
+        if self._users.get_profile():
             return self._state.api_token
         csrf = self.get_login_csrf()
         duo_auth_url = None

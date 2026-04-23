@@ -18,6 +18,7 @@ class ApiTestCase(unittest.TestCase):
     def setUp(self):
         self.state = synack._state.State()
         self.state._db = MagicMock()
+        self.state._synack_domain = 'synack.com'
         self.api = synack.plugins.Api(self.state)
         self.api._debug = MagicMock()
         self.api._db = MagicMock()
@@ -80,6 +81,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_full_url(self):
         """Base URL should not be added if a full url is passed"""
         self.api._state.session.get = MagicMock()
+        self.api._state.session.get.return_value.status_code = 200
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
         self.api._state.api_token = "12345"
@@ -98,6 +100,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_get(self):
         """GET requests should work"""
         self.api._state.session.get = MagicMock()
+        self.api._state.session.get.return_value.status_code = 200
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
         self.api._state.api_token = "12345"
@@ -116,6 +119,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_head(self):
         """HEAD requests should work"""
         self.api._state.session.head = MagicMock()
+        self.api._state.session.head.return_value.status_code = 200
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
         self.api._state.api_token = "12345"
@@ -134,6 +138,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_header_kwargs(self):
         """requests should merge in kwargs headers"""
         self.api._state.session.get = MagicMock()
+        self.api._state.session.get.return_value.status_code = 200
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
         self.api._state.api_token = "12345"
@@ -168,11 +173,12 @@ class ApiTestCase(unittest.TestCase):
                   "\n\tQuery: None" + \
                   "\n\tData: None" + \
                   "\n\tContent: Returned Content"
-        self.api._debug.log.assert_called_with("Network Request", message)
+        self.api._debug.log.assert_any_call("Network Request", message)
 
     def test_request_patch(self):
         """PATCH requests should work"""
         self.api._state.session.patch = MagicMock()
+        self.api._state.session.patch.return_value.status_code = 200
         data = {'test': 'test'}
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
@@ -192,6 +198,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_post(self):
         """POST requests should work"""
         self.api._state.session.post = MagicMock()
+        self.api._state.session.post.return_value.status_code = 200
         data = {'test': 'test'}
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"
@@ -222,6 +229,7 @@ class ApiTestCase(unittest.TestCase):
         }
         url = 'https://platform.synack.com/api/test'
         self.api._state.session.get = MagicMock()
+        self.api._state.session.get.return_value.status_code = 200
         self.api._state.use_proxies = True
         self.api._state.http_proxy = proxies.get('http')
         self.api._state.https_proxy = proxies.get('https')
@@ -235,6 +243,7 @@ class ApiTestCase(unittest.TestCase):
     def test_request_put(self):
         """PUT requests should work"""
         self.api._state.session.put = MagicMock()
+        self.api._state.session.put.return_value.status_code = 200
         data = {'test': 'test'}
         self.api._state.use_proxies = False
         self.api._state.user_id = "paco"

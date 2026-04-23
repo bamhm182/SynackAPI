@@ -133,7 +133,7 @@ Run `./checks.sh` before committing. It enforces:
 3. **Plugin documentation coverage** — every public (non-`_` prefixed), non-`@property` method in a plugin must have a corresponding `## <plugin>.<method>` section in `docs/src/usage/plugins/<plugin>.md`. Private methods (starting with `_`) are excluded from this requirement.
 4. **Test methods in alphabetical order** — same rule applied to `test/test_*.py`.
 5. **Doc sections in alphabetical order** — `## <name>` headings in each plugin doc file must be sorted A-Z.
-6. **Coverage report** — runs `python3-coverage` over `test/` (excluding alembic), reports lines not at 100%, and generates HTML report.
+6. **Coverage report** — runs `coverage` over `test/` (excluding alembic), reports lines not at 100%, and generates HTML report.
 
 **Summary:** when adding or renaming a method in a plugin, you must also:
 - Keep it in alphabetical order among all peer methods (public and private) in the plugin file.
@@ -152,8 +152,8 @@ Run `./checks.sh` before committing. It enforces:
 
 ### Unit Tests
 ```bash
-python3-coverage run --source=src --omit=src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py -m unittest discover test
-python3-coverage report
+coverage run --source=src --omit=src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py -m unittest discover test
+coverage report
 ```
 No real credentials needed — all external calls are mocked.
 
@@ -200,7 +200,7 @@ Production (from `setup.py`):
 - `SQLAlchemy` — ORM
 - `urllib3` — URL utilities
 
-Dev: `python3-coverage`, `flake8`, `mdbook`
+Dev: `coverage`, `flake8`, `mdbook`
 
 Install: `pip install -r requirements.txt` (installs the package and its dependencies from `setup.py`)
 

@@ -82,7 +82,7 @@ class Api(Plugin):
             base = f'https://platform.{self._state.synack_domain}/api/'
         url = f'{base}{path}'
 
-        verify = False
+        verify = False if self._state.use_proxies else True
         warnings.filterwarnings('ignore')
 
         proxies = self._state.proxies if self._state.use_proxies else None
