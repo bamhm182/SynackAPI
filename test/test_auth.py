@@ -27,8 +27,9 @@ class AuthTestCase(unittest.TestCase):
         self.auth._duo = MagicMock()
 
     def test_get_api_token(self):
-        """Should complete the login workflow when check fails"""
+        """Should use HOTP path when no virtual device is registered"""
         self.auth._state.api_token = ""
+        self.auth._db.duo_akey = ''
         self.auth.set_login_script = MagicMock()
         self.auth.get_authentication_response = MagicMock()
         self.auth.get_authentication_response.return_value = {
@@ -45,6 +46,28 @@ class AuthTestCase(unittest.TestCase):
         self.auth.get_login_csrf.assert_called_with()
         self.auth.set_login_script.assert_called_with()
         self.auth.get_authentication_response.assert_called_with('csrf_fwlnm')
+        self.auth._duo.get_grant_token.assert_called_with('https://duoauth.local')
+        self.auth._duo.get_grant_token_push.assert_not_called()
+
+    def test_get_api_token_push(self):
+        """Should use push path when a virtual device is registered"""
+        self.auth._state.api_token = ""
+        self.auth._db.duo_akey = 'registered_akey'
+        self.auth.set_login_script = MagicMock()
+        self.auth.get_authentication_response = MagicMock()
+        self.auth.get_authentication_response.return_value = {
+            'duo_auth_url': 'https://duoauth.local'
+        }
+        self.auth._users.get_profile = MagicMock()
+        self.auth._users.get_profile.return_value = None
+        self.auth.get_login_csrf = MagicMock(return_value="csrf_fwlnm")
+
+        self.auth._api.request.return_value.status_code = 200
+        ret_json = {"access_token": "api_lwfaume"}
+        self.auth._api.request.return_value.json.return_value = ret_json
+        self.assertEqual("api_lwfaume", self.auth.get_api_token())
+        self.auth._duo.get_grant_token_push.assert_called_with('https://duoauth.local')
+        self.auth._duo.get_grant_token.assert_not_called()
 
     def test_get_api_token_login_success(self):
         """Should return the database token when check succeeds"""

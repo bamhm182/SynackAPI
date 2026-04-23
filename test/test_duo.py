@@ -66,6 +66,75 @@ class DuoTestCase(unittest.TestCase):
         result = self.duo.get_grant_token('https://duo.test/auth')
         self.assertIsNone(result)
 
+    def test_get_grant_token_push(self):
+        """Should complete push MFA flow and return grant_token"""
+        self.duo._get_session_variables = MagicMock()
+        self.duo._set_session_variables = MagicMock()
+        self.duo._get_txid = MagicMock()
+        self.duo._get_status = MagicMock()
+        self.duo._get_oidc_exit = MagicMock()
+        self.duo._get_grant_token = MagicMock()
+        self.duo._txid = 'test_txid'
+        self.duo._status = 'SUCCESS'
+        self.duo._progress_token = 'test_token'
+        self.duo._grant_token = 'expected_token'
+        result = self.duo.get_grant_token_push('https://duo.test/auth')
+        self.assertEqual(result, 'expected_token')
+
+    def test_get_grant_token_push_no_txid(self):
+        """Should return None when txid is not obtained on push path"""
+        self.duo._get_session_variables = MagicMock()
+        self.duo._set_session_variables = MagicMock()
+        self.duo._get_txid = MagicMock()
+        self.duo._txid = None
+        result = self.duo.get_grant_token_push('https://duo.test/auth')
+        self.assertIsNone(result)
+
+    def test_get_mfa_details_hotp(self):
+        """Should use HOTP when otp_secret is set and no virtual device is registered"""
+        self.state._otp_secret = 'JBSWY3DPEHPK3PXP'
+        self.state._otp_count = '0'
+        self.duo._db.duo_akey = ''
+        self.duo._get_mfa_details()
+        self.assertEqual(self.duo._factor, 'Passcode')
+        self.assertEqual(self.duo._device, 'null')
+
+    def test_get_mfa_details_push(self):
+        """Should use Duo Push when no otp_secret is set"""
+        self.state._otp_secret = ''
+        self.duo._base_url = 'https://api.duosecurity.com'
+        self.duo._sid = 'test_sid'
+        self.duo._xsrf = 'test_xsrf'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo._api.request.return_value.json.return_value = {
+            'response': {
+                'auth_method_order': [{'factor': 'Duo Push', 'deviceKey': 'phone-abc'}],
+                'phones': [{'key': 'phone-abc', 'index': 'phone0'}]
+            }
+        }
+        self.duo._get_mfa_details()
+        self.assertEqual(self.duo._factor, 'Duo Push')
+        self.assertEqual(self.duo._device, 'phone0')
+
+    def test_get_mfa_details_push_over_hotp(self):
+        """Should use Duo Push over HOTP when a virtual device is registered"""
+        self.state._otp_secret = 'JBSWY3DPEHPK3PXP'
+        self.state._otp_count = '0'
+        self.duo._db.duo_akey = 'registered_akey'
+        self.duo._base_url = 'https://api.duosecurity.com'
+        self.duo._sid = 'test_sid'
+        self.duo._xsrf = 'test_xsrf'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo._api.request.return_value.json.return_value = {
+            'response': {
+                'auth_method_order': [{'factor': 'Duo Push', 'deviceKey': 'phone-abc'}],
+                'phones': [{'key': 'phone-abc', 'index': 'phone0'}]
+            }
+        }
+        self.duo._get_mfa_details()
+        self.assertEqual(self.duo._factor, 'Duo Push')
+        self.assertEqual(self.duo._device, 'phone0')
+
     def test_set_duo_push_approved(self):
         """Should approve all pending push transactions"""
         self.duo._get_push_transactions = MagicMock(return_value=[

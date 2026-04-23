@@ -27,7 +27,10 @@ class Auth(Plugin):
             auth_response = self.get_authentication_response(csrf)
             duo_auth_url = auth_response.get('duo_auth_url', '')
         if duo_auth_url:
-            grant_token = self._duo.get_grant_token(duo_auth_url)
+            if self._db.duo_akey:
+                grant_token = self._duo.get_grant_token_push(duo_auth_url)
+            else:
+                grant_token = self._duo.get_grant_token(duo_auth_url)
         if grant_token:
             url = f'https://platform.{self._state.synack_domain}/'
             headers = {

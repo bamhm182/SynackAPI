@@ -115,7 +115,22 @@ class Duo(Plugin):
             self._grant_token = res.json().get('grant_token')
 
     def get_grant_token(self, auth_url):
-        """Get Grant Token from Duo Security"""
+        """Get Grant Token from Duo Security via HOTP passcode"""
+        self._auth_url = auth_url
+        self._get_session_variables()
+        self._set_session_variables()
+        self._set_session_variables()  # Yes, this needs to be called twice...
+        self._get_txid()
+        if self._txid:
+            self._get_status()
+        if self._status == 'SUCCESS':
+            self._get_oidc_exit()
+            if self._progress_token:
+                self._get_grant_token()
+            return self._grant_token
+
+    def get_grant_token_push(self, auth_url):
+        """Get Grant Token from Duo Security via registered virtual device push"""
         self._auth_url = auth_url
         self._get_session_variables()
         self._set_session_variables()
