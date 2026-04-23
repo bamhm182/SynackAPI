@@ -21,7 +21,7 @@ With that said, please take the following items into consideration:
     * Run `flake8 src test live-tests` from within the primary directory before submitting a PR. Ensure there are no complaints returned.
 * We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.
 
-There is also the `./check.sh` script in the primary directory that will run everything I would like you to check before submitting a PR.
+There is also the `./checks.sh` script in the primary directory that will run everything I would like you to check before submitting a PR.
 
 If you have any questions on how you can contribute, please reach out via the SRT Slack.
 

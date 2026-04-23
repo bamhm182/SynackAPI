@@ -94,6 +94,28 @@ class Targets(Plugin):
             slug = targets[0].slug
         return slug
 
+    def get(self, status='registered', query_changes={}):
+        """Get information about targets returned from a query"""
+        if not self._db.categories:
+            self.get_assessments()
+        categories = []
+        for category in self._db.categories:
+            if category.passed_practical and category.passed_written:
+                categories.append(category.id)
+        query = {
+            'filter[primary]': status,
+            'filter[secondary]': 'all',
+            'filter[industry]': 'all',
+            'filter[category][]': categories
+        }
+        query.update(query_changes)
+        res = self._api.request('GET', 'targets', query=query)
+        if res.status_code == 200:
+            self._db.add_targets(res.json(), is_registered=True)
+            return res.json()
+        elif res.status_code == 403 and self._state.login:
+            self._auth.get_api_token()
+
     def get_assessments(self):
         """Check which assessments have been completed"""
         res = self._api.request('GET', 'assessments')
@@ -114,10 +136,10 @@ class Targets(Plugin):
                 curr = self.get_connected()
                 target = self._db.find_targets(slug=curr.get('slug'))
 
-        if type(scope) == str:
+        if isinstance(scope, str):
             scope = [scope]
 
-        if type(host_type) == str:
+        if isinstance(host_type, str):
             host_type = [host_type]
         elif host_type is None:
             host_type = list()
@@ -217,28 +239,6 @@ class Targets(Plugin):
                 return res.json()
             elif res.status_code == 403 and self._state.login:
                 self._auth.get_api_token()
-
-    def get(self, status='registered', query_changes={}):
-        """Get information about targets returned from a query"""
-        if not self._db.categories:
-            self.get_assessments()
-        categories = []
-        for category in self._db.categories:
-            if category.passed_practical and category.passed_written:
-                categories.append(category.id)
-        query = {
-            'filter[primary]': status,
-            'filter[secondary]': 'all',
-            'filter[industry]': 'all',
-            'filter[category][]': categories
-        }
-        query.update(query_changes)
-        res = self._api.request('GET', 'targets', query=query)
-        if res.status_code == 200:
-            self._db.add_targets(res.json(), is_registered=True)
-            return res.json()
-        elif res.status_code == 403 and self._state.login:
-            self._auth.get_api_token()
 
     def get_registered_summary(self):
         """Get information on your registered targets"""

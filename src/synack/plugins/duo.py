@@ -6,10 +6,16 @@ Functions related to handling Duo Security Multi-Factor Authentication.
 from .base import Plugin
 
 import base64
+from Crypto.Hash import SHA512
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+import datetime
+import email.utils
 import json
 import pyotp
 import re
 import time
+import urllib.parse
 
 
 class Duo(Plugin):
@@ -48,6 +54,66 @@ class Duo(Plugin):
         headers.update(overrides if overrides else dict())
         return headers
 
+    def _generate_push_signature(self, method, path, now, data):
+        rsa_key = RSA.import_key(self._db.duo_rsa_key)
+        message = (now + '\n' + method + '\n' + self._db.duo_host.lower() + '\n' +
+                   path + '\n' + urllib.parse.urlencode(data)).encode('ascii')
+        h = SHA512.new(message)
+        signature = pkcs1_15.new(rsa_key).sign(h)
+        auth = ('Basic ' + base64.b64encode(
+            (self._db.duo_pkey + ':' + base64.b64encode(signature).decode('ascii')).encode('ascii')
+        ).decode('ascii'))
+        return auth
+
+    def get_duo_push_values(self, code):
+        """Register SynackAPI as a virtual Duo device using a Duo activation code"""
+        code_part, host_part = map(lambda x: x.strip('<>'), code.split('-'))
+        missing_padding = len(host_part) % 4
+        if missing_padding:
+            host_part += '=' * (4 - missing_padding)
+        host = base64.b64decode(host_part.encode('ascii')).decode('ascii')
+        rsa_key = RSA.import_key(self._db.duo_rsa_key)
+        params = {
+            'customer_protocol': '1',
+            'pubkey': rsa_key.publickey().export_key('PEM').decode('ascii'),
+            'pkpush': 'rsa-sha512',
+            'jailbroken': 'false',
+            'architecture': 'arm64',
+            'region': 'US',
+            'app_id': 'com.duosecurity.duomobile',
+            'full_disk_encryption': 'true',
+            'passcode_status': 'true',
+            'platform': 'Android',
+            'app_version': '3.49.0',
+            'app_build_number': '323001',
+            'version': '11',
+            'manufacturer': 'unknown',
+            'language': 'en',
+            'model': 'Browser Extension',
+            'security_patch_level': '2021-02-01'
+        }
+        url = f'https://{host}/push/v2/activation/{code_part}?{urllib.parse.urlencode(params)}'
+        res = self._api.request('POST', url)
+        if res.status_code == 200:
+            response = res.json().get('response', {})
+            self._db.duo_akey = response.get('akey', '')
+            self._db.duo_pkey = response.get('pkey', '')
+            self._db.duo_host = host
+
+    def _get_grant_token(self):
+        headers = {
+            'X-Csrf-Token': self._xsrf
+        }
+        data = {
+            'progress_token': self._progress_token
+        }
+        res = self._api.login('POST',
+                              'authenticate',
+                              data=data,
+                              headers=headers)
+        if res.status_code == 200:
+            self._grant_token = res.json().get('grant_token')
+
     def get_grant_token(self, auth_url):
         """Get Grant Token from Duo Security"""
         self._auth_url = auth_url
@@ -62,20 +128,6 @@ class Duo(Plugin):
             if self._progress_token:
                 self._get_grant_token()
             return self._grant_token
-
-    def _get_grant_token(self):
-        headers = {
-            'X-Csrf-Token': self._xsrf
-        }
-        data = {
-            'progress_token': self._progress_token
-        }
-        res = self._api.login('POST',
-                                'authenticate',
-                                data=data,
-                                headers=headers)
-        if res.status_code == 200:
-            self._grant_token = res.json().get('grant_token')
 
     def _get_mfa_details(self):
         if self._state.otp_secret:
@@ -139,6 +191,24 @@ class Duo(Plugin):
             except AttributeError:
                 self._progress_token = re.search('token=([^&]*)', res.url).group(1)
                 self._xsrf = self._utils.get_html_tag_value('csrf-token', res.text)
+
+    def _get_push_transactions(self):
+        now = email.utils.format_datetime(datetime.datetime.utcnow())
+        path = '/push/v2/device/transactions'
+        data = {
+            'akey': self._db.duo_akey,
+            'fips_status': '1',
+            'hsm_status': 'true',
+            'pkpush': 'rsa-sha512'
+        }
+        signature = self._generate_push_signature('GET', path, now, data)
+        res = self._api.request('GET', f'https://{self._db.duo_host}{path}',
+                                query=data,
+                                headers={'Authorization': signature, 'x-duo-date': now,
+                                         'host': self._db.duo_host})
+        if res.status_code == 200:
+            return res.json().get('response', {}).get('transactions', [])
+        return []
 
     def _get_session_variables(self):
         self._referrer = f'https://login.{self._state.synack_domain}/'
@@ -222,7 +292,8 @@ class Duo(Plugin):
                     print(res.json())
                     break
                 elif status_enum == 13:  # Awaiting Push Notification
-                    pass
+                    if self._db.duo_akey:
+                        self.set_duo_push_approved()
                 elif status_enum == 15:  # Push Notification MFA Blocked
                     break
                 elif status_enum == 44:  # Prior Code
@@ -277,6 +348,28 @@ class Duo(Plugin):
                 if self._state.otp_secret:
                     self._db.otp_count += 1
 
+    def set_duo_push_approved(self):
+        """Approve pending Duo push transactions for the registered virtual device"""
+        for transaction in self._get_push_transactions():
+            txid = transaction.get('urgid', '')
+            if not txid:
+                continue
+            now = email.utils.format_datetime(datetime.datetime.utcnow())
+            path = f'/push/v2/device/transactions/{txid}'
+            data = {
+                'akey': self._db.duo_akey,
+                'answer': 'approve',
+                'fips_status': '1',
+                'hsm_status': 'true',
+                'pkpush': 'rsa-sha512'
+            }
+            signature = self._generate_push_signature('POST', path, now, data)
+            self._api.request('POST', f'https://{self._db.duo_host}{path}',
+                              data=data,
+                              headers={'Authorization': signature, 'x-duo-date': now,
+                                       'host': self._db.duo_host, 'txId': txid,
+                                       'Content-Type': 'application/x-www-form-urlencoded'})
+
     def _set_session_variables(self):
         headers = {
             'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
@@ -297,4 +390,3 @@ class Duo(Plugin):
         res = self._api.request('POST', self._referrer, headers=headers, data=self._session_vars)
         if res.status_code == 200:
             self._referrer = res.url
-

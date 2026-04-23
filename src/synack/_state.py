@@ -140,7 +140,7 @@ class State(object):
 
     @config_dir.setter
     def config_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
-        if type(value) == str:
+        if isinstance(value, str):
             value = pathlib.Path(value).expanduser().resolve()
         self._config_dir = value
 
@@ -165,7 +165,7 @@ class State(object):
 
     @template_dir.setter
     def template_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
-        if type(value) == str:
+        if isinstance(value, str):
             value = pathlib.Path(value).expanduser().resolve()
         self._template_dir = value
 
@@ -179,7 +179,7 @@ class State(object):
 
     @scratchspace_dir.setter
     def scratchspace_dir(self, value: Union[str, pathlib.PosixPath]) -> None:
-        if type(value) == str:
+        if isinstance(value, str):
             value = pathlib.Path(value).expanduser().resolve()
         self._scratchspace_dir = value
 

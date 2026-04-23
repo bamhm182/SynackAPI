@@ -186,6 +186,32 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._db.find_targets.assert_has_calls(calls)
         self.targets.get_registered_summary.assert_called_with()
 
+    def test_get(self):
+        """Should get a list of targets"""
+        self.targets._db.categories = [
+            Category(id=1, passed_practical=True,  passed_written=True),
+            Category(id=2, passed_practical=True,  passed_written=True),
+            Category(id=3, passed_practical=False, passed_written=False),
+        ]
+        query = {
+            'filter[primary]': 'unregistered',
+            'filter[secondary]': 'all',
+            'filter[industry]': 'all',
+            'filter[category][]': [1, 2]
+        }
+        self.targets._api.request.return_value.status_code = 200
+        results = [
+            {
+                "codename": "SLEEPYSLUG",
+                "slug": "1o2h8o"
+            }
+        ]
+        self.targets._api.request.return_value.json.return_value = results
+        self.assertEqual(results, self.targets.get_unregistered())
+        self.targets._api.request.assert_called_with("GET",
+                                                     "targets",
+                                                     query=query)
+
     def test_get_assessments_all_passed(self):
         """Should return a list of passed assessments"""
         assessments = [
@@ -216,6 +242,25 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._db.categories = [cat1]
         self.assertEqual([cat1], self.targets.get_assessments())
         self.targets._db.add_categories.assert_called_with(assessments)
+
+    def test_get_assessments_empty(self):
+        """Should get a list of unregistered targets"""
+        self.targets.get_assessments = MagicMock()
+        self.targets._db.categories = []
+        query = {
+            'filter[primary]': 'unregistered',
+            'filter[secondary]': 'all',
+            'filter[industry]': 'all',
+            'filter[category][]': []
+        }
+        self.targets._api.request.return_value.status_code = 200
+        results = []
+        self.targets._api.request.return_value.json.return_value = results
+        self.assertEqual(results, self.targets.get_unregistered())
+        self.targets.get_assessments.assert_called_with()
+        self.targets._api.request.assert_called_with("GET",
+                                                     "targets",
+                                                     query=query)
 
     def test_get_assets(self):
         """Should return a list of assets for a currently connected target"""
@@ -402,51 +447,6 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual("json_return",
                          self.targets.get_credentials(codename='SLEEPYSLUG'))
         self.targets._api.request.assert_called_with('POST', url)
-
-    def test_get(self):
-        """Should get a list of targets"""
-        self.targets._db.categories = [
-            Category(id=1, passed_practical=True,  passed_written=True),
-            Category(id=2, passed_practical=True,  passed_written=True),
-            Category(id=3, passed_practical=False, passed_written=False),
-        ]
-        query = {
-            'filter[primary]': 'unregistered',
-            'filter[secondary]': 'all',
-            'filter[industry]': 'all',
-            'filter[category][]': [1, 2]
-        }
-        self.targets._api.request.return_value.status_code = 200
-        results = [
-            {
-                "codename": "SLEEPYSLUG",
-                "slug": "1o2h8o"
-            }
-        ]
-        self.targets._api.request.return_value.json.return_value = results
-        self.assertEqual(results, self.targets.get_unregistered())
-        self.targets._api.request.assert_called_with("GET",
-                                                     "targets",
-                                                     query=query)
-
-    def test_get_assessments_empty(self):
-        """Should get a list of unregistered targets"""
-        self.targets.get_assessments = MagicMock()
-        self.targets._db.categories = []
-        query = {
-            'filter[primary]': 'unregistered',
-            'filter[secondary]': 'all',
-            'filter[industry]': 'all',
-            'filter[category][]': []
-        }
-        self.targets._api.request.return_value.status_code = 200
-        results = []
-        self.targets._api.request.return_value.json.return_value = results
-        self.assertEqual(results, self.targets.get_unregistered())
-        self.targets.get_assessments.assert_called_with()
-        self.targets._api.request.assert_called_with("GET",
-                                                     "targets",
-                                                     query=query)
 
     def test_get_registered_summary(self):
         """Should make a request to get basic info about registered targets"""

@@ -49,7 +49,7 @@ class Missions(Plugin):
         missions -- List of missions from one of the get_missions functions
         """
         ret = {
-            'total': { 'count': 0, 'value': 0, 'time': 0 }
+            'total': {'count': 0, 'value': 0, 'time': 0}
         }
         for mission in missions:
             codename = mission.get('listingCodename', 'UNKNOWN')
@@ -232,7 +232,7 @@ class Missions(Plugin):
             if curr:
                 for f in ['introduction', 'testing_methodology',
                           'conclusion']:
-                    if len(curr.get(f)) >= 20 and force == False:
+                    if len(curr.get(f)) >= 20 and not force:
                         safe = False
                         break
             if safe:

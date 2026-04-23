@@ -15,6 +15,7 @@ down_revision = '6814001a4ed4'
 branch_labels = None
 depends_on = None
 
+
 def upgrade():
     with op.batch_alter_table('config') as batch_op:
         batch_op.add_column(sa.Column('synack_domain', sa.VARCHAR(100), server_default='synack.com'))

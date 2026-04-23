@@ -5,6 +5,7 @@ Manipulates/Reads the database and provides it to other plugins
 
 import alembic.config
 import alembic.command
+from Crypto.PublicKey import RSA
 import sqlalchemy as sa
 
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
@@ -30,9 +31,6 @@ class Db(Plugin):
         self.set_migration()
 
         engine = sa.create_engine(f'sqlite:///{str(self.sqlite_db)}')
-        metadata = sa.MetaData()
-        metadata.reflect(bind=engine)
-        metadata.clear()
         sa.event.listen(engine, 'connect', self._fk_pragma_on_connect)
         self.Session = sessionmaker(bind=engine)
 
@@ -76,7 +74,6 @@ class Db(Plugin):
                     )
                     session.execute(stmt)
                     ips_data = list()
-
 
         if ips_data:
             stmt = sqlite_insert(IP).values(ips_data)
@@ -153,7 +150,6 @@ class Db(Plugin):
                         )
                         session.execute(stmt)
                         ports_data = list()
-
 
         if ports_data:
             stmt = sqlite_insert(Port).values(ports_data)
@@ -279,14 +275,6 @@ class Db(Plugin):
         self.set_config('debug', value)
 
     @property
-    def email(self):
-        ret = self.get_config('email')
-        if not ret:
-            ret = input('Synack Email: ')
-            self.email = ret
-        return ret
-
-    @property
     def duo_akey(self):
         return self.get_config('duo_akey')
 
@@ -313,19 +301,23 @@ class Db(Plugin):
     @property
     def duo_rsa_key(self):
         pem = self.get_config('duo_rsa_key')
-        if rsa_key = '':
-            rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-            pem = rsa_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ).decode('utf-8')
+        if not pem:
+            rsa_key = RSA.generate(2048)
+            pem = rsa_key.export_key('PEM').decode('utf-8')
             self.set_config('duo_rsa_key', pem)
         return pem
 
     @duo_rsa_key.setter
-    def duo_pubkey(self, value):
-        self.set_config('duo_pubkey', value)
+    def duo_rsa_key(self, value):
+        self.set_config('duo_rsa_key', value)
+
+    @property
+    def email(self):
+        ret = self.get_config('email')
+        if not ret:
+            ret = input('Synack Email: ')
+            self.email = ret
+        return ret
 
     @email.setter
     def email(self, value):
@@ -419,7 +411,7 @@ class Db(Plugin):
                 query = query.filter(sa.or_(*filters))
             else:
                 query = query.filter(sa.and_(*filters))
-    
+
         targets = query.all()
 
         session.expunge_all()
@@ -584,6 +576,7 @@ class Db(Plugin):
         config.set_main_option('script_location', str(db_folder / 'alembic'))
         config.set_main_option('version_locations',
                                str(db_folder / 'alembic/versions'))
+        config.set_main_option('path_separator', 'os')
         config.set_main_option('sqlalchemy.url',
                                f'sqlite:///{str(self.sqlite_db)}')
         alembic.command.upgrade(config, 'head')
@@ -677,19 +670,19 @@ class Db(Plugin):
         self.set_config('smtp_username', value)
 
     @property
-    def targets(self):
-        session = self.Session()
-        targets = session.query(Target).all()
-        session.close()
-        return targets
-
-    @property
     def synack_domain(self):
         return self.get_config('synack_domain')
 
     @synack_domain.setter
     def synack_domain(self, value):
         self.set_config('synack_domain', value)
+
+    @property
+    def targets(self):
+        session = self.Session()
+        targets = session.query(Target).all()
+        session.close()
+        return targets
 
     @property
     def template_dir(self):

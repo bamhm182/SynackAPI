@@ -108,6 +108,21 @@
 >> 'uwfpmfpgjlum'
 >> ```
 
+## targets.get(status='registered', query_changes={})
+
+> Pulls back a list of targets matching the specified query
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `status` | string | The type of targets to pull back. (Ex: `registered`, `unregistered`, `upcoming`, `all`)
+> | `query_changes` | dict() | Changes to make to the standard query. (Ex: `{"sorting['field']": "dateUploaded"}`
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get(status='unregistered')
+>> [{"codename": "SLEEPYSLUG", ...}, ...]
+>> ```
+
 ## targets.get_assessments()
 
 > Pull back a list of assessments and whether you have passed them.
@@ -208,21 +223,6 @@
 >> [{"credentials": [{...},...],...}]
 >> >>> h.targets.get_credentials(codename='CHILLINCHILLA')
 >> [{"credentials": [{...},...],...}]
->> ```
-
-## targets.get(status='registered', query_changes={})
-
-> Pulls back a list of targets matching the specified query
->
-> | Arguments | Type | Description
-> | --- | --- | ---
-> | `status` | string | The type of targets to pull back. (Ex: `registered`, `unregistered`, `upcoming`, `all`)
-> | `query_changes` | dict() | Changes to make to the standard query. (Ex: `{"sorting['field']": "dateUploaded"}`
->
->> Examples
->> ```python3
->> >>> h.targets.get(status='unregistered')
->> [{"codename": "SLEEPYSLUG", ...}, ...]
 >> ```
 
 ## targets.get_registered_summary()

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 flake8 src test live-tests
 
@@ -61,6 +61,6 @@ for doc in ./docs/src/usage/plugins/*.md; do
     fi
 done
 
-python3-coverage run --source=src --omit=src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py -m unittest discover test
-python3-coverage report | egrep -v "^[^T].*100%"
-python3-coverage html
+coverage run --source=src --omit=src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py -m unittest discover test
+coverage report | egrep -v "^[^T].*100%"
+coverage html
