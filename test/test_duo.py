@@ -108,25 +108,24 @@ class DuoTestCase(unittest.TestCase):
 
     def test_get_grant_token_push(self):
         """Should complete push MFA flow and return grant_token"""
-        self.duo._get_session_variables = MagicMock()
-        self.duo._set_session_variables = MagicMock()
-        self.duo._get_txid = MagicMock()
-        self.duo._get_status = MagicMock()
-        self.duo._get_oidc_exit = MagicMock()
-        self.duo._get_grant_token = MagicMock()
-        self.duo._txid = 'test_txid'
-        self.duo._status = 'SUCCESS'
-        self.duo._progress_token = 'test_token'
+        self.duo._get_push_auth_url_params = MagicMock(return_value=True)
+        self.duo._get_push_txid = MagicMock(return_value='push-txid-123')
+        self.duo._get_push_status = MagicMock(return_value=True)
+        self.duo._get_push_grant_token = MagicMock()
         self.duo._grant_token = 'expected_token'
         result = self.duo.get_grant_token_push('https://duo.test/auth')
         self.assertEqual(result, 'expected_token')
 
+    def test_get_grant_token_push_no_auth_params(self):
+        """Should return None when push auth URL params cannot be extracted"""
+        self.duo._get_push_auth_url_params = MagicMock(return_value=False)
+        result = self.duo.get_grant_token_push('https://duo.test/auth')
+        self.assertIsNone(result)
+
     def test_get_grant_token_push_no_txid(self):
-        """Should return None when txid is not obtained on push path"""
-        self.duo._get_session_variables = MagicMock()
-        self.duo._set_session_variables = MagicMock()
-        self.duo._get_txid = MagicMock()
-        self.duo._txid = None
+        """Should return None when push txid cannot be obtained"""
+        self.duo._get_push_auth_url_params = MagicMock(return_value=True)
+        self.duo._get_push_txid = MagicMock(return_value=None)
         result = self.duo.get_grant_token_push('https://duo.test/auth')
         self.assertIsNone(result)
 
