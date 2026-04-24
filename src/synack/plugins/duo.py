@@ -337,6 +337,8 @@ class Duo(Plugin):
                 elif status_enum == 44:  # Prior Code
                     self._db.otp_count += 5
                     break
+                else status_enum == 56:  # Push Notification Sent
+                    self.set_duo_push_approved()
                 elif message_enum == 57:  # Bad Request
                     print('Your Request was bad!')
                     break
