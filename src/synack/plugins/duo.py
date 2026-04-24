@@ -453,29 +453,36 @@ class Duo(Plugin):
                 if self._state.otp_secret:
                     self._db.otp_count += 1
 
-    def set_duo_push_approved(self):
+    def set_duo_push_approved(self, attempts=10, approvals=1, sleep=5):
         """Approve pending Duo push transactions for the registered virtual device"""
         acted = []
-        for transaction in self._get_push_transactions():
-            txid = transaction.get('urgid', '')
-            if not txid:
-                continue
-            now = email.utils.format_datetime(datetime.datetime.utcnow())
-            path = f'/push/v2/device/transactions/{txid}'
-            data = {
-                'akey': self._db.duo_akey,
-                'answer': 'approve',
-                'fips_status': '1',
-                'hsm_status': 'true',
-                'pkpush': 'rsa-sha512'
-            }
-            signature = self._generate_push_signature('POST', path, now, data)
-            self._api.request('POST', f'https://{self._db.duo_host}{path}',
-                              data=data,
-                              headers={'Authorization': signature, 'x-duo-date': now,
-                                       'host': self._db.duo_host, 'txId': txid,
-                                       'Content-Type': 'application/x-www-form-urlencoded'})
-            acted.append(transaction)
+        attempt = 0
+        while attempts == 0 or attempt < attempts:
+            for transaction in self._get_push_transactions():
+                txid = transaction.get('urgid', '')
+                if not txid:
+                    continue
+                now = email.utils.format_datetime(datetime.datetime.utcnow())
+                path = f'/push/v2/device/transactions/{txid}'
+                data = {
+                    'akey': self._db.duo_akey,
+                    'answer': 'approve',
+                    'fips_status': '1',
+                    'hsm_status': 'true',
+                    'pkpush': 'rsa-sha512'
+                }
+                signature = self._generate_push_signature('POST', path, now, data)
+                self._api.request('POST', f'https://{self._db.duo_host}{path}',
+                                  data=data,
+                                  headers={'Authorization': signature, 'x-duo-date': now,
+                                           'host': self._db.duo_host, 'txId': txid,
+                                           'Content-Type': 'application/x-www-form-urlencoded'})
+                acted.append(transaction)
+                if approvals != 0 and len(acted) >= approvals:
+                    return acted
+            attempt += 1
+            if attempts == 0 or attempt < attempts:
+                time.sleep(sleep)
         return acted
 
     def _set_session_variables(self):
