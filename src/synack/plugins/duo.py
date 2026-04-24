@@ -27,7 +27,6 @@ class Duo(Plugin):
                     self._registry.get(plugin)(self._state))
 
         self._auth_url = None
-        self._authkey = None
         self._base_url = None
         self._device = None
         self._factor = None
@@ -163,18 +162,6 @@ class Duo(Plugin):
                 self._get_grant_token()
             return self._grant_token
 
-    def get_grant_token_push(self, auth_url):
-        """Get Grant Token from Duo Security via registered virtual device push"""
-        self._auth_url = auth_url
-        if not self._get_push_auth_url_params():
-            return None
-        push_txid = self._get_push_txid()
-        if not push_txid:
-            return None
-        if self._get_push_status(push_txid):
-            self._get_push_grant_token()
-        return self._grant_token
-
     def _get_mfa_details(self):
         if self._state.otp_secret and not self._db.duo_akey:
             self._device = 'null'
@@ -239,52 +226,6 @@ class Duo(Plugin):
                 self._progress_token = re.search('token=([^&]*)', res.url).group(1)
                 self._xsrf = self._utils.get_html_tag_value('csrf-token', res.text)
 
-    def _get_push_auth_url_params(self):
-        res = self._api.request('GET', self._auth_url)
-        if res.status_code != 200:
-            return False
-        akey_match = re.search(r'/prompt/([^/?]+)', res.url)
-        authkey_match = re.search(r'[?&]authkey=([^&]+)', res.url)
-        base_match = re.search(r'(https://[^/]+)', res.url)
-        if not akey_match or not authkey_match or not base_match:
-            return False
-        self._sid = akey_match.group(1)
-        self._authkey = authkey_match.group(1)
-        self._base_url = base_match.group(1)
-        return True
-
-    def _get_push_grant_token(self):
-        res = self._api.request('GET', f'{self._base_url}/prompt/{self._sid}/auth/finalize_auth',
-                                query={'authkey': self._authkey})
-        if res.status_code == 200:
-            try:
-                body = res.json()
-                redirect_url = body.get('uri') or body.get('redirect_url') or body.get('url')
-                if redirect_url:
-                    if redirect_url.startswith('/'):
-                        redirect_url = self._base_url + redirect_url
-                    res2 = self._api.request('GET', redirect_url)
-                    match = re.search(r'[?&]grant_token=([^&]+)', res2.url)
-                    if match:
-                        self._grant_token = match.group(1)
-            except (ValueError, AttributeError):
-                pass
-
-    def _get_push_status(self, push_txid):
-        query = {'authkey': self._authkey, 'push_txid': push_txid, 'saw_good_news': 'false'}
-        for _ in range(10):
-            res = self._api.request('GET', f'{self._base_url}/prompt/{self._sid}/auth/factors/push/status',
-                                    query=query)
-            if res.status_code == 200:
-                status = res.json().get('result', res.json().get('status', ''))
-                if isinstance(status, str) and status.lower() in ('success', 'allow', 'allowed'):
-                    return True
-                if isinstance(status, str) and status.lower() in ('deny', 'denied', 'failure', 'fail'):
-                    return False
-            self.set_duo_push_approved()
-            time.sleep(5)
-        return False
-
     def _get_push_transactions(self):
         now = email.utils.format_datetime(datetime.datetime.utcnow())
         path = '/push/v2/device/transactions'
@@ -302,14 +243,6 @@ class Duo(Plugin):
         if res.status_code == 200:
             return res.json().get('response', {}).get('transactions', [])
         return []
-
-    def _get_push_txid(self):
-        data = {'authkey': self._authkey, 'pkey': self._db.duo_pkey}
-        res = self._api.request('POST', f'{self._base_url}/prompt/{self._sid}/auth/factors/push/auth',
-                                data=data)
-        if res.status_code == 200:
-            return res.json().get('push_txid', '')
-        return None
 
     def _get_session_variables(self):
         self._referrer = f'https://login.{self._state.synack_domain}/'

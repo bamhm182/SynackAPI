@@ -32,23 +32,9 @@
 
 ## duo.get_grant_token(auth_url)
 
-> Handles Duo Security MFA stages and returns the grant_token used to finish logging into Synack
->
-> | Arguments | Description
-> | --- | ---
-> | `auth_url` | Duo Security Authentication URL generaated by sending credentials to Synack
->
->> Examples
->> ```python3
->> >>> h.duo.get_grant_token('https:///...duosecurity.com/...')
->> 'Y8....6g'
->> ```
-
-## duo.get_grant_token_push(auth_url)
-
-> Handles Duo Security MFA stages using a registered virtual device push and returns the
-> grant_token used to finish logging into Synack. Requires virtual device credentials
-> (`duo_akey`, `duo_pkey`, `duo_host`) to be configured in the database.
+> Handles Duo Security MFA stages and returns the grant_token used to finish logging into Synack.
+> Supports both HOTP passcode and registered virtual device push, selected automatically based
+> on configured credentials.
 >
 > | Arguments | Description
 > | --- | ---
@@ -56,7 +42,7 @@
 >
 >> Examples
 >> ```python3
->> >>> h.duo.get_grant_token_push('https://...duosecurity.com/...')
+>> >>> h.duo.get_grant_token('https:///...duosecurity.com/...')
 >> 'Y8....6g'
 >> ```
 
