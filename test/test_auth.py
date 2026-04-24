@@ -27,9 +27,13 @@ class AuthTestCase(unittest.TestCase):
         self.auth._duo = MagicMock()
 
     def test_get_api_token(self):
-        """Should use HOTP path when no virtual device is registered"""
+        """Should use HOTP path when otp credentials are set and no virtual device is registered"""
         self.auth._state.api_token = ""
         self.auth._db.duo_akey = ''
+        self.auth._db.duo_pkey = ''
+        self.auth._db.duo_host = ''
+        self.auth._db.otp_secret = 'TOPSECRET'
+        self.auth._db.otp_count = 0
         self.auth.set_login_script = MagicMock()
         self.auth.get_authentication_response = MagicMock()
         self.auth.get_authentication_response.return_value = {
@@ -49,10 +53,45 @@ class AuthTestCase(unittest.TestCase):
         self.auth._duo.get_grant_token.assert_called_with('https://duoauth.local')
         self.auth._duo.get_grant_token_push.assert_not_called()
 
+    def test_get_api_token_configure_mfa(self):
+        """Should call configure_mfa and proceed with push when neither MFA method is configured"""
+        self.auth._state.api_token = ""
+        self.auth._db.duo_akey = ''
+        self.auth._db.duo_pkey = ''
+        self.auth._db.duo_host = ''
+        self.auth._db.otp_secret = None
+        self.auth._db.otp_count = None
+
+        self.auth._duo.configure_mfa.side_effect = lambda: [
+            setattr(self.auth._db, 'duo_akey', 'new_akey'),
+            setattr(self.auth._db, 'duo_pkey', 'new_pkey'),
+            setattr(self.auth._db, 'duo_host', 'api.duo.com'),
+        ]
+        self.auth.set_login_script = MagicMock()
+        self.auth.get_authentication_response = MagicMock(return_value={'duo_auth_url': 'https://duoauth.local'})
+        self.auth._users.get_profile = MagicMock(return_value=None)
+        self.auth.get_login_csrf = MagicMock(return_value="csrf_fwlnm")
+        self.auth._api.request.return_value.status_code = 200
+        self.auth._api.request.return_value.json.return_value = {"access_token": "api_lwfaume"}
+        self.assertEqual("api_lwfaume", self.auth.get_api_token())
+        self.auth._duo.configure_mfa.assert_called_once()
+        self.auth._duo.get_grant_token_push.assert_called_with('https://duoauth.local')
+        self.auth._duo.get_grant_token.assert_not_called()
+
+    def test_get_api_token_login_success(self):
+        """Should return the database token when check succeeds"""
+        self.auth._state.api_token = "qweqweqwe"
+        self.auth.set_login_script = MagicMock()
+        self.auth._users.get_profile = MagicMock()
+        self.auth._users.get_profile.return_value = {"user_id": "john"}
+        self.assertEqual("qweqweqwe", self.auth.get_api_token())
+
     def test_get_api_token_push(self):
         """Should use push path when a virtual device is registered"""
         self.auth._state.api_token = ""
         self.auth._db.duo_akey = 'registered_akey'
+        self.auth._db.duo_pkey = 'registered_pkey'
+        self.auth._db.duo_host = 'api.duosecurity.com'
         self.auth.set_login_script = MagicMock()
         self.auth.get_authentication_response = MagicMock()
         self.auth.get_authentication_response.return_value = {
@@ -68,14 +107,6 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual("api_lwfaume", self.auth.get_api_token())
         self.auth._duo.get_grant_token_push.assert_called_with('https://duoauth.local')
         self.auth._duo.get_grant_token.assert_not_called()
-
-    def test_get_api_token_login_success(self):
-        """Should return the database token when check succeeds"""
-        self.auth._state.api_token = "qweqweqwe"
-        self.auth.set_login_script = MagicMock()
-        self.auth._users.get_profile = MagicMock()
-        self.auth._users.get_profile.return_value = {"user_id": "john"}
-        self.assertEqual("qweqweqwe", self.auth.get_api_token())
 
     def test_get_notifications_token(self):
         """Should get the notifications token"""

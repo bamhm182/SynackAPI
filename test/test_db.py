@@ -678,6 +678,23 @@ class DbTestCase(unittest.TestCase):
         self.db.notifications_token = "123"
         self.db.set_config.assert_called_with("notifications_token", "123")
 
+    def test_otp_count(self):
+        """Should pull otp_count from the database"""
+        self.db.get_config = MagicMock()
+        self.db.get_config.return_value = 5
+
+        self.assertEqual(5, self.db.otp_count)
+        self.db.get_config.assert_called_with("otp_count")
+
+    def test_otp_count_none(self):
+        """Should return None without prompting when otp_count is unset"""
+        self.db.get_config = MagicMock()
+        self.db.get_config.return_value = None
+
+        with patch("builtins.input") as mock_input:
+            self.assertIsNone(self.db.otp_count)
+            mock_input.assert_not_called()
+
     def test_otp_secret(self):
         """Should pull otp_secret from the database"""
         self.db.get_config = MagicMock()
@@ -686,18 +703,15 @@ class DbTestCase(unittest.TestCase):
 
         self.assertEqual("ABCDEFGH", self.db.otp_secret)
 
-    def test_otp_secret_prompt(self):
-        """Should ask the user for otp_secret if none"""
+    def test_otp_secret_none(self):
+        """Should return None without prompting when otp_secret is unset"""
         self.db.get_config = MagicMock()
-        self.db.set_config = MagicMock()
         self.db.get_config.return_value = None
 
         with patch("builtins.input") as mock_input:
-            mock_input.return_value = 'ABCDEFGH'
-            self.assertEqual('ABCDEFGH', self.db.otp_secret)
-            mock_input.assert_called_with('Synack OTP Secret: ')
+            self.assertIsNone(self.db.otp_secret)
+            mock_input.assert_not_called()
         self.db.get_config.assert_called_with("otp_secret")
-        self.db.set_config.assert_called_with("otp_secret", "ABCDEFGH")
 
     def test_password(self):
         """Should pull password from the database"""

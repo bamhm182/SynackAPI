@@ -54,6 +54,39 @@ class Duo(Plugin):
         headers.update(overrides if overrides else dict())
         return headers
 
+    def _configure_hotp(self):
+        secret = input('OTP Secret: ').strip()
+        count = input('OTP Count: ').strip()
+        self._db.otp_secret = secret
+        self._db.otp_count = int(count)
+
+    def configure_mfa(self):
+        """Configure MFA interactively, choosing between Duo Push virtual device or HOTP"""
+        choice = input('MFA Type (push/hotp): ').strip().lower()
+        if choice == 'push':
+            self._configure_push()
+        else:
+            self._configure_hotp()
+
+    def _configure_push(self):
+        choice = input('Setup Type (new/existing): ').strip().lower()
+        if choice == 'new':
+            code = input('Duo Activation Code: ').strip()
+            self.get_duo_push_values(code)
+        else:
+            self._db.duo_akey = input('Duo AKey: ').strip()
+            self._db.duo_pkey = input('Duo PKey: ').strip()
+            self._db.duo_host = input('Duo Host: ').strip()
+            rsa_input = input('Duo RSA Private Key (PEM or base64): ').strip()
+            try:
+                key = RSA.import_key(rsa_input)
+                pem = key.export_key('PEM').decode('utf-8')
+            except (ValueError, IndexError, TypeError):
+                decoded = base64.b64decode(rsa_input)
+                key = RSA.import_key(decoded)
+                pem = key.export_key('PEM').decode('utf-8')
+            self._db.duo_rsa_key = pem
+
     def _generate_push_signature(self, method, path, now, data):
         rsa_key = RSA.import_key(self._db.duo_rsa_key)
         message = (now + '\n' + method + '\n' + self._db.duo_host.lower() + '\n' +

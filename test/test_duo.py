@@ -24,6 +24,46 @@ class DuoTestCase(unittest.TestCase):
         self.duo._db = MagicMock()
         self.duo._utils = MagicMock()
 
+    def test_configure_mfa_hotp(self):
+        """Should store otp_secret and otp_count when user selects hotp"""
+        with patch('builtins.input', side_effect=['hotp', 'SECRET123', '5']):
+            self.duo.configure_mfa()
+        self.assertEqual(self.duo._db.otp_secret, 'SECRET123')
+        self.assertEqual(self.duo._db.otp_count, 5)
+
+    @patch('synack.plugins.duo.RSA')
+    def test_configure_mfa_push_existing(self, mock_rsa):
+        """Should store push credentials directly when user selects push existing"""
+        pem = '-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----'
+        mock_key = MagicMock()
+        mock_key.export_key.return_value = pem.encode()
+        mock_rsa.import_key.return_value = mock_key
+        with patch('builtins.input', side_effect=['push', 'existing', 'akey123', 'pkey123', 'api.duo.com', pem]):
+            self.duo.configure_mfa()
+        self.assertEqual(self.duo._db.duo_akey, 'akey123')
+        self.assertEqual(self.duo._db.duo_pkey, 'pkey123')
+        self.assertEqual(self.duo._db.duo_host, 'api.duo.com')
+        self.assertEqual(self.duo._db.duo_rsa_key, pem)
+
+    @patch('synack.plugins.duo.RSA')
+    def test_configure_mfa_push_existing_b64(self, mock_rsa):
+        """Should accept base64-encoded RSA private key and store normalized PEM"""
+        pem = '-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----'
+        b64_key = base64.b64encode(pem.encode()).decode()
+        mock_key = MagicMock()
+        mock_key.export_key.return_value = pem.encode()
+        mock_rsa.import_key.side_effect = [ValueError('invalid'), mock_key]
+        with patch('builtins.input', side_effect=['push', 'existing', 'akey123', 'pkey123', 'api.duo.com', b64_key]):
+            self.duo.configure_mfa()
+        self.assertEqual(self.duo._db.duo_rsa_key, pem)
+
+    def test_configure_mfa_push_new(self):
+        """Should call get_duo_push_values with the activation code for a new device"""
+        self.duo.get_duo_push_values = MagicMock()
+        with patch('builtins.input', side_effect=['push', 'new', 'CODE-aGVsbG8=']):
+            self.duo.configure_mfa()
+        self.duo.get_duo_push_values.assert_called_with('CODE-aGVsbG8=')
+
     @patch('synack.plugins.duo.RSA')
     def test_get_duo_push_values(self, mock_rsa):
         """Should register as a virtual Duo device and store credentials"""

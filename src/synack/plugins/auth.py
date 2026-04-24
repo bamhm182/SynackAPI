@@ -27,9 +27,15 @@ class Auth(Plugin):
             auth_response = self.get_authentication_response(csrf)
             duo_auth_url = auth_response.get('duo_auth_url', '')
         if duo_auth_url:
-            if self._db.duo_akey:
+            has_push = self._db.duo_akey and self._db.duo_pkey and self._db.duo_host
+            has_hotp = self._db.otp_secret and self._db.otp_count is not None
+            if not has_push and not has_hotp:
+                self._duo.configure_mfa()
+                has_push = self._db.duo_akey and self._db.duo_pkey and self._db.duo_host
+                has_hotp = self._db.otp_secret and self._db.otp_count is not None
+            if has_push:
                 grant_token = self._duo.get_grant_token_push(duo_auth_url)
-            else:
+            elif has_hotp:
                 grant_token = self._duo.get_grant_token(duo_auth_url)
         if grant_token:
             url = f'https://platform.{self._state.synack_domain}/'
