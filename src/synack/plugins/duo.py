@@ -455,6 +455,7 @@ class Duo(Plugin):
 
     def set_duo_push_approved(self):
         """Approve pending Duo push transactions for the registered virtual device"""
+        acted = []
         for transaction in self._get_push_transactions():
             txid = transaction.get('urgid', '')
             if not txid:
@@ -474,6 +475,8 @@ class Duo(Plugin):
                               headers={'Authorization': signature, 'x-duo-date': now,
                                        'host': self._db.duo_host, 'txId': txid,
                                        'Content-Type': 'application/x-www-form-urlencoded'})
+            acted.append(transaction)
+        return acted
 
     def _set_session_variables(self):
         headers = {
