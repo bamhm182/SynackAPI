@@ -171,6 +171,7 @@ class Duo(Plugin):
         }
         res = self._api.request('GET', f'{self._base_url}/frame/v4/auth/prompt/data', headers=headers, query=query)
         if res.status_code == 200:
+            device_key = ''
             for method in res.json().get('response', {}).get('auth_method_order', []):
                 if method.get('factor', '') == 'Duo Push':
                     device_key = method.get('deviceKey', '')
@@ -229,9 +230,13 @@ class Duo(Plugin):
         self._referrer = f'https://login.{self._state.synack_domain}/'
         res = self._api.request('GET', self._auth_url, headers=self._build_headers())
         if res.status_code == 200:
-            self._sid = re.search('sid=([^&]*)', res.url).group(1)
+            sid_match = re.search('sid=([^&]*)', res.url)
+            base_url_match = re.search('(https.*duo[^.]*.com)/', res.url)
+            if not sid_match or not base_url_match:
+                return
+            self._sid = sid_match.group(1)
             self._referrer = res.url
-            self._base_url = re.search('(https.*duo[^.]*.com)/', res.url).group(1)
+            self._base_url = base_url_match.group(1)
             self._xsrf = self._utils.get_html_tag_value('_xsrf', res.text)
 
             client_hints = base64.b64encode(json.dumps({
