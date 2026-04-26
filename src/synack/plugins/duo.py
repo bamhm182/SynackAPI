@@ -481,7 +481,8 @@ class Duo(Plugin):
         headers = {
             'Accept': '*/*',
             'Origin': self._base_url,
-            'Referer': f'{self._base_url}/prompt/{self._akey}?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
+            'Referer': f'{self._base_url}/prompt/{self._akey}' +
+                       f'?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -670,7 +671,8 @@ class Duo(Plugin):
         headers = {
             'Accept': '*/*',
             'Origin': self._base_url,
-            'Referer': f'{self._base_url}/prompt/{self._akey}?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
+            'Referer': f'{self._base_url}/prompt/{self._akey}' +
+                       f'?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',

@@ -11,7 +11,7 @@ from .base import Plugin
 class Transactions(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api']:
+        for plugin in ['Api', 'Auth']:
             setattr(self,
                     '_'+plugin.lower(),
                     self._registry.get(plugin)(self._state))

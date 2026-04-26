@@ -7,7 +7,7 @@ import os
 import sys
 import unittest
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
@@ -77,6 +77,21 @@ class ApiTestCase(unittest.TestCase):
         self.api.request.assert_called_with('GET',
                                             url,
                                             headers=headers)
+
+    def test_request_external_url(self):
+        """External URLs should not get Authorization headers"""
+        self.api._state.session.get = MagicMock()
+        self.api._state.session.get.return_value.status_code = 200
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        url = 'https://duo.security.com/test'
+        self.api.request('GET', url)
+        self.api._state.session.get.assert_called_with(url,
+                                                       headers={},
+                                                       proxies=None,
+                                                       params=None,
+                                                       verify=True)
 
     def test_request_full_url(self):
         """Base URL should not be added if a full url is passed"""
@@ -215,6 +230,28 @@ class ApiTestCase(unittest.TestCase):
                                                         proxies=None,
                                                         verify=True)
 
+    def test_request_post_urlencoded(self):
+        """POST with urlencoded Content-Type should send form data"""
+        self.api._state.session.post = MagicMock()
+        self.api._state.session.post.return_value.status_code = 200
+        data = {'test': 'test'}
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        url = 'https://platform.synack.com/api/test'
+        headers = {
+            'Authorization': 'Bearer 12345',
+            'user_id': 'paco',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        self.api.request('POST', 'test', data=data,
+                         headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        self.api._state.session.post.assert_called_with(url,
+                                                        data=data,
+                                                        headers=headers,
+                                                        proxies=None,
+                                                        verify=True)
+
     def test_request_proxies(self):
         """Proxies should be used if set"""
         proxies = {
@@ -259,3 +296,68 @@ class ApiTestCase(unittest.TestCase):
                                                        proxies=None,
                                                        params=data,
                                                        verify=True)
+
+    def test_request_status_400(self):
+        """400/401 responses should log a failure"""
+        res = MagicMock()
+        res.status_code = 400
+        self.api._state.session.get = MagicMock(return_value=res)
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.api._debug.log.assert_any_call('Request failed',
+                                            f'({res.status_code} - {res.reason}) {res.url}')
+
+    def test_request_status_403(self):
+        """403 responses should log logged out"""
+        res = MagicMock()
+        res.status_code = 403
+        self.api._state.session.get = MagicMock(return_value=res)
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.api._debug.log.assert_any_call('Request failed',
+                                            f'({res.status_code} - Logged Out) {res.url}')
+
+    def test_request_status_412(self):
+        """412 responses should log mission already claimed"""
+        res = MagicMock()
+        res.status_code = 412
+        self.api._state.session.get = MagicMock(return_value=res)
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.api._debug.log.assert_any_call('Request failed',
+                                            f'({res.status_code} - Mission already claimed) {res.url}')
+
+    def test_request_status_429(self):
+        """429 responses should pause and retry"""
+        res_429 = MagicMock()
+        res_429.status_code = 429
+        res_200 = MagicMock()
+        res_200.status_code = 200
+        self.api._state.session.get = MagicMock(side_effect=[res_429, res_200])
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        with patch('synack.plugins.api.time.sleep') as mock_sleep:
+            self.api.request('GET', 'test')
+        mock_sleep.assert_called_with(30)
+        self.assertEqual(2, self.api._state.session.get.call_count)
+
+    def test_request_status_500(self):
+        """5xx responses should log and retry"""
+        res_500 = MagicMock()
+        res_500.status_code = 500
+        res_200 = MagicMock()
+        res_200.status_code = 200
+        self.api._state.session.get = MagicMock(side_effect=[res_500, res_200])
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.assertEqual(2, self.api._state.session.get.call_count)
+        self.api._debug.log.assert_any_call('Retrying', 'Attempt #1')

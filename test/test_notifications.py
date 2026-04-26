@@ -42,3 +42,16 @@ class NotificationsTestCase(unittest.TestCase):
         self.assertEqual({"one": "1"}, self.notifications.get_unread_count())
         self.notifications._api.notifications.assert_called_with("GET", path,
                                                                  query=query)
+
+    def test_set_read(self):
+        """Should set all notifications to read"""
+        self.notifications._api.notifications.return_value.status_code = 200
+        self.notifications._api.notifications.return_value.json.return_value = {"one": "1"}
+        self.notifications._state.notifications_token = "good_token"
+        query = {
+            "authorization_token": "good_token"
+        }
+        path = "read_all"
+        self.assertEqual({"one": "1"}, self.notifications.set_read())
+        self.notifications._api.notifications.assert_called_with("GET", path,
+                                                                 query=query)

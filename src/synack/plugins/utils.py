@@ -11,14 +11,10 @@ import re
 class Utils(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in []:
-            setattr(self,
-                    '_'+plugin.lower(),
-                    self._registry.get(plugin)(self._state))
 
     @staticmethod
     def get_html_tag_value(field, text):
         match = re.search(f'<[^>]*name=.{field}.[^>]*(?:content|value)=.([^"\']*)', text)
-        if match.group is None:
+        if match is None:
             match = re.search(f'<[^>]*(?:content|value)=.([^"\']*)[^>]*name=.{field}', text)
         return match.group(1) if match else ''

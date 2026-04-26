@@ -212,6 +212,23 @@ class TargetsTestCase(unittest.TestCase):
                                                      "targets",
                                                      query=query)
 
+    def test_get_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._db.categories = [Category(id=1, passed_practical=True, passed_written=True)]
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get()
+        self.targets._auth.get_api_token.assert_called_once()
+
+    def test_get_assessments_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_assessments()
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_assessments_all_passed(self):
         """Should return a list of passed assessments"""
         assessments = [
@@ -276,6 +293,14 @@ class TargetsTestCase(unittest.TestCase):
                                                      '&scope%5B%5D=discovered&sort%5B%5D=location&active=true' +
                                                      '&sortDir=asc&page=1&perPage=5000')
 
+    def test_get_assets_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_assets(target=Target(slug='327h8iw'))
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_assets_non_defaults(self):
         """Should return a list of assets given information to query"""
         self.targets._db.find_targets.return_value = [Target(codename='TURBULENTTORTOISE', slug='327h8iw')]
@@ -297,6 +322,14 @@ class TargetsTestCase(unittest.TestCase):
                                                      '&organizationUid%5B%5D=uiehqw&assetType%5B%5D=blah' +
                                                      '&hostType%5B%5D=cidr&scope%5B%5D=secret' +
                                                      '&sort%5B%5D=loc&active=false&sortDir=desc&page=3&perPage=50')
+
+    def test_get_attachments_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_attachments(target=Target(slug='u2ire'))
+        self.targets._auth.get_api_token.assert_called_once()
 
     def test_get_attachments_current(self):
         """Should return a list of attachments based on currently selected target"""
@@ -368,6 +401,14 @@ class TargetsTestCase(unittest.TestCase):
         }
         self.assertEqual(out, self.targets.get_connected())
 
+    def test_get_connected_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_connected()
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_connected_disconnected(self):
         """Should report Not Connected when not connected to a target"""
         self.targets._api.request.return_value.status_code = 200
@@ -405,6 +446,15 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual(self.targets.get_connections(slug='u2ire'), connections)
         self.targets._api.request.assert_called_with('GET', 'listing_analytics/connections',
                                                      query={"listing_id": "u2ire"})
+
+    def test_get_connections_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_connections(slug='u2ire')
+        self.targets._auth.get_api_token.assert_called_once()
 
     def test_get_connections_no_args(self):
         """Should return a summary of the lifetime and current connections if no args provided"""
@@ -448,6 +498,15 @@ class TargetsTestCase(unittest.TestCase):
                          self.targets.get_credentials(codename='SLEEPYSLUG'))
         self.targets._api.request.assert_called_with('POST', url)
 
+    def test_get_credentials_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._db.find_targets.return_value = [Target(organization='qwewqe', slug='asdasd')]
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_credentials(codename='SLEEPYSLUG')
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_registered_summary(self):
         """Should make a request to get basic info about registered targets"""
         t1 = {
@@ -471,6 +530,14 @@ class TargetsTestCase(unittest.TestCase):
         path = 'targets/registered_summary'
         self.assertEqual(out, self.targets.get_registered_summary())
         self.targets._api.request.assert_called_with('GET', path)
+
+    def test_get_registered_summary_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_registered_summary()
+        self.targets._auth.get_api_token.assert_called_once()
 
     def test_get_scope_for_host(self):
         """Should get the scope for a Host when given Host information"""
@@ -652,6 +719,15 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._api.request.assert_called_with('GET', 'listing_analytics/categories',
                                                      query={"listing_id": "u2ire", "status": "accepted"})
 
+    def test_get_submissions_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_submissions(slug='u2ire')
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_submissions_invalid_status(self):
         """Should return an empty dictionary if status is invalid"""
         return_data = {
@@ -739,6 +815,15 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._api.request.assert_called_with('GET', 'listing_analytics/submissions',
                                                      query={"listing_id": "u2ire"})
 
+    def test_get_submissions_summary_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_submissions_summary(slug='u2ire')
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_submissions_summary_hours(self):
         """Should return the amount of submissions in the last x hours given a slug"""
         return_data = {
@@ -806,6 +891,14 @@ class TargetsTestCase(unittest.TestCase):
                                                      data={'listing_id': '28h93iw'})
         self.targets.get_connected.assert_called_with()
 
+    def test_set_connected_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.set_connected()
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_set_connected_disconnect(self):
         """Should disconnect from target if none specified"""
         self.targets._api.request.return_value.status_code = 200
@@ -852,6 +945,14 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._api.request.return_value.status_code = 200
         self.assertEqual(unreg, self.targets.set_registered())
         self.targets._api.request.assert_has_calls(calls)
+
+    def test_set_registered_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.set_registered([{'slug': '1o2h8o'}])
+        self.targets._auth.get_api_token.assert_called_once()
 
     def test_set_registered_many(self):
         """Should call itself again if it has determined the page was full"""

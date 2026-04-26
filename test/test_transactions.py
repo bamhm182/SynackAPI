@@ -35,3 +35,11 @@ class TransactionsTestCase(unittest.TestCase):
         self.assertEqual(ret, json.loads(bal))
         self.transactions._api.request.assert_called_with('HEAD',
                                                           'transactions')
+
+    def test_get_balance_403_login(self):
+        """Should call get_api_token on 403 when login is True"""
+        self.transactions._auth = MagicMock()
+        self.transactions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.transactions.get_balance()
+        self.transactions._auth.get_api_token.assert_called_once()

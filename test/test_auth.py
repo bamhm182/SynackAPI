@@ -75,8 +75,7 @@ class AuthTestCase(unittest.TestCase):
         self.auth._api.request.return_value.json.return_value = {"access_token": "api_lwfaume"}
         self.assertEqual("api_lwfaume", self.auth.get_api_token())
         self.auth._duo.configure_mfa.assert_called_once()
-        self.auth._duo.get_grant_token_push.assert_called_with('https://duoauth.local')
-        self.auth._duo.get_grant_token.assert_not_called()
+        self.auth._duo.get_grant_token.assert_called_with('https://duoauth.local')
 
     def test_get_api_token_login_success(self):
         """Should return the database token when check succeeds"""
@@ -105,8 +104,34 @@ class AuthTestCase(unittest.TestCase):
         ret_json = {"access_token": "api_lwfaume"}
         self.auth._api.request.return_value.json.return_value = ret_json
         self.assertEqual("api_lwfaume", self.auth.get_api_token())
-        self.auth._duo.get_grant_token_push.assert_called_with('https://duoauth.local')
-        self.auth._duo.get_grant_token.assert_not_called()
+        self.auth._duo.get_grant_token.assert_called_with('https://duoauth.local')
+
+    def test_get_authentication_response(self):
+        """Should return json when credentials are accepted"""
+        self.auth._state._email = 'user@example.com'
+        self.auth._state._password = 'secret'
+        self.auth._api.login.return_value.status_code = 200
+        self.auth._api.login.return_value.json.return_value = {'duo_auth_url': 'https://duo.test'}
+        result = self.auth.get_authentication_response('csrf123')
+        self.assertEqual({'duo_auth_url': 'https://duo.test'}, result)
+        self.auth._api.login.assert_called_with('POST', 'authenticate',
+                                                headers={'X-CSRF-Token': 'csrf123'},
+                                                data={'email': 'user@example.com', 'password': 'secret'})
+
+    def test_get_authentication_response_400(self):
+        """Should refresh CSRF and retry on 400"""
+        self.auth._state._email = 'user@example.com'
+        self.auth._state._password = 'secret'
+        res_400 = MagicMock()
+        res_400.status_code = 400
+        res_200 = MagicMock()
+        res_200.status_code = 200
+        res_200.json.return_value = {'duo_auth_url': 'https://duo.test'}
+        self.auth._api.login.side_effect = [res_400, res_200]
+        self.auth.get_login_csrf = MagicMock(return_value='new_csrf')
+        result = self.auth.get_authentication_response('old_csrf')
+        self.auth.get_login_csrf.assert_called_once()
+        self.assertEqual({'duo_auth_url': 'https://duo.test'}, result)
 
     def test_get_notifications_token(self):
         """Should get the notifications token"""
@@ -127,6 +152,20 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual('12345', self.auth.get_login_csrf())
         self.auth._api.request.assert_called_with("GET",
                                                   "https://login.synack.com")
+
+    def test_set_api_token_invalid(self):
+        """Should clear the token and return True on success"""
+        self.auth._api.request.return_value.status_code = 200
+        result = self.auth.set_api_token_invalid()
+        self.assertTrue(result)
+        self.assertEqual('', self.auth._db.api_token)
+        self.auth._api.request.assert_called_with('POST', 'logout')
+
+    def test_set_api_token_invalid_failure(self):
+        """Should return False when logout fails"""
+        self.auth._api.request.return_value.status_code = 500
+        result = self.auth.set_api_token_invalid()
+        self.assertFalse(result)
 
     def test_set_login_script(self):
         """Should attempt to create a login script with the api token"""

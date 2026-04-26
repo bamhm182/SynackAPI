@@ -13,7 +13,7 @@ from .base import Plugin
 class Targets(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api', 'Db', 'Scratchspace']:
+        for plugin in ['Api', 'Auth', 'Db', 'Scratchspace']:
             setattr(self,
                     '_'+plugin.lower(),
                     self._registry.get(plugin)(self._state))

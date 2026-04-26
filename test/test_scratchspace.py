@@ -78,6 +78,22 @@ class ScratchspaceTestCase(unittest.TestCase):
             m.return_value.write.assert_called_with('{"test": "test"}')
             m.assert_called_with('/tmp/TIREDTURKEY/burp.txt', 'w')
 
+    def test_set_download_attachments_403_login(self):
+        """Should call get_api_token on 403 when login is True"""
+        dest_path = pathlib.Path('/tmp/TIREDTURKEY/file1.txt')
+        self.scratchspace.build_filepath = MagicMock()
+        self.scratchspace.build_filepath.return_value = dest_path
+        self.scratchspace._api = MagicMock()
+        self.scratchspace._auth = MagicMock()
+        self.scratchspace._api.request.return_value.status_code = 403
+        self.state.login = True
+        attachments = [
+            {'slug': '43i7h', 'filename': 'file1.txt', 'url': 'https://downloads.com/xyzf'}
+        ]
+        with patch('pathlib.Path.exists', return_value=False):
+            self.scratchspace.set_download_attachments(attachments, codename='TIREDTURKEY')
+        self.scratchspace._auth.get_api_token.assert_called_once()
+
     def test_set_download_attachments_codename(self):
         """Should download files give a list of attachments"""
         dest_path = pathlib.Path('/tmp/TIREDTURKEY/burp.txt')

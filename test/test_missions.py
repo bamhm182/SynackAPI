@@ -162,6 +162,14 @@ class MissionsTestCase(unittest.TestCase):
         }
         self.assertEqual(ret, self.missions.build_summary(m))
 
+    def test_get_403_login(self):
+        """Should call get_api_token on 403 and return empty list"""
+        self.missions._auth = MagicMock()
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.assertEqual([], self.missions.get())
+        self.missions._auth.get_api_token.assert_called_once()
+
     def test_get_approved(self):
         """Should request APPROVED missions"""
         self.missions.get = MagicMock()
@@ -198,6 +206,14 @@ class MissionsTestCase(unittest.TestCase):
         self.missions._api.request.assert_called_with("HEAD",
                                                       "tasks/v1/tasks",
                                                       query=query)
+
+    def test_get_count_403_login(self):
+        """Should call get_api_token on 403 and return 0"""
+        self.missions._auth = MagicMock()
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.assertEqual(0, self.missions.get_count())
+        self.missions._auth.get_api_token.assert_called_once()
 
     def test_get_count_status_uid(self):
         """Should get the current number of STATUS missions on TARGET"""
@@ -257,6 +273,16 @@ class MissionsTestCase(unittest.TestCase):
         self.assertEqual(ret, self.missions.get_evidences(m))
         self.missions._api.request.assert_called_with("GET", path)
 
+    def test_get_evidences_403_login(self):
+        """Should call get_api_token on 403"""
+        self.missions._auth = MagicMock()
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        m = {"id": "abc123", "title": "T", "assetTypes": ["web"],
+             "taskType": "MISSION", "validResponses": [{}, {"value": "x"}]}
+        self.missions.get_evidences(m)
+        self.missions._auth.get_api_token.assert_called_once()
+
     def test_get_in_review(self):
         """Should request FOR_REVIEW missions"""
         self.missions.get = MagicMock()
@@ -310,6 +336,14 @@ class MissionsTestCase(unittest.TestCase):
         self.missions._api.request.assert_called_with('GET',
                                                       'tasks/v2/researcher/claimed_amount')
 
+    def test_get_wallet_claimed_403_login(self):
+        """Should call get_api_token on 403"""
+        self.missions._auth = MagicMock()
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.missions.get_wallet_claimed()
+        self.missions._auth.get_api_token.assert_called_once()
+
     def test_get_wallet_limit(self):
         """Should report the Mission Wallet Limit Amount"""
         self.missions._api.request.return_value.status_code = 200
@@ -319,6 +353,14 @@ class MissionsTestCase(unittest.TestCase):
         self.assertEqual(20, self.missions.get_wallet_limit())
         self.missions._api.request.assert_called_with('GET',
                                                       'profiles/me')
+
+    def test_get_wallet_limit_403_login(self):
+        """Should call get_api_token on 403"""
+        self.missions._auth = MagicMock()
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.missions.get_wallet_limit()
+        self.missions._auth.get_api_token.assert_called_once()
 
     def test_set_claimed(self):
         """Should send a CLAIM to set_status"""
@@ -334,6 +376,23 @@ class MissionsTestCase(unittest.TestCase):
         self.assertEqual(["ret"], self.missions.set_disclaimed(["nope"]))
         self.missions.set_status.assert_called_with(["nope"],
                                                     "DISCLAIM")
+
+    def test_set_evidences_403_login(self):
+        """Should call get_api_token on 403 during set_evidences"""
+        self.missions._auth = MagicMock()
+        template = {"introduction": "intro", "testing_methodology": "test",
+                    "conclusion": "verdict", "structuredResponse": "no"}
+        curr = {"introduction": "A", "testing_methodology": "B", "conclusion": "C"}
+        mission = {"id": "2uthgr", "title": "T", "assetTypes": ["web"],
+                   "taskType": "MISSION", "validResponses": [{}, {"value": "x"}],
+                   "listingCodename": "SLAPPYMONKEY"}
+        self.missions._templates.get_file.return_value = template
+        self.missions.get_evidences = MagicMock()
+        self.missions.get_evidences.return_value = curr
+        self.missions._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.missions.set_evidences(mission)
+        self.missions._auth.get_api_token.assert_called_once()
 
     def test_set_evidences_safe(self):
         """Should replace current text with template if < 20 characters"""
