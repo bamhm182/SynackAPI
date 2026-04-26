@@ -147,24 +147,25 @@ class DbTestCase(unittest.TestCase):
         """Should update Organizations table if organization.slug provided"""
         mock_session = MagicMock()
         targets = [{
-            "organization": {"slug": "qweqwe"}
+            "organization": {"slug": "qweqwe", "name": "Qwe Qwe"}
         }]
         self.db.add_organizations(targets, mock_session)
         mock_insert.assert_called_with(synack.db.models.Organization)
-        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe'}])
-        mock_insert.return_value.values.return_value.on_conflict_do_nothing.assert_called_with(
-            index_elements=['slug'])
-        stmt = mock_insert.return_value.values.return_value.on_conflict_do_nothing.return_value
+        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe', 'name': 'Qwe Qwe'}])
+        mock_insert.return_value.values.return_value.on_conflict_do_update.assert_called_with(
+            index_elements=['slug'],
+            set_={'name': mock_insert.return_value.values.return_value.excluded.name})
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
         mock_session.execute.assert_called_with(stmt)
 
     @patch('synack.plugins.db.sqlite_insert')
     def test_add_organizations_dict_targets(self, mock_insert):
         """Should handle dict of targets"""
         mock_session = MagicMock()
-        targets = {'t1': {'organization': {'slug': 'qweqwe'}}}
+        targets = {'t1': {'organization': {'slug': 'qweqwe', 'name': 'Qwe Qwe'}}}
         self.db.add_organizations(targets, mock_session)
         mock_insert.assert_called_with(synack.db.models.Organization)
-        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe'}])
+        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe', 'name': 'Qwe Qwe'}])
 
     def test_add_organizations_no_session(self):
         """Should create and destroy a db session if not provided"""
@@ -187,10 +188,11 @@ class DbTestCase(unittest.TestCase):
         }]
         self.db.add_organizations(targets, mock_session)
         mock_insert.assert_called_with(synack.db.models.Organization)
-        mock_insert.return_value.values.assert_called_with([{'slug': 'asdasd'}])
-        mock_insert.return_value.values.return_value.on_conflict_do_nothing.assert_called_with(
-            index_elements=['slug'])
-        stmt = mock_insert.return_value.values.return_value.on_conflict_do_nothing.return_value
+        mock_insert.return_value.values.assert_called_with([{'slug': 'asdasd', 'name': None}])
+        mock_insert.return_value.values.return_value.on_conflict_do_update.assert_called_with(
+            index_elements=['slug'],
+            set_={'name': mock_insert.return_value.values.return_value.excluded.name})
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
         mock_session.execute.assert_called_with(stmt)
 
     @patch('synack.plugins.db.sqlite_insert')
@@ -199,7 +201,7 @@ class DbTestCase(unittest.TestCase):
         mock_session = MagicMock()
         targets = [{'organization': 'my_org_slug'}]
         self.db.add_organizations(targets, mock_session)
-        mock_insert.return_value.values.assert_called_with([{'slug': 'my_org_slug'}])
+        mock_insert.return_value.values.assert_called_with([{'slug': 'my_org_slug', 'name': None}])
 
     @patch('synack.plugins.db.sqlite_insert')
     def test_add_ports_batch_flush(self, mock_insert):
