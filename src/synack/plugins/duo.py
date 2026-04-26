@@ -263,6 +263,7 @@ class Duo(Plugin):
                     'name': 'card_visit',
                     'level': 'info'
                 })
+                self.set_duo_push_approved()
                 self._get_prompt_push_status()
             if self._status == 'SUCCESS':
                 self._get_prompt_remember_me()
