@@ -26,14 +26,19 @@ class Duo(Plugin):
                     '_'+plugin.lower(),
                     self._registry.get(plugin)(self._state))
 
+        self._akey = None
         self._auth_url = None
+        self._authkey = None
         self._base_url = None
         self._device = None
         self._factor = None
         self._grant_token = None
         self._hotp = None
+        self._pkey = None
         self._progress_token = None
+        self._push_txid = None
         self._referrer = None
+        self._req_trace_group = None
         self._session_vars = None
         self._status = None
         self._sid = None
@@ -148,19 +153,31 @@ class Duo(Plugin):
             self._grant_token = res.json().get('grant_token')
 
     def get_grant_token(self, auth_url):
-        """Get Grant Token from Duo Security via HOTP passcode"""
+        """Get Grant Token from Duo Security via HOTP passcode or Duo Push"""
         self._auth_url = auth_url
         self._get_session_variables()
-        self._set_session_variables()
-        self._set_session_variables()  # Yes, this needs to be called twice...
-        self._get_txid()
-        if self._txid:
-            self._get_status()
-        if self._status == 'SUCCESS':
-            self._get_oidc_exit()
-            if self._progress_token:
-                self._get_grant_token()
-            return self._grant_token
+        if self._akey and self._authkey:
+            self._get_prompt_payload()
+            self._get_prompt_initialization()
+            self._get_prompt_evaluation()
+            if self._pkey:
+                self._get_prompt_push_txid()
+            if self._push_txid:
+                self._get_prompt_push_status()
+            if self._status == 'SUCCESS':
+                self._get_prompt_finalize()
+                return self._grant_token
+        else:
+            self._set_session_variables()
+            self._set_session_variables()  # Yes, this needs to be called twice...
+            self._get_txid()
+            if self._txid:
+                self._get_status()
+            if self._status == 'SUCCESS':
+                self._get_oidc_exit()
+                if self._progress_token:
+                    self._get_grant_token()
+                return self._grant_token
 
     def _get_mfa_details(self):
         if self._state.otp_secret and not self._db.duo_akey:
@@ -226,6 +243,109 @@ class Duo(Plugin):
                 self._progress_token = re.search('token=([^&]*)', res.url).group(1)
                 self._xsrf = self._utils.get_html_tag_value('csrf-token', res.text)
 
+    def _get_prompt_evaluation(self):
+        query = {
+            'authkey': self._authkey,
+            'browser_features': json.dumps({
+                'touch_supported': 'false',
+                'platform_authenticator_status': 'unavailable',
+                'webauthn_supported': 'true'
+            }, separators=(',', ':')),
+            'local_trust_choice': 'undecided'
+        }
+        res = self._api.request('GET',
+                                f'{self._base_url}/prompt/{self._akey}/pre_authn/evaluation',
+                                query=query)
+        if res.status_code == 200:
+            factors = (res.json()
+                       .get('response', {})
+                       .get('available_unified_auth_factors', {})
+                       .get('factors', []))
+            for factor in factors:
+                if factor.get('factor_type') == 'push':
+                    self._pkey = factor.get('device_info', {}).get('pkey', '')
+                    break
+
+    def _get_prompt_finalize(self):
+        res = self._api.request('GET',
+                                f'{self._base_url}/prompt/{self._akey}/auth/finalize_auth',
+                                query={'authkey': self._authkey})
+        if res.status_code == 200:
+            exit_url = res.json().get('response', {}).get('url', '')
+            if exit_url:
+                final = self._api.request('GET', exit_url)
+                grant_match = re.search(r'grant_token=([^&]*)', final.url)
+                if grant_match:
+                    self._grant_token = grant_match.group(1)
+
+    def _get_prompt_initialization(self):
+        client_hints = base64.b64encode(json.dumps({
+            'brands': [
+                {'brand': 'Chromium', 'version': '131'},
+                {'brand': 'Not_A Brand', 'version': '24'}
+            ],
+            'fullVersionList': [],
+            'mobile': False,
+            'platform': 'Linux',
+            'platformVersion': '',
+            'uaFullVersion': ''
+        }).encode()).decode()
+        query = {
+            'authkey': self._authkey,
+            'is_ipad': 'false',
+            'client_hints': client_hints
+        }
+        self._api.request('GET',
+                          f'{self._base_url}/prompt/{self._akey}/pre_authn/initialization',
+                          query=query)
+
+    def _get_prompt_payload(self):
+        query = {
+            'authkey': self._authkey,
+            'browser_features': json.dumps({
+                'touch_supported': 'false',
+                'platform_authenticator_status': 'unavailable',
+                'webauthn_supported': 'true'
+            }, separators=(',', ':'))
+        }
+        self._api.request('GET',
+                          f'{self._base_url}/prompt/{self._akey}/auth/payload',
+                          query=query)
+
+    def _get_prompt_push_status(self):
+        query = {
+            'authkey': self._authkey,
+            'push_txid': self._push_txid,
+            'saw_good_news': 'false'
+        }
+        for i in range(10):
+            res = self._api.request('GET',
+                                    f'{self._base_url}/prompt/{self._akey}/auth/factors/push/status',
+                                    query=query)
+            if res.status_code == 200:
+                result = res.json().get('response', {}).get('result', {})
+                status_enum = res.json().get('response', {}).get('status_enum', -1)
+                result_str = result.get('result', 'UNKNOWN') if isinstance(result, dict) else str(result)
+                if result_str == 'SUCCESS':
+                    self._status = 'SUCCESS'
+                    break
+                elif status_enum == 15:
+                    self.set_duo_push_approved()
+                elif status_enum in [6, 7]:
+                    break
+            time.sleep(5)
+
+    def _get_prompt_push_txid(self):
+        data = {
+            'authkey': self._authkey,
+            'pkey': self._pkey
+        }
+        res = self._api.request('POST',
+                                f'{self._base_url}/prompt/{self._akey}/auth/factors/push/auth',
+                                data=data)
+        if res.status_code == 200:
+            self._push_txid = res.json().get('response', {}).get('push_txid', '')
+
     def _get_push_transactions(self):
         now = email.utils.format_datetime(datetime.datetime.utcnow())
         path = '/push/v2/device/transactions'
@@ -248,13 +368,25 @@ class Duo(Plugin):
         self._referrer = f'https://login.{self._state.synack_domain}/'
         res = self._api.request('GET', self._auth_url, headers=self._build_headers())
         if res.status_code == 200:
-            sid_match = re.search('sid=([^&]*)', res.url)
             base_url_match = re.search('(https.*duo[^.]*.com)/', res.url)
-            if not sid_match or not base_url_match:
+            if not base_url_match:
+                return
+            self._base_url = base_url_match.group(1)
+            self._referrer = res.url
+            # New synack.com / duosecurity.com prompt-based flow
+            prompt_match = re.search(r'/prompt/([^/?]+)\?authkey=([^&]+)', res.url)
+            if prompt_match:
+                self._akey = prompt_match.group(1)
+                self._authkey = prompt_match.group(2)
+                trace_match = re.search(r'req_trace_group=([^&]+)', res.url)
+                if trace_match:
+                    self._req_trace_group = trace_match.group(1)
+                return
+            # Old synack.us / duofederal.com frameless v4 flow
+            sid_match = re.search('sid=([^&]*)', res.url)
+            if not sid_match:
                 return
             self._sid = sid_match.group(1)
-            self._referrer = res.url
-            self._base_url = base_url_match.group(1)
             self._xsrf = self._utils.get_html_tag_value('_xsrf', res.text)
 
             client_hints = base64.b64encode(json.dumps({
