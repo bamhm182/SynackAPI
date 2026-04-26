@@ -522,6 +522,7 @@ class TargetsTestCase(unittest.TestCase):
             "outage_windows": [],
             "vulnerability_discovery": True
         }
+        self.targets._db.categories = [Category(id=1)]
         self.targets._api.request.return_value.status_code = 200
         self.targets._api.request.return_value.json.return_value = [t1]
         out = {
@@ -534,10 +535,20 @@ class TargetsTestCase(unittest.TestCase):
     def test_get_registered_summary_403_login(self):
         """Should call get_api_token on 403"""
         self.targets._auth = MagicMock()
+        self.targets._db.categories = [Category(id=1)]
         self.targets._api.request.return_value.status_code = 403
         self.state.login = True
         self.targets.get_registered_summary()
         self.targets._auth.get_api_token.assert_called_once()
+
+    def test_get_registered_summary_no_categories(self):
+        """Should call get_assessments if categories table is empty"""
+        self.targets._db.categories = []
+        self.targets.get_assessments = MagicMock()
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = []
+        self.targets.get_registered_summary()
+        self.targets.get_assessments.assert_called_once()
 
     def test_get_scope_for_host(self):
         """Should get the scope for a Host when given Host information"""

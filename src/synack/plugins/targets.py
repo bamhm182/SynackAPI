@@ -242,6 +242,8 @@ class Targets(Plugin):
 
     def get_registered_summary(self):
         """Get information on your registered targets"""
+        if not self._db.categories:
+            self.get_assessments()
         res = self._api.request('GET', 'targets/registered_summary')
         ret = []
         if res.status_code == 200:
