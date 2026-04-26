@@ -676,9 +676,8 @@ class Duo(Plugin):
             'X-Duo-Req-Trace-Group': self._req_trace_group
         }
         self._api.request('POST',
-                          f'{self._base_url}/prompt/{self._akey}/auth/browser_events',
+                          f'{self._base_url}/prompt/{self._akey}/auth/browser_events?authkey={self._authkey}',
                           headers=headers,
-                          query={'authkey': self._authkey},
                           data=body)
 
     def set_duo_push_approved(self, attempts=10, approvals=1, sleep=5):
