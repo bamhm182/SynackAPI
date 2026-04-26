@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v6
       - name: Initialize Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Install Dependencies
@@ -30,17 +30,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v6
       - name: Inject version from Tag
         run: sed -i 's/version="[0-9.]*"/version="'${GITHUB_REF#refs/*/v}'"/' setup.py
       - name: Initialize Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Build binary wheel and a source tarball
         run: python setup.py sdist
       - name: Upload Build
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -53,12 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
