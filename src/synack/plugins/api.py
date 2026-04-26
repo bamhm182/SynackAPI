@@ -150,6 +150,8 @@ class Api(Plugin):
             self._debug.log('Request failed', f'({res.status_code} - Logged Out) {res.url}')
         elif res.status_code == 412:
             self._debug.log('Request failed', f'({res.status_code} - Mission already claimed) {res.url}')
+        elif res.status_code == 423:
+            self._debug.log('Request failed', f'({res.status_code} - Locked) {res.url}')
         elif res.status_code == 429:
             self._debug.log('Too many requests', f'({res.status_code} - {res.reason}) {res.url}')
             if attempts < 5:

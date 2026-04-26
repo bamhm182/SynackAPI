@@ -21,6 +21,7 @@ in
 pkgs.mkShell {
   buildInputs = [
     python
+    pkgs.gh
   ];
   shellHook = ''
     current_dir="$PWD"
@@ -33,6 +34,7 @@ pkgs.mkShell {
     done
 
     echo "Python Version    : $(python3 --version)"
+    echo "Github Version    : $(gh --version | awk '/^gh/ {print $3}')"
     echo "Project Directory : ''${PROJECT_DIR}"
   '';
 }

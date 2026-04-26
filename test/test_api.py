@@ -333,6 +333,19 @@ class ApiTestCase(unittest.TestCase):
         self.api._debug.log.assert_any_call('Request failed',
                                             f'({res.status_code} - Mission already claimed) {res.url}')
 
+    def test_request_status_423(self):
+        """423 responses should log locked and not retry"""
+        res = MagicMock()
+        res.status_code = 423
+        self.api._state.session.get = MagicMock(return_value=res)
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.api._debug.log.assert_any_call('Request failed',
+                                            f'({res.status_code} - Locked) {res.url}')
+        self.assertEqual(1, self.api._state.session.get.call_count)
+
     def test_request_status_429(self):
         """429 responses should pause and retry"""
         res_429 = MagicMock()

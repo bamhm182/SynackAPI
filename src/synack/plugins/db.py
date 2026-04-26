@@ -461,6 +461,8 @@ class Db(Plugin):
         if not config:
             config = Config()
             session.add(config)
+            session.commit()
+            config = session.query(Config).filter_by(id=1).first()
         session.close()
         return getattr(config, name) if name else config
 

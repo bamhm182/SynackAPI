@@ -119,19 +119,24 @@ class AuthTestCase(unittest.TestCase):
                                                 data={'email': 'user@example.com', 'password': 'secret'})
 
     def test_get_authentication_response_400(self):
-        """Should refresh CSRF and retry on 400"""
+        """Should clear credentials and raise ValueError on 400"""
         self.auth._state._email = 'user@example.com'
         self.auth._state._password = 'secret'
         res_400 = MagicMock()
         res_400.status_code = 400
-        res_200 = MagicMock()
-        res_200.status_code = 200
-        res_200.json.return_value = {'duo_auth_url': 'https://duo.test'}
-        self.auth._api.login.side_effect = [res_400, res_200]
-        self.auth.get_login_csrf = MagicMock(return_value='new_csrf')
-        result = self.auth.get_authentication_response('old_csrf')
-        self.auth.get_login_csrf.assert_called_once()
-        self.assertEqual({'duo_auth_url': 'https://duo.test'}, result)
+        self.auth._api.login.return_value = res_400
+        with self.assertRaises(ValueError):
+            self.auth.get_authentication_response('old_csrf')
+        self.assertEqual('', self.auth._db.email)
+        self.assertEqual('', self.auth._db.password)
+
+    def test_get_authentication_response_423(self):
+        """Should raise ValueError on 423 locked"""
+        res_423 = MagicMock()
+        res_423.status_code = 423
+        self.auth._api.login.return_value = res_423
+        with self.assertRaises(ValueError):
+            self.auth.get_authentication_response('csrf')
 
     def test_get_notifications_token(self):
         """Should get the notifications token"""

@@ -754,14 +754,16 @@ class DbTestCase(unittest.TestCase):
     def test_get_config_empty_db(self):
         self.db.Session = MagicMock()
         query = self.db.Session.return_value.query
-        query.return_value.filter_by.return_value.first.return_value = None
+        mock_config = MagicMock()
+        mock_config.password = None
+        query.return_value.filter_by.return_value.first.side_effect = [None, mock_config]
 
         self.db.get_config('password')
 
         query.assert_called_with(synack.db.models.Config)
         query.return_value.filter_by.assert_called_with(id=1)
-        query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.add.assert_called()
+        self.db.Session.return_value.commit.assert_called()
         self.db.Session.return_value.close.assert_called_with()
 
     def test_http_proxy(self):
