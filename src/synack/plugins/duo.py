@@ -29,11 +29,15 @@ class Duo(Plugin):
         self._akey = None
         self._auth_url = None
         self._authkey = None
+        self._authn_evaluation = None
+        self._available_auth_method_types = ''
         self._base_url = None
+        self._can_opt_out_of_push = False
         self._device = None
         self._factor = None
         self._grant_token = None
         self._hotp = None
+        self._ikey = None
         self._pkey = None
         self._progress_token = None
         self._push_txid = None
@@ -43,7 +47,20 @@ class Duo(Plugin):
         self._status = None
         self._sid = None
         self._txid = None
+        self._ukey = None
         self._xsrf = None
+
+    def _browser_features(self):
+        return json.dumps({
+            'touch_supported': False,
+            'platform_authenticator_status': 'unavailable',
+            'webauthn_supported': True,
+            'screen_resolution_height': 1529,
+            'screen_resolution_width': 2446,
+            'screen_color_depth': 24,
+            'is_uvpa_available': False,
+            'client_capabilities_uvpa': False
+        }, separators=(',', ':'))
 
     def _build_headers(self, overrides=None):
         headers = {
@@ -157,14 +174,118 @@ class Duo(Plugin):
         self._auth_url = auth_url
         self._get_session_variables()
         if self._akey and self._authkey:
+            self._post_browser_event({
+                'context': {
+                    'current_view': 'index',
+                    'view_history': '',
+                    'message': 'Browser event',
+                    'platform_authenticator_status': 'unavailable',
+                    'platform_id': 'unknown',
+                    'req-trace-group': self._req_trace_group
+                },
+                'name': 'platform info',
+                'level': 'info'
+            })
             self._get_prompt_payload()
+            self._post_browser_event({
+                'context': {
+                    'current_view': 'pre_authn_init',
+                    'view_history': 'pre_authn_init',
+                    'message': 'Browser event',
+                    'card_name': 'PreAuthnInitializationCard',
+                    'akey': self._akey,
+                    'authn_result': {'status': 'unperformed'},
+                    'ikey': self._ikey,
+                    'platform_authenticator_status': 'unavailable',
+                    'platform_id': 'unknown',
+                    'ukey': self._ukey,
+                    'auth_flow': 'mfa'
+                },
+                'name': 'card_visit',
+                'level': 'info'
+            })
             self._get_prompt_initialization()
+            self._post_browser_event({
+                'context': {
+                    'current_view': 'device_health',
+                    'view_history': 'pre_authn_init,device_health',
+                    'message': 'Browser event',
+                    'card_name': 'DeviceHealthCard',
+                    'akey': self._akey,
+                    'authn_result': {'status': 'unperformed'},
+                    'ikey': self._ikey,
+                    'platform_authenticator_status': 'unavailable',
+                    'platform_id': 'unknown',
+                    'ukey': self._ukey,
+                    'auth_flow': 'mfa'
+                },
+                'name': 'card_visit',
+                'level': 'info'
+            })
+            self._post_browser_event({
+                'context': {
+                    'current_view': 'pre_authn_eval',
+                    'view_history': 'pre_authn_init,device_health,pre_authn_eval',
+                    'message': 'Browser event',
+                    'card_name': 'PreAuthnEvaluationCard',
+                    'akey': self._akey,
+                    'authn_result': {'status': 'unperformed'},
+                    'ikey': self._ikey,
+                    'platform_authenticator_status': 'unavailable',
+                    'platform_id': 'unknown',
+                    'ukey': self._ukey,
+                    'auth_flow': 'mfa'
+                },
+                'name': 'card_visit',
+                'level': 'info'
+            })
             self._get_prompt_evaluation()
             if self._pkey:
                 self._get_prompt_push_txid()
             if self._push_txid:
+                self._post_browser_event({
+                    'context': {
+                        'current_view': 'duo_push',
+                        'view_history': 'pre_authn_init,device_health,pre_authn_eval,duo_push',
+                        'message': 'Browser event',
+                        'card_name': 'DuoPushCard',
+                        'active_auth_method': {'id': 'DUO_PUSH', 'authenticator_key': self._pkey},
+                        'akey': self._akey,
+                        'authn_result': {'status': 'unperformed'},
+                        'available_auth_method_types': self._available_auth_method_types,
+                        'can_opt_out_of_push': self._can_opt_out_of_push,
+                        'ikey': self._ikey,
+                        'platform_authenticator_status': 'unavailable',
+                        'platform_id': 'unknown',
+                        'ukey': self._ukey,
+                        'auth_flow': 'mfa'
+                    },
+                    'name': 'card_visit',
+                    'level': 'info'
+                })
                 self._get_prompt_push_status()
             if self._status == 'SUCCESS':
+                self._get_prompt_remember_me()
+                self._post_browser_event({
+                    'context': {
+                        'current_view': 'auth_success',
+                        'view_history': 'pre_authn_init,device_health,pre_authn_eval,duo_push,auth_success',
+                        'message': 'Browser event',
+                        'card_name': 'SuccessCard',
+                        'active_auth_method': {'id': 'DUO_PUSH', 'authenticator_key': self._pkey},
+                        'akey': self._akey,
+                        'authn_result': {'status': 'success', 'evaluation': self._authn_evaluation},
+                        'available_auth_method_types': self._available_auth_method_types,
+                        'can_opt_out_of_push': self._can_opt_out_of_push,
+                        'ikey': self._ikey,
+                        'platform_authenticator_status': 'unavailable',
+                        'platform_id': 'unknown',
+                        'ukey': self._ukey,
+                        'auth_flow': 'mfa'
+                    },
+                    'name': 'card_visit',
+                    'level': 'info'
+                })
                 self._get_prompt_finalize()
                 return self._grant_token
         else:
@@ -246,21 +367,19 @@ class Duo(Plugin):
     def _get_prompt_evaluation(self):
         query = {
             'authkey': self._authkey,
-            'browser_features': json.dumps({
-                'touch_supported': 'false',
-                'platform_authenticator_status': 'unavailable',
-                'webauthn_supported': 'true'
-            }, separators=(',', ':')),
+            'browser_features': self._browser_features(),
             'local_trust_choice': 'undecided'
         }
         res = self._api.request('GET',
                                 f'{self._base_url}/prompt/{self._akey}/pre_authn/evaluation',
                                 query=query)
         if res.status_code == 200:
-            factors = (res.json()
-                       .get('response', {})
+            response = res.json().get('response', {})
+            self._can_opt_out_of_push = response.get('can_opt_out_of_push', False)
+            factors = (response
                        .get('available_unified_auth_factors', {})
                        .get('factors', []))
+            self._available_auth_method_types = ','.join(f.get('factor_type', '') for f in factors)
             for factor in factors:
                 if factor.get('factor_type') == 'push':
                     self._pkey = factor.get('device_info', {}).get('pkey', '')
@@ -302,15 +421,15 @@ class Duo(Plugin):
     def _get_prompt_payload(self):
         query = {
             'authkey': self._authkey,
-            'browser_features': json.dumps({
-                'touch_supported': 'false',
-                'platform_authenticator_status': 'unavailable',
-                'webauthn_supported': 'true'
-            }, separators=(',', ':'))
+            'browser_features': self._browser_features()
         }
-        self._api.request('GET',
-                          f'{self._base_url}/prompt/{self._akey}/auth/payload',
-                          query=query)
+        res = self._api.request('GET',
+                                f'{self._base_url}/prompt/{self._akey}/auth/payload',
+                                query=query)
+        if res.status_code == 200:
+            response = res.json().get('response', {})
+            self._ikey = response.get('ikey', '')
+            self._ukey = response.get('ukey', '')
 
     def _get_prompt_push_status(self):
         query = {
@@ -327,6 +446,17 @@ class Duo(Plugin):
                 status_enum = res.json().get('response', {}).get('status_enum', -1)
                 result_str = result.get('result', 'UNKNOWN') if isinstance(result, dict) else str(result)
                 if result_str == 'SUCCESS':
+                    authn_eval = (res.json().get('response', {})
+                                  .get('result', {})
+                                  .get('auth_result', {})
+                                  .get('authn_evaluation', {}))
+                    self._authn_evaluation = {
+                        'is_allowed': authn_eval.get('is_allowed', True),
+                        'auth_method_type': authn_eval.get('auth_method_type', 'push'),
+                        'authenticator_key': authn_eval.get('authenticator_key', self._pkey),
+                        'status_enum': authn_eval.get('status_enum', 5),
+                        'request_browser_trust': authn_eval.get('request_browser_trust', False)
+                    }
                     self._status = 'SUCCESS'
                     break
                 elif status_enum == 15:
@@ -345,6 +475,21 @@ class Duo(Plugin):
                                 data=data)
         if res.status_code == 200:
             self._push_txid = res.json().get('response', {}).get('push_txid', '')
+
+    def _get_prompt_remember_me(self):
+        headers = {
+            'Accept': '*/*',
+            'Origin': self._base_url,
+            'Referer': f'{self._base_url}/prompt/{self._akey}?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'X-Duo-Req-Trace-Group': self._req_trace_group
+        }
+        self._api.request('POST',
+                          f'{self._base_url}/prompt/{self._akey}/auth/remember_me',
+                          headers=headers,
+                          data={'authkey': self._authkey})
 
     def _get_push_transactions(self):
         now = email.utils.format_datetime(datetime.datetime.utcnow())
@@ -519,6 +664,22 @@ class Duo(Plugin):
                 self._txid = res.json().get('response', {}).get('txid', '')
                 if self._state.otp_secret:
                     self._db.otp_count += 1
+
+    def _post_browser_event(self, body):
+        headers = {
+            'Accept': '*/*',
+            'Origin': self._base_url,
+            'Referer': f'{self._base_url}/prompt/{self._akey}?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'X-Duo-Req-Trace-Group': self._req_trace_group
+        }
+        self._api.request('POST',
+                          f'{self._base_url}/prompt/{self._akey}/auth/browser_events',
+                          headers=headers,
+                          query={'authkey': self._authkey},
+                          data=body)
 
     def set_duo_push_approved(self, attempts=10, approvals=1, sleep=5):
         """Approve pending Duo push transactions for the registered virtual device"""
