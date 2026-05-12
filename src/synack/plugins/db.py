@@ -113,7 +113,7 @@ class Db(Plugin):
             stmt = sqlite_insert(Organization).values(organizations_data)
             stmt = stmt.on_conflict_do_update(
                 index_elements=['slug'],
-                set_={'name': stmt.excluded.name}
+                set_={'name': sa.func.coalesce(stmt.excluded.name, Organization.name)}
             )
             session.execute(stmt)
 

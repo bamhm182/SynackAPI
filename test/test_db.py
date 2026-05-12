@@ -6,6 +6,7 @@ Tests for the plugins/db.py Db class
 import alembic.command
 import alembic.config
 import os
+import sqlalchemy as sa
 import sys
 import pathlib
 import unittest
@@ -152,9 +153,9 @@ class DbTestCase(unittest.TestCase):
         self.db.add_organizations(targets, mock_session)
         mock_insert.assert_called_with(synack.db.models.Organization)
         mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe', 'name': 'Qwe Qwe'}])
-        mock_insert.return_value.values.return_value.on_conflict_do_update.assert_called_with(
-            index_elements=['slug'],
-            set_={'name': mock_insert.return_value.values.return_value.excluded.name})
+        call_kwargs = mock_insert.return_value.values.return_value.on_conflict_do_update.call_args.kwargs
+        self.assertEqual(call_kwargs['index_elements'], ['slug'])
+        self.assertIsInstance(call_kwargs['set_']['name'], sa.sql.functions.coalesce)
         stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
         mock_session.execute.assert_called_with(stmt)
 
@@ -189,9 +190,9 @@ class DbTestCase(unittest.TestCase):
         self.db.add_organizations(targets, mock_session)
         mock_insert.assert_called_with(synack.db.models.Organization)
         mock_insert.return_value.values.assert_called_with([{'slug': 'asdasd', 'name': None}])
-        mock_insert.return_value.values.return_value.on_conflict_do_update.assert_called_with(
-            index_elements=['slug'],
-            set_={'name': mock_insert.return_value.values.return_value.excluded.name})
+        call_kwargs = mock_insert.return_value.values.return_value.on_conflict_do_update.call_args.kwargs
+        self.assertEqual(call_kwargs['index_elements'], ['slug'])
+        self.assertIsInstance(call_kwargs['set_']['name'], sa.sql.functions.coalesce)
         stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
         mock_session.execute.assert_called_with(stmt)
 

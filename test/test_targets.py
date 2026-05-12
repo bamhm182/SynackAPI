@@ -72,6 +72,8 @@ class TargetsTestCase(unittest.TestCase):
 
     def test_build_scope_web_burp(self):
         """Should build a Burp Suite Scope given a Synack API Scope"""
+        self.state.user_id = 'abc123'
+        target = Target(codename='SLOPPYSLUG')
         scope = [
             {
                 'listing': 'uqwheiuqwhe',
@@ -99,7 +101,7 @@ class TargetsTestCase(unittest.TestCase):
                     'exclude': [
                         {
                             'enabled': True,
-                            'scheme': 'http',
+                            'protocol': 'http',
                             'host': 'evil.stuff.com',
                             'file': '/login/'
                         }
@@ -107,21 +109,44 @@ class TargetsTestCase(unittest.TestCase):
                     'include': [
                         {
                             'enabled': True,
-                            'scheme': 'https',
+                            'protocol': 'https',
                             'host': 'stuff.com',
                             'file': '/'
                         },
                         {
                             'enabled': True,
-                            'scheme': 'https',
+                            'protocol': 'https',
                             'host': 'super.stuff.com',
                             'file': '/'
                         }
                     ]
                 }
-            }
+            },
+            'project_options': {'session_handling_rules': {'rules': [
+                {
+                    'actions': [
+                        {
+                            'add_if_not_present': 'true',
+                            'enabled': 'true',
+                            'name': 'X-Synack',
+                            'type': 'set_header',
+                            'value': 'abc123-SLOPPYSLUG'
+                        }
+                    ],
+                    'description': 'Add X-Synack Header',
+                    'enabled': 'true',
+                    'exclude_from_scope': [],
+                    'include_from_scope': [],
+                    'named_params': [],
+                    'restrict_scope_to_named_params': 'false',
+                    'tools_scope': ['Target', 'Proxy', 'Scanner', 'Intruder', 'Repeater', 'Sequencer',
+                                    'Burp AI', 'Extensions'],
+                    'url_scope': 'suite',
+                    'url_scope_advanced_mode': 'true'
+                }
+            ]}}
         }
-        self.assertEqual(expected, self.targets.build_scope_web_burp(scope))
+        self.assertEqual(expected, self.targets.build_scope_web_burp(scope, target))
 
     def test_build_scope_web_db(self):
         """Should build a web scope that can be ingested into the Database"""
@@ -669,7 +694,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._state.use_scratchspace = True
         out = self.targets.get_scope_web(codename='SASSYSQUIRREL')
         self.assertEqual(scope, out)
-        self.targets.build_scope_web_burp.assert_called_with(scope)
+        self.targets.build_scope_web_burp.assert_called_with(scope, tgt)
         self.targets._db.find_targets.assert_called_with(codename='SASSYSQUIRREL')
         self.targets.get_assets.assert_called_with(target=tgt, active='true', asset_type='webapp')
 
@@ -701,7 +726,7 @@ class TargetsTestCase(unittest.TestCase):
         self.targets._state.use_scratchspace = True
         out = self.targets.get_scope_web()
         self.assertEqual(scope, out)
-        self.targets.build_scope_web_burp.assert_called_with(scope)
+        self.targets.build_scope_web_burp.assert_called_with(scope, tgt)
         self.targets.get_connected.assert_called_with()
         self.targets._db.find_targets.assert_called_with(slug='93g8eg8')
         self.targets.get_assets.assert_called_with(target=tgt, active='true', asset_type='webapp')

@@ -44,9 +44,33 @@ class Targets(Plugin):
                 })
         return ret
 
-    def build_scope_web_burp(self, scope):
+    def build_scope_web_burp(self, scope, target):
         """Return a Burp Suite scope given retrieved web scope"""
         ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': list(), 'include': list()}}}
+
+        ret['project_options'] = {'session_handling_rules': {'rules': [
+            {
+                'actions': [
+                    {
+                        'add_if_not_present': 'true',
+                        'enabled': 'true',
+                        'name': 'X-Synack',
+                        'type': 'set_header',
+                        'value': f'{self._state.user_id}-{target.codename}'
+                    }
+                ],
+                'description': 'Add X-Synack Header',
+                'enabled': 'true',
+                'exclude_from_scope': list(),
+                'include_from_scope': list(),
+                'named_params': list(),
+                'restrict_scope_to_named_params': 'false',
+                'tools_scope': ['Target', 'Proxy', 'Scanner', 'Intruder', 'Repeater', 'Sequencer',
+                                'Burp AI', 'Extensions'],
+                'url_scope': 'suite',
+                'url_scope_advanced_mode': 'true'
+            }
+        ]}}
 
         for asset in scope:
             state = 'include' if asset.get('status') == 'in' else 'exclude'
@@ -57,7 +81,7 @@ class Targets(Plugin):
                 url = urlparse(raw.scheme + '://' + item)
             ret['target']['scope'][state].append({
                 'enabled': True if url.hostname else False,
-                'scheme': url.scheme if url.scheme else 'any',
+                'protocol': url.scheme if url.scheme else 'any',
                 'host': url.hostname,
                 'file': url.path
             })
@@ -337,7 +361,7 @@ class Targets(Plugin):
 
             if len(scope) > 0:
                 if self._state.use_scratchspace:
-                    self._scratchspace.set_burp_file(self.build_scope_web_burp(scope), target=target)
+                    self._scratchspace.set_burp_file(self.build_scope_web_burp(scope, target), target=target)
 
         return scope
 
