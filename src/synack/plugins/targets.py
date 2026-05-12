@@ -46,31 +46,31 @@ class Targets(Plugin):
 
     def build_scope_web_burp(self, scope, target):
         """Return a Burp Suite scope given retrieved web scope"""
-        ret = {'target': {'scope': {'advanced_mode': 'true', 'exclude': list(), 'include': list()}}}
+        ret = {'target': {'scope': {'advanced_mode': True, 'exclude': list(), 'include': list()}}}
 
-        ret['project_options'] = {'session_handling_rules': {'rules': [
+        ret['project_options'] = {'sessions': {'session_handling_rules': {'rules': [
             {
                 'actions': [
                     {
-                        'add_if_not_present': 'true',
-                        'enabled': 'true',
+                        'add_if_not_present': True,
+                        'enabled': True,
                         'name': 'X-Synack',
                         'type': 'set_header',
                         'value': f'{self._state.user_id}-{target.codename}'
                     }
                 ],
                 'description': 'Add X-Synack Header',
-                'enabled': 'true',
+                'enabled': True,
                 'exclude_from_scope': list(),
                 'include_from_scope': list(),
                 'named_params': list(),
-                'restrict_scope_to_named_params': 'false',
+                'restrict_scope_to_named_params': False,
                 'tools_scope': ['Target', 'Proxy', 'Scanner', 'Intruder', 'Repeater', 'Sequencer',
                                 'Burp AI', 'Extensions'],
                 'url_scope': 'suite',
-                'url_scope_advanced_mode': 'true'
+                'url_scope_advanced_mode': True
             }
-        ]}}
+        ]}}}
 
         for asset in scope:
             state = 'include' if asset.get('status') == 'in' else 'exclude'

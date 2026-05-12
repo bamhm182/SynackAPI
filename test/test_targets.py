@@ -97,7 +97,7 @@ class TargetsTestCase(unittest.TestCase):
         expected = {
             'target': {
                 'scope': {
-                    'advanced_mode': 'true',
+                    'advanced_mode': True,
                     'exclude': [
                         {
                             'enabled': True,
@@ -122,29 +122,29 @@ class TargetsTestCase(unittest.TestCase):
                     ]
                 }
             },
-            'project_options': {'session_handling_rules': {'rules': [
+            'project_options': {'sessions': {'session_handling_rules': {'rules': [
                 {
                     'actions': [
                         {
-                            'add_if_not_present': 'true',
-                            'enabled': 'true',
+                            'add_if_not_present': True,
+                            'enabled': True,
                             'name': 'X-Synack',
                             'type': 'set_header',
                             'value': 'abc123-SLOPPYSLUG'
                         }
                     ],
                     'description': 'Add X-Synack Header',
-                    'enabled': 'true',
+                    'enabled': True,
                     'exclude_from_scope': [],
                     'include_from_scope': [],
                     'named_params': [],
-                    'restrict_scope_to_named_params': 'false',
+                    'restrict_scope_to_named_params': False,
                     'tools_scope': ['Target', 'Proxy', 'Scanner', 'Intruder', 'Repeater', 'Sequencer',
                                     'Burp AI', 'Extensions'],
                     'url_scope': 'suite',
-                    'url_scope_advanced_mode': 'true'
+                    'url_scope_advanced_mode': True
                 }
-            ]}}
+            ]}}}
         }
         self.assertEqual(expected, self.targets.build_scope_web_burp(scope, target))
 
