@@ -16,13 +16,15 @@ class Scratchspace(Plugin):
                     '_'+plugin.lower(),
                     self._registry.get(plugin)(self._state))
 
-    def build_filepath(self, filename, target=None, codename=None):
+    def build_filepath(self, filename, subdir=None, target=None, codename=None):
         if target:
             codename = target.codename
 
         if codename:
             f = self._state.scratchspace_dir
             f = f / codename
+            if subdir:
+                f = f / subdir
             f.mkdir(parents=True, exist_ok=True)
             f = f / filename
             return f
@@ -38,7 +40,7 @@ class Scratchspace(Plugin):
         for attachment in attachments:
             overwrite_current = overwrite
             if target or codename:
-                dest_file = self.build_filepath(attachment.get('filename'), target=target, codename=codename)
+                dest_file = self.build_filepath(attachment.get('filename'), subdir="attachments", target=target, codename=codename)
                 if prompt_overwrite and dest_file.exists():
                     ans = input(f'{attachment.get("filename")} exists. Overwrite? [y/N]: ')
                     overwrite_current = ans.lower().startswith('y')

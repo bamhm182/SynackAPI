@@ -101,13 +101,16 @@ class Missions(Plugin):
                 'status': status,
                 'perPage': per_page,
                 'page': page,
-                'viewed': "true"
+                'viewed': 'true'
         }
+
         if listing_uids:
             query["listingUids"] = listing_uids
+
         res = self._api.request('GET',
                                 'tasks/v2/tasks',
                                 query=query)
+
         if res.status_code == 200:
             ret = res.json()
             if len(ret) == per_page and page < max_pages:

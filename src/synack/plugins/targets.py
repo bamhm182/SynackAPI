@@ -201,7 +201,7 @@ class Targets(Plugin):
             elif res.status_code == 403 and self._state.login:
                 self._auth.get_api_token()
 
-    def get_attachments(self, target=None, **kwargs):
+    def get_attachments(self, download=False, target=None, **kwargs):
         """Get the attachments of a target."""
         if target is None:
             if len(kwargs) == 0:
@@ -209,8 +209,12 @@ class Targets(Plugin):
             target = self._db.find_targets(**kwargs)
             if target:
                 target = target[0]
+
         res = self._api.request('GET', f'targets/{target.slug}/resources')
+
         if res.status_code == 200:
+            if download and self._state.use_scratchspace:
+                self._scratchspace.set_download_attachments(res.json(), target=target)
             return res.json()
         elif res.status_code == 403 and self._state.login:
             self._auth.get_api_token()
