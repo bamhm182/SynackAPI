@@ -281,5 +281,6 @@ class Missions(Plugin):
             "title": title,
             "payout": payout,
             "status": status,
-            "success": True if res.status_code == 201 else False
+            "success": True if res.status_code == 201 else False,
+            "status_code": res.status_code
         }
