@@ -268,6 +268,22 @@ class Targets(Plugin):
             elif res.status_code == 403 and self._state.login:
                 self._auth.get_api_token()
 
+    def get_info(self, target=None, **kwargs):
+        """Get the information of a target."""
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self._db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+
+        res = self._api.request('GET', f'targets/{target.slug}')
+
+        if res.status_code == 200:
+            return res.json()
+        elif res.status_code == 403 and self._state.login:
+            self._auth.get_api_token()
+
     def get_registered_summary(self):
         """Get information on your registered targets"""
         if not self._db.categories:
