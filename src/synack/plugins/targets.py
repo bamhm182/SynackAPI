@@ -431,6 +431,36 @@ class Targets(Plugin):
         }
         return self.get(status='upcoming', query_changes=query_changes)
 
+    def get_updates(self, target=None, page=1, max_pages=1, per_page=10, **kwargs):
+        """Get the updates of a target."""
+        if target is None:
+            if len(kwargs) == 0:
+                kwargs = {'codename': self.get_connected().get('codename')}
+            target = self._db.find_targets(**kwargs)
+            if target:
+                target = target[0]
+
+        query = {
+            'page': page,
+            'per_page': per_page,
+            'sort_dir': 'desc',
+            'sort_field': 'created_at'
+        }
+
+        res = self._api.request('GET', f'targets/{target.slug}/updates')
+
+        if res.status_code == 200:
+            ret = res.json()
+            if len(ret) == per_page and page < max_pages:
+                new = self.get(target=target,
+                               page=page+1,
+                               max_pages=max_pages,
+                               per_page=per_page)
+                ret.extend(new)
+            return ret
+        elif res.status_code == 403 and self._state.login:
+            self._auth.get_api_token()
+
     def set_connected(self, target=None, **kwargs):
         """Connect to a target"""
         slug = None

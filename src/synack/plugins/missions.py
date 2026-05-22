@@ -98,10 +98,10 @@ class Missions(Plugin):
         listing_uids -- A specific listing ID to check for missions
         """
         query = {
-                'status': status,
-                'perPage': per_page,
-                'page': page,
-                'viewed': 'true'
+            'status': status,
+            'perPage': per_page,
+            'page': page,
+            'viewed': 'true'
         }
 
         if listing_uids:
