@@ -90,7 +90,7 @@ class Api(Plugin):
         if f'{self._state.synack_domain}/api/' in url:
             headers = {
                 'Authorization': f'Bearer {self._state.api_token}',
-                'user_id': self._state.user_id
+                'X-Synack': self._state.user_id
             }
         else:
             headers = dict()
