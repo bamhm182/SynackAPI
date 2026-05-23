@@ -4,6 +4,7 @@ Functions related to handling and checking targets
 """
 
 import ipaddress
+import rapidfuzz
 import re
 
 from urllib.parse import urlparse
@@ -298,6 +299,58 @@ class Targets(Plugin):
         elif res.status_code == 403 and self._state.login:
             self._auth.get_api_token()
         return ret
+
+    def get_roe(self, unique=False, dedupe=True, **kwargs):
+        """Get the rules of engagement of a target"""
+        if len(kwargs) > 0:
+            target = self._db.find_targets(**kwargs)[0]
+        else:
+            curr = self.get_connected()
+            target = self._db.find_targets(slug=curr.get('slug'))[0]
+
+        roe = set()
+
+        if target:
+            info = self.get_info(target)
+            roe.update(info.get('rules').split('\n'))
+            roe.update([rule.get('description', '') for rule in info.get('roes', dict())])
+
+            roe = {s.lstrip('-').strip() for s in roe}
+            roe.discard('')
+            if unique:
+                # Get rid of ROE common across all targets to highlight key ROE
+                roe.difference_update([
+                    'ASK before you ACT. Contact support via support@synack.com or the Help button for questions about scope, problems with credentials, connectivity issues, etc.',
+                    'Attack payload data must use professional language (no vulgarity, profanity, etc).',
+                    'Check before you test. If assets seem unrelated to the target (i.e. dynamic IPs), contact Synack Support before proceeding with testing. Vuln submissions may be rejected if they are determined to be unrelated to the target.',
+                    'Do not host payloads on third party servers, only use Synack servers (request access to TUPoC). If you are found to violate this rule by using a system not controlled by Synack, you will be removed from access to this target and be evaluated for further punishment.',
+                    'If default credentials are discovered for any service, you MUST stop and report.  Any findings discovered after-the-fact will be rejected.',
+                    'NEVER test outside of LP+ [[more info](https://support.synack.com/hc/en-us/articles/360010168373-LP-Zero-Tolerance-Policy)].',
+                    'No callback-related research/testing that uses non-Synack hosted infrastructure.',
+                    'No intentional Denial of Service testing [[more info](https://support.synack.com/hc/en-us/articles/115013809368-Denial-of-Service)].',
+                    'No interfering with the S2S connection to client’s assets.',
+                    'No password brute force or password spraying.',
+                    'No physical or social engineering.',
+                    'No testing of 3rd party services unless explicitly specified as in-scope.',
+                    'No scanning while away from your machine (must be present to halt scanning if traffic is too heavy).',
+                    'No uploading of client-related content to 3rd party utilities (e.g. Github, DropBox, YouTube). Collaborating with other SRT via SRT Slack is allowed as long as full payloads/URLs are not shared and target codenames are always used.',
+                    'SRT must include the word "Synack" in the names or data of payloads, injected data, and files created for leveraging vulnerabilities for the purpose of assisting the client in identifying testing traffic.',
+                    'Using an account you have to pay for, a personal account, or an account that was found with weak credentials is a violation of the RoE. Using credentials you obtained from other listings is also a violation, as this may provide an unfair advantage over other SRT.'
+                ])
+            # Get rid of excess entries
+            roe.difference_update([
+                '### Client-Specific Rules of Engagement',
+            ])
+
+        if dedupe:
+            deduped_roe = list()
+            for rule in roe:
+                normalized = rule.lower().strip()
+                if not any(rapidfuzz.fuzz.ratio(normalized, s2.lower().strip()) >= 95 for s2 in deduped_roe):
+                    deduped_roe.append(rule)
+            roe = set(deduped_roe)
+
+        return roe
 
     def get_scope(self, **kwargs):
         """Get the scope of a target"""

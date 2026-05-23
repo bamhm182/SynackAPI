@@ -33,6 +33,7 @@ setuptools.setup(
         "pyaml>=21.10.1",
         "pycryptodome>=3.15.0",
         "pyotp>=2.7.0",
+        "RapidFuzz>=3.14.5",
         "requests>=2.28.1",
         "SQLAlchemy>=1.4.44",
         "urllib3>=1.26.13",
