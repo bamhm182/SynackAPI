@@ -106,9 +106,26 @@ class TemplatesTestCase(unittest.TestCase):
             "section2": "Section 2 text"
         }
         with patch('builtins.open', m, create=True):
-            ret = self.templates.build_sections('/tmp/mission.txt')
+            ret = self.templates.build_sections('/tmp/mission.txt',
+                                                include_extras=True)
             self.assertEqual(sections, ret)
             m.assert_called_with('/tmp/mission.txt', 'r')
+
+    def test_build_sections_filters_to_necessary(self):
+        """Without include_extras, only the necessary keys are returned"""
+        m = mock_open()
+        m.return_value.read.return_value = '''
+        [[[introduction]]]
+        Intro text
+
+        [[[extra_section]]]
+        Extra text
+
+        [[[END]]]
+        '''
+        with patch('builtins.open', m, create=True):
+            ret = self.templates.build_sections('/tmp/mission.txt')
+            self.assertEqual({'introduction': 'Intro text'}, ret)
 
     def test_build_text_replaced_variables(self):
         """Should replace variables in text given text and Target info"""
@@ -144,7 +161,7 @@ class TemplatesTestCase(unittest.TestCase):
             mock_exists.return_value = True
             self.templates.get_file(mission)
             self.templates.build_filepath.assert_called_with(mission, generic_ok=True)
-            self.templates.build_sections.assert_called_with('/tmp/mission.txt')
+            self.templates.build_sections.assert_called_with('/tmp/mission.txt', False)
 
     def test_set_file(self):
         self.templates.build_filepath = MagicMock()
@@ -157,19 +174,19 @@ class TemplatesTestCase(unittest.TestCase):
             "conclusion": "Conclusion"
         }
         m = mock_open()
+        # set_file iterates every key in order, emitting `\n[[[k]]]\nv\n` per
+        # entry (joined by '\n'), and inserts the downloaded-template warning
+        # right after the introduction section.
         out = "\n".join([
-            "[[[structuredResponse]]]\n",
-            template["structuredResponse"],
-            "\n[[[introduction]]]\n",
+            f'\n[[[version]]]\n{template["version"]}\n',
+            f'\n[[[structuredResponse]]]\n{template["structuredResponse"]}\n',
+            f'\n[[[introduction]]]\n{template["introduction"]}\n',
             "THIS IS A DOWNLOADED TEMPLATE!",
             "ENSURE THERE IS NO SENSITIVE INFORMATION,",
             "THEN DELETE THIS WARNING!\n",
-            template["introduction"],
-            "\n[[[testing_methodology]]]\n",
-            template["testing_methodology"],
-            "\n[[[conclusion]]]\n",
-            template["conclusion"],
-            "\n[[[END]]]"
+            f'\n[[[testing_methodology]]]\n{template["testing_methodology"]}\n',
+            f'\n[[[conclusion]]]\n{template["conclusion"]}\n',
+            "[[[END]]]"
         ])
 
         with patch('builtins.open', m, create=True):

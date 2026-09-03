@@ -84,7 +84,7 @@ class Templates(Plugin):
             out_list = list()
             for k, v in evidences.items():
                 out_list.append(f'\n[[[{k}]]]\n{v}\n')
-                if k == 'intruduction':
+                if k == 'introduction':
                     out_list.append('THIS IS A DOWNLOADED TEMPLATE!')
                     out_list.append('ENSURE THERE IS NO SENSITIVE INFORMATION,')
                     out_list.append('THEN DELETE THIS WARNING!\n')

@@ -4,6 +4,7 @@ Functions related to handling and checking authentication.
 """
 
 import re
+import time
 
 from .base import Plugin
 
@@ -11,21 +12,34 @@ from .base import Plugin
 class Auth(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for plugin in ['Api', 'Db', 'Duo', 'Users']:
+        for plugin in ['Api', 'Db', 'Debug', 'Duo', 'Users']:
             setattr(self,
                     '_'+plugin.lower(),
                     self._registry.get(plugin)(self._state))
 
-    def get_api_token(self):
-        """Log in to get a new API token."""
+    def get_api_token(self, attempts=3):
+        """Log in to get a new API token.
+
+        Arguments:
+        attempts -- how many times to try when login is blocked by an existing
+                    session elsewhere. Synack forbids simultaneous sessions and
+                    returns HTTP 400 for the authenticate call, but logging in
+                    again terminates the other session, so a retry succeeds.
+        """
         if self._users.get_profile():
             return self._state.api_token
         csrf = self.get_login_csrf()
         duo_auth_url = None
         grant_token = None
         if csrf:
-            auth_response = self.get_authentication_response(csrf)
+            auth_response = self.get_authentication_response(csrf) or {}
             duo_auth_url = auth_response.get('duo_auth_url', '')
+            if self._is_session_conflict(auth_response) and attempts > 1:
+                self._debug.log('Existing Synack session elsewhere',
+                                'Logging in here terminates it; '
+                                f'retrying ({attempts - 1} left).')
+                time.sleep(2)
+                return self.get_api_token(attempts - 1)
         if duo_auth_url:
             has_push = self._db.duo_akey and self._db.duo_pkey and self._db.duo_host
             has_hotp = self._db.otp_secret and self._db.otp_count is not None
@@ -69,6 +83,16 @@ class Auth(Plugin):
         if res.status_code == 200:
             return res.json()
         elif res.status_code == 400:
+            try:
+                j = res.json()
+            except ValueError:
+                j = {}
+            if self._is_session_conflict(j):
+                # An active session exists elsewhere. Synack returns 400 here,
+                # but the credentials are fine -- logging in again terminates
+                # the other session. Return the body so get_api_token can retry
+                # WITHOUT clearing stored credentials.
+                return j
             ans = input('Invalid email or password. Clear credentials? [y/N] ')
             if ans.lower().startswith('y'):
                 self._db.email = ''
@@ -76,6 +100,23 @@ class Auth(Plugin):
             raise ValueError('Invalid email or password.')
         elif res.status_code == 423:
             raise ValueError('Account locked. Too many failed login attempts.')
+
+    @staticmethod
+    def _is_session_conflict(response):
+        """True if authenticate failed only because a session exists elsewhere.
+
+        Synack forbids simultaneous sessions and returns HTTP 400 with a body
+        like:
+            {"success": false, "error": "Simultaneous Non Launchpoint and
+             LaunchPoint+ sessions are not permitted. Logging in here will
+             terminate your existing session ..."}
+        This is distinct from bad credentials and is safe to retry.
+        """
+        if not isinstance(response, dict):
+            return False
+        error = str(response.get('error', '')).lower()
+        return response.get('success') is False and (
+            'session' in error or 'simultaneous' in error)
 
     def get_login_csrf(self):
         """Get the CSRF Token from the login page"""

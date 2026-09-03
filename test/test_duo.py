@@ -323,7 +323,33 @@ class DuoTestCase(unittest.TestCase):
         self.assertEqual(self.duo._xsrf, 'new_csrf')
 
     def test_get_prompt_evaluation(self):
-        """Should extract pkey and available auth method types"""
+        """Should extract pkey/methods from nested auth_factors_context"""
+        self.duo._authkey = 'test_authkey'
+        self.duo._base_url = 'https://api.duosecurity.com'
+        self.duo._akey = 'test_akey'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo._api.request.return_value.json.return_value = {
+            'response': {
+                'action': 'auth',
+                'auth_factors_context': {
+                    'can_opt_out_of_push': True,
+                    'available_unified_auth_factors': {
+                        'factors': [
+                            {'factor_type': 'push',
+                             'device_info': {'pkey': 'pkey_abc'}},
+                            {'factor_type': 'mobile_otp'}
+                        ]
+                    }
+                }
+            }
+        }
+        self.duo._get_prompt_evaluation()
+        self.assertTrue(self.duo._can_opt_out_of_push)
+        self.assertEqual(self.duo._pkey, 'pkey_abc')
+        self.assertEqual(self.duo._available_auth_method_types, 'push,mobile_otp')
+
+    def test_get_prompt_evaluation_flat_fallback(self):
+        """Should still parse the legacy flat response shape"""
         self.duo._authkey = 'test_authkey'
         self.duo._base_url = 'https://api.duosecurity.com'
         self.duo._akey = 'test_akey'
@@ -463,6 +489,10 @@ class DuoTestCase(unittest.TestCase):
         }
         self.duo._get_prompt_push_txid()
         self.assertEqual(self.duo._push_txid, 'push_txid_abc')
+        # Duo's prompt API requires JSON bodies; a urlencoded Content-Type
+        # makes Api.request send form data, which Duo rejects with 401.
+        _, kwargs = self.duo._api.request.call_args
+        self.assertEqual(kwargs['headers']['Content-Type'], 'application/json')
 
     def test_get_prompt_remember_me(self):
         """Should POST to remember_me endpoint"""

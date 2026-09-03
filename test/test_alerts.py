@@ -83,6 +83,17 @@ class AlertsTestCase(unittest.TestCase):
         self.assertEqual(self.alerts.sanitize('URL: https://www.test.com/1/2/3/air'), 'URL: [URL]')
         self.assertEqual(self.alerts.sanitize('This is a URL: bob.com'), 'This is a URL: [URL]')
 
+    def test_sanitize_allowlisted_urls(self):
+        """Allowlisted URLs should be preserved while other URLs are redacted"""
+        # The allowlisted URL is placeholdered up front and restored at the end,
+        # so it survives; the non-allowlisted URL is still redacted.
+        msg = ('See https://support.synack.com/hc/articles/1 '
+               'and also http://evil.example.com/x')
+        out = self.alerts.sanitize(msg)
+        self.assertIn('https://support.synack.com/hc/articles/1', out)
+        self.assertIn('[URL]', out)
+        self.assertNotIn('evil.example.com', out)
+
     def test_slack(self):
         """Should POST a message to slack"""
         with patch('requests.post') as mock_post:

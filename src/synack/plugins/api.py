@@ -217,12 +217,17 @@ class Api(Plugin):
                 time.sleep(30)
                 attempts += 1
                 return self.request(method, path, attempts, **kwargs)
-        elif res.status_code >= 400:
+        elif res.status_code >= 500:
+            # Only server-side (5xx) errors are worth retrying. 4xx are
+            # permanent client errors -- retrying them just hammers the
+            # endpoint (e.g. a 404 was being re-sent 5x during the Duo flow).
             self._debug.log('Request failed', f'({res.status_code} - {res.reason}) {res.url}')
             if attempts < 5:
                 self._debug.log('Retrying', f'Attempt #{attempts + 1}')
                 attempts += 1
                 return self.request(method, path, attempts, **kwargs)
+        elif res.status_code >= 400:
+            self._debug.log('Request failed', f'({res.status_code} - {res.reason}) {res.url}')
         else:
             self._debug.log('Request Successful', f'({res.status_code} - {res.reason}) {res.url}')
 

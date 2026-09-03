@@ -412,3 +412,28 @@ class ApiTestCase(unittest.TestCase):
         self.api.request('GET', 'test')
         self.assertEqual(2, self.api._state.session.get.call_count)
         self.api._debug.log.assert_any_call('Retrying', 'Attempt #1')
+
+    def test_request_redirect_without_location_stops(self):
+        """A 3xx with no Location header should break the follow loop"""
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        redirect = MagicMock()
+        redirect.status_code = 303
+        redirect.url = 'https://api.duosecurity.com/auth'
+        redirect.headers = {}  # no Location -> cannot follow
+        self.api._state.session.get = MagicMock(return_value=redirect)
+        res = self.api.request('GET', 'https://api.duosecurity.com/auth')
+        self.assertEqual(303, res.status_code)
+        self.assertEqual(1, self.api._state.session.get.call_count)
+
+    def test_request_status_404_not_retried(self):
+        """4xx responses are permanent and must not be retried"""
+        res_404 = MagicMock()
+        res_404.status_code = 404
+        self.api._state.session.get = MagicMock(return_value=res_404)
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+        self.api.request('GET', 'test')
+        self.assertEqual(1, self.api._state.session.get.call_count)

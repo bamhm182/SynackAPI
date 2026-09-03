@@ -144,6 +144,58 @@ class AuthTestCase(unittest.TestCase):
         self.assertNotEqual('', self.auth._db.email)
         self.assertNotEqual('', self.auth._db.password)
 
+    def test_get_authentication_response_400_session_conflict(self):
+        """A session-conflict 400 should return the body, not clear creds/raise"""
+        self.auth._state._email = 'user@example.com'
+        self.auth._state._password = 'secret'
+        body = {
+            'success': False,
+            'error': ('Simultaneous Non Launchpoint and LaunchPoint+ sessions '
+                      'are not permitted. Logging in here will terminate your '
+                      'existing session and deselect any selected target.')
+        }
+        res_400 = MagicMock()
+        res_400.status_code = 400
+        res_400.json.return_value = body
+        self.auth._api.login.return_value = res_400
+        # No input() prompt, no raise -- just returns the body
+        result = self.auth.get_authentication_response('csrf')
+        self.assertEqual(body, result)
+        self.assertNotEqual('', self.auth._db.email)
+        self.assertNotEqual('', self.auth._db.password)
+
+    def test_get_api_token_session_conflict_retry(self):
+        """Should retry when blocked by an existing session, then succeed"""
+        self.auth._state.api_token = ""
+        self.auth._db.duo_akey = 'ak'
+        self.auth._db.duo_pkey = 'pk'
+        self.auth._db.duo_host = 'api.duo.com'
+        self.auth.set_login_script = MagicMock()
+        self.auth._users.get_profile = MagicMock(return_value=None)
+        self.auth.get_login_csrf = MagicMock(return_value='csrf')
+        conflict = {'success': False, 'error': 'existing session not permitted'}
+        ok = {'duo_auth_url': 'https://duoauth.local'}
+        self.auth.get_authentication_response = MagicMock(side_effect=[conflict, ok])
+        self.auth._duo.get_grant_token.return_value = 'grant'
+        self.auth._api.request.return_value.status_code = 200
+        self.auth._api.request.return_value.json.return_value = {'access_token': 'api_tok'}
+        with unittest.mock.patch('synack.plugins.auth.time.sleep'):
+            self.assertEqual('api_tok', self.auth.get_api_token())
+        self.assertEqual(2, self.auth.get_authentication_response.call_count)
+        self.auth._duo.get_grant_token.assert_called_with('https://duoauth.local')
+
+    def test_get_authentication_response_400_non_json(self):
+        """A 400 with an unparseable body falls back to invalid-credentials"""
+        self.auth._state._email = 'user@example.com'
+        self.auth._state._password = 'secret'
+        res_400 = MagicMock()
+        res_400.status_code = 400
+        res_400.json.side_effect = ValueError('no json')
+        self.auth._api.login.return_value = res_400
+        with unittest.mock.patch('builtins.input', return_value='n'):
+            with self.assertRaises(ValueError):
+                self.auth.get_authentication_response('csrf')
+
     def test_get_authentication_response_423(self):
         """Should raise ValueError on 423 locked"""
         res_423 = MagicMock()

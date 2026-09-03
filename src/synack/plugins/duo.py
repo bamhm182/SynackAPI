@@ -419,8 +419,12 @@ class Duo(Plugin):
                                 query=query)
         if res.status_code == 200:
             response = res.json().get('response', {})
-            self._can_opt_out_of_push = response.get('can_opt_out_of_push', False)
-            factors = (response
+            # Duo nests the factor list under `auth_factors_context`; older/other
+            # variants placed it directly on `response`. Prefer the nested
+            # location and fall back to the flat one so both shapes work.
+            factors_context = response.get('auth_factors_context', response)
+            self._can_opt_out_of_push = factors_context.get('can_opt_out_of_push', False)
+            factors = (factors_context
                        .get('available_unified_auth_factors', {})
                        .get('factors', []))
             self._available_auth_method_types = ','.join(f.get('factor_type', '') for f in factors)
@@ -512,7 +516,7 @@ class Duo(Plugin):
     def _get_prompt_push_txid(self):
         headers = {
             'Accept': '*/*',
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Content-Type': 'application/json',
             'Origin': self._base_url,
             'Referer': f'{self._base_url}/prompt/{self._akey}' +
                        f'?authkey={self._authkey}&req_trace_group={self._req_trace_group}',
@@ -550,7 +554,7 @@ class Duo(Plugin):
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Content-Type': 'application/json',
             'X-Duo-Req-Trace-Group': self._req_trace_group
         }
         self._api.request('POST',
@@ -748,7 +752,7 @@ class Duo(Plugin):
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Content-Type': 'application/json',
             'X-Duo-Req-Trace-Group': self._req_trace_group
         }
         self._api.request('POST',
