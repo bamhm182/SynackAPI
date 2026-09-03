@@ -37,5 +37,12 @@ setuptools.setup(
         "requests>=2.28.1",
         "SQLAlchemy>=1.4.44",
         "urllib3>=1.26.13",
-    ]
+    ],
+    extras_require={
+        "dev": [
+            "coverage>=7.0.0",
+            "flake8>=6.0.0",
+            "pytest>=7.0.0",
+        ],
+    }
 )

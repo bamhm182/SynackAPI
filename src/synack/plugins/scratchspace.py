@@ -40,7 +40,10 @@ class Scratchspace(Plugin):
         for attachment in attachments:
             overwrite_current = overwrite
             if target or codename:
-                dest_file = self.build_filepath(attachment.get('filename'), subdir="attachments", target=target, codename=codename)
+                dest_file = self.build_filepath(attachment.get('filename'),
+                                                subdir="attachments",
+                                                target=target,
+                                                codename=codename)
                 if prompt_overwrite and dest_file.exists():
                     ans = input(f'{attachment.get("filename")} exists. Overwrite? [y/N]: ')
                     overwrite_current = ans.lower().startswith('y')

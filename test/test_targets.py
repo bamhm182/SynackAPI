@@ -410,6 +410,121 @@ class TargetsTestCase(unittest.TestCase):
         self.assertEqual(self.targets.get_attachments(target=Target(slug='u2ire')), attachments)
         self.targets._api.request.assert_called_with('GET', 'targets/u2ire/resources')
 
+    def test_get_attachments_download(self):
+        """Should download attachments to scratchspace when requested"""
+        attachments = [{'filename': 'file1.txt'}]
+        self.targets._scratchspace = MagicMock()
+        self.state.use_scratchspace = True
+        target = Target(slug='u2ire')
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = attachments
+        ret = self.targets.get_attachments(download=True, target=target)
+        self.assertEqual(ret, attachments)
+        self.targets._scratchspace.set_download_attachments.assert_called_with(
+            attachments, target=target)
+
+    def test_get_info(self):
+        """Should return target info given a slug"""
+        info = {'codename': 'TASTYTACO', 'slug': 'u2ire'}
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = info
+        self.assertEqual(self.targets.get_info(slug='u2ire'), info)
+        self.targets._api.request.assert_called_with('GET', 'targets/u2ire')
+
+    def test_get_info_current(self):
+        """Should resolve the connected target when none is given"""
+        self.targets.get_connected = MagicMock(return_value={'codename': 'TASTYTACO'})
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = {'ok': True}
+        self.assertEqual(self.targets.get_info(), {'ok': True})
+        self.targets._db.find_targets.assert_called_with(codename='TASTYTACO')
+
+    def test_get_info_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_info(target=Target(slug='u2ire'))
+        self.targets._auth.get_api_token.assert_called_once()
+
+    def test_get_roe(self):
+        """Should combine rules and roes descriptions into a deduped set"""
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.get_info = MagicMock(return_value={
+            'rules': '- Rule A\nRule B',
+            'roes': [{'description': 'Rule C'}]
+        })
+        ret = self.targets.get_roe(slug='u2ire')
+        self.assertEqual(ret, {'Rule A', 'Rule B', 'Rule C'})
+
+    def test_get_roe_unique(self):
+        """Should strip ROE common to all targets when unique=True"""
+        common = ('No password brute force or password spraying.')
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.get_info = MagicMock(return_value={
+            'rules': f'Special Rule\n{common}',
+            'roes': []
+        })
+        ret = self.targets.get_roe(unique=True, slug='u2ire')
+        self.assertIn('Special Rule', ret)
+        self.assertNotIn(common, ret)
+
+    def test_get_roe_connected(self):
+        """Should resolve the connected target when no kwargs given"""
+        self.targets.get_connected = MagicMock(return_value={'slug': 'u2ire'})
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets.get_info = MagicMock(return_value={'rules': 'Rule A', 'roes': []})
+        ret = self.targets.get_roe()
+        self.assertEqual(ret, {'Rule A'})
+        self.targets._db.find_targets.assert_called_with(slug='u2ire')
+
+    def test_get_updates(self):
+        """Should return a single page of target updates"""
+        updates = [{'id': 1}]
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = updates
+        self.assertEqual(self.targets.get_updates(slug='u2ire'), updates)
+        self.targets._api.request.assert_called_with(
+            'GET', 'targets/u2ire/updates',
+            query={'page': 1, 'per_page': 10,
+                   'sort_dir': 'desc', 'sort_field': 'created_at'})
+
+    def test_get_updates_current(self):
+        """Should resolve the connected target when none is given"""
+        self.targets.get_connected = MagicMock(return_value={'codename': 'TASTYTACO'})
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.return_value = []
+        self.assertEqual(self.targets.get_updates(), [])
+        self.targets._db.find_targets.assert_called_with(codename='TASTYTACO')
+
+    def test_get_updates_paginates(self):
+        """Should recurse into get_updates while a full page is returned"""
+        page1 = [{'id': 1}, {'id': 2}]
+        page2 = [{'id': 3}]
+        self.targets._db.find_targets.return_value = [Target(slug='u2ire')]
+        self.targets._api.request.return_value.status_code = 200
+        self.targets._api.request.return_value.json.side_effect = [page1, page2]
+        ret = self.targets.get_updates(target=Target(slug='u2ire'),
+                                       per_page=2, max_pages=2)
+        self.assertEqual(ret, [{'id': 1}, {'id': 2}, {'id': 3}])
+        # Second (paginated) request should ask for page 2
+        self.targets._api.request.assert_called_with(
+            'GET', 'targets/u2ire/updates',
+            query={'page': 2, 'per_page': 2,
+                   'sort_dir': 'desc', 'sort_field': 'created_at'})
+
+    def test_get_updates_403_login(self):
+        """Should call get_api_token on 403"""
+        self.targets._auth = MagicMock()
+        self.targets._api.request.return_value.status_code = 403
+        self.state.login = True
+        self.targets.get_updates(target=Target(slug='u2ire'))
+        self.targets._auth.get_api_token.assert_called_once()
+
     def test_get_connected(self):
         """Should make a request to get the currently selected target"""
         self.targets._api.request.return_value.status_code = 200

@@ -34,6 +34,14 @@ class ScratchspaceTestCase(unittest.TestCase):
         ret = self.scratchspace.build_filepath('test.txt', target=target)
         self.assertEqual(pathlib.Path('/tmp/TIREDTURKEY/test.txt'), ret)
 
+    def test_build_filepath_subdir(self):
+        """Should nest the file under the given subdir"""
+        self.scratchspace._state.scratchspace_dir = pathlib.Path('/tmp')
+        ret = self.scratchspace.build_filepath('test.txt', codename='TIREDTURKEY',
+                                               subdir='attachments')
+        self.assertEqual(
+            pathlib.Path('/tmp/TIREDTURKEY/attachments/test.txt'), ret)
+
     def test_set_asset_file(self):
         """Shoudl create an asset file within the correct directory"""
         self.scratchspace.build_filepath = MagicMock()

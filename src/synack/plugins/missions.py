@@ -6,7 +6,7 @@ Functions related to handling, viewing, claiming, etc. missions
 import operator
 import random
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .base import Plugin
 
@@ -61,7 +61,7 @@ class Missions(Plugin):
             ret['total']['value'] += mission['payout']['amount']
 
             if mission.get('status') == 'CLAIMED':
-                utc = datetime.utcnow()
+                utc = datetime.now(timezone.utc).replace(tzinfo=None)
                 try:
                     claimed_on = datetime.strptime(mission['claimedOn'],
                                                    '%Y-%m-%dT%H:%M:%S.%fZ')

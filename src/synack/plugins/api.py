@@ -82,8 +82,12 @@ class Api(Plugin):
             base = f'https://platform.{self._state.synack_domain}/api/'
         url = f'{base}{path}'
 
-        verify = False
-        warnings.filterwarnings('ignore')
+        # Only skip TLS verification when routing through an intercepting
+        # proxy (e.g. Burp), whose CA won't be trusted. Otherwise verify
+        # certificates normally.
+        verify = not self._state.use_proxies
+        if not verify:
+            warnings.filterwarnings('ignore')
 
         proxies = self._state.proxies if self._state.use_proxies else None
 
@@ -99,43 +103,53 @@ class Api(Plugin):
         query = kwargs.get('query')
         data = kwargs.get('data')
 
+        # No synackapi request should ever hang: cap the connect phase at 10s
+        # and the read phase at 30s.
+        timeout = (10, 30)
+
         if method.upper() == 'GET':
             res = self._state.session.get(url,
                                           headers=headers,
                                           proxies=proxies,
                                           params=query,
-                                          verify=verify)
+                                          verify=verify,
+                                          timeout=timeout)
         elif method.upper() == 'HEAD':
             res = self._state.session.head(url,
                                            headers=headers,
                                            proxies=proxies,
                                            params=query,
-                                           verify=verify)
+                                           verify=verify,
+                                           timeout=timeout)
         elif method.upper() == 'PATCH':
             res = self._state.session.patch(url,
                                             json=data,
                                             headers=headers,
                                             proxies=proxies,
-                                            verify=verify)
+                                            verify=verify,
+                                            timeout=timeout)
         elif method.upper() == 'POST':
             if 'urlencoded' in headers.get('Content-Type', ''):
                 res = self._state.session.post(url,
                                                data=data,
                                                headers=headers,
                                                proxies=proxies,
-                                               verify=verify)
+                                               verify=verify,
+                                               timeout=timeout)
             else:
                 res = self._state.session.post(url,
                                                json=data,
                                                headers=headers,
                                                proxies=proxies,
-                                               verify=verify)
+                                               verify=verify,
+                                               timeout=timeout)
         elif method.upper() == 'PUT':
             res = self._state.session.put(url,
                                           headers=headers,
                                           proxies=proxies,
                                           params=data,
-                                          verify=verify)
+                                          verify=verify,
+                                          timeout=timeout)
 
         self._debug.log("Network Request",
                         f"{res.status_code} -- {method.upper()} -- {url}" +

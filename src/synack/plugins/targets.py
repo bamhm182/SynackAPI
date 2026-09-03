@@ -320,22 +320,22 @@ class Targets(Plugin):
             if unique:
                 # Get rid of ROE common across all targets to highlight key ROE
                 roe.difference_update([
-                    'ASK before you ACT. Contact support via support@synack.com or the Help button for questions about scope, problems with credentials, connectivity issues, etc.',
+                    'ASK before you ACT. Contact support via support@synack.com or the Help button for questions about scope, problems with credentials, connectivity issues, etc.',  # noqa: E501
                     'Attack payload data must use professional language (no vulgarity, profanity, etc).',
-                    'Check before you test. If assets seem unrelated to the target (i.e. dynamic IPs), contact Synack Support before proceeding with testing. Vuln submissions may be rejected if they are determined to be unrelated to the target.',
-                    'Do not host payloads on third party servers, only use Synack servers (request access to TUPoC). If you are found to violate this rule by using a system not controlled by Synack, you will be removed from access to this target and be evaluated for further punishment.',
-                    'If default credentials are discovered for any service, you MUST stop and report.  Any findings discovered after-the-fact will be rejected.',
-                    'NEVER test outside of LP+ [[more info](https://support.synack.com/hc/en-us/articles/360010168373-LP-Zero-Tolerance-Policy)].',
+                    'Check before you test. If assets seem unrelated to the target (i.e. dynamic IPs), contact Synack Support before proceeding with testing. Vuln submissions may be rejected if they are determined to be unrelated to the target.',  # noqa: E501
+                    'Do not host payloads on third party servers, only use Synack servers (request access to TUPoC). If you are found to violate this rule by using a system not controlled by Synack, you will be removed from access to this target and be evaluated for further punishment.',  # noqa: E501
+                    'If default credentials are discovered for any service, you MUST stop and report.  Any findings discovered after-the-fact will be rejected.',  # noqa: E501
+                    'NEVER test outside of LP+ [[more info](https://support.synack.com/hc/en-us/articles/360010168373-LP-Zero-Tolerance-Policy)].',  # noqa: E501
                     'No callback-related research/testing that uses non-Synack hosted infrastructure.',
-                    'No intentional Denial of Service testing [[more info](https://support.synack.com/hc/en-us/articles/115013809368-Denial-of-Service)].',
+                    'No intentional Denial of Service testing [[more info](https://support.synack.com/hc/en-us/articles/115013809368-Denial-of-Service)].',  # noqa: E501
                     'No interfering with the S2S connection to client’s assets.',
                     'No password brute force or password spraying.',
                     'No physical or social engineering.',
                     'No testing of 3rd party services unless explicitly specified as in-scope.',
-                    'No scanning while away from your machine (must be present to halt scanning if traffic is too heavy).',
-                    'No uploading of client-related content to 3rd party utilities (e.g. Github, DropBox, YouTube). Collaborating with other SRT via SRT Slack is allowed as long as full payloads/URLs are not shared and target codenames are always used.',
-                    'SRT must include the word "Synack" in the names or data of payloads, injected data, and files created for leveraging vulnerabilities for the purpose of assisting the client in identifying testing traffic.',
-                    'Using an account you have to pay for, a personal account, or an account that was found with weak credentials is a violation of the RoE. Using credentials you obtained from other listings is also a violation, as this may provide an unfair advantage over other SRT.'
+                    'No scanning while away from your machine (must be present to halt scanning if traffic is too heavy).',  # noqa: E501
+                    'No uploading of client-related content to 3rd party utilities (e.g. Github, DropBox, YouTube). Collaborating with other SRT via SRT Slack is allowed as long as full payloads/URLs are not shared and target codenames are always used.',  # noqa: E501
+                    'SRT must include the word "Synack" in the names or data of payloads, injected data, and files created for leveraging vulnerabilities for the purpose of assisting the client in identifying testing traffic.',  # noqa: E501
+                    'Using an account you have to pay for, a personal account, or an account that was found with weak credentials is a violation of the RoE. Using credentials you obtained from other listings is also a violation, as this may provide an unfair advantage over other SRT.'  # noqa: E501
                 ])
             # Get rid of excess entries
             roe.difference_update([
@@ -500,15 +500,15 @@ class Targets(Plugin):
             'sort_field': 'created_at'
         }
 
-        res = self._api.request('GET', f'targets/{target.slug}/updates')
+        res = self._api.request('GET', f'targets/{target.slug}/updates', query=query)
 
         if res.status_code == 200:
             ret = res.json()
             if len(ret) == per_page and page < max_pages:
-                new = self.get(target=target,
-                               page=page+1,
-                               max_pages=max_pages,
-                               per_page=per_page)
+                new = self.get_updates(target=target,
+                                       page=page+1,
+                                       max_pages=max_pages,
+                                       per_page=per_page)
                 ret.extend(new)
             return ret
         elif res.status_code == 403 and self._state.login:

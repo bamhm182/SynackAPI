@@ -129,6 +129,34 @@ class DuoTestCase(unittest.TestCase):
         self.assertEqual(self.duo._db.duo_host, host)
 
     @patch('synack.plugins.duo.RSA')
+    def test_get_duo_push_values_stores_hotp_seed(self, mock_rsa):
+        """Should store the hotp_secret hex STRING (ascii bytes) as base32 otp_secret
+
+        Regression: Duo delivers hotp_secret as a hex string, but the string
+        itself (its ASCII characters) is the HMAC key -- it must NOT be
+        hex-decoded first. otp_secret is the base32 of those ascii bytes and
+        otp_count resets to 0.
+        """
+        mock_key = MagicMock()
+        mock_rsa.import_key.return_value = mock_key
+        mock_key.publickey.return_value.export_key.return_value = b'fake_pubkey'
+        self.duo._db.duo_rsa_key = 'fake_pem'
+        hotp_hex = '71667efbabf292338b94501448186bab'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo._api.request.return_value.json.return_value = {
+            'response': {'akey': 'a', 'pkey': 'p', 'hotp_secret': hotp_hex}
+        }
+        host_b64 = base64.b64encode(b'api.duosecurity.com').decode()
+        self.duo.get_duo_push_values(f'CODE-{host_b64}')
+        expected = base64.b32encode(hotp_hex.encode('ascii')).decode('ascii')
+        self.assertEqual(self.duo._db.otp_secret, expected)
+        # It must NOT be the hex-decoded interpretation
+        self.assertNotEqual(
+            self.duo._db.otp_secret,
+            base64.b32encode(bytes.fromhex(hotp_hex)).decode('ascii'))
+        self.assertEqual(self.duo._db.otp_count, 0)
+
+    @patch('synack.plugins.duo.RSA')
     def test_get_duo_push_values_missing_padding(self, mock_rsa):
         """Should add base64 padding when host_part length is not a multiple of 4"""
         mock_key = MagicMock()
@@ -143,6 +171,23 @@ class DuoTestCase(unittest.TestCase):
         host_part = base64.b64encode(b'a.com').decode().rstrip('=')
         self.duo.get_duo_push_values(f'CODE-{host_part}')
         self.assertEqual(self.duo._db.duo_host, 'a.com')
+
+    def test_get_duo_passcode(self):
+        """Should generate the next HOTP passcode and advance otp_count"""
+        hotp_hex = '71667efbabf292338b94501448186bab'
+        secret = base64.b32encode(hotp_hex.encode('ascii')).decode('ascii')
+        self.state._otp_secret = secret
+        self.state._otp_count = 0
+        self.duo._db = MagicMock()
+        code = self.duo.get_duo_passcode()
+        # Known-good vector confirmed against the real Duo device
+        self.assertEqual(code, '029833')
+        self.assertEqual(self.duo._db.otp_count, 1)
+
+    def test_get_duo_passcode_no_secret(self):
+        """Should return None when no otp_secret is configured"""
+        self.state._otp_secret = ''
+        self.assertIsNone(self.duo.get_duo_passcode())
 
     def test_get_grant_token(self):
         """Should complete MFA flow and return grant_token"""
@@ -777,6 +822,101 @@ class DuoTestCase(unittest.TestCase):
         self.duo._api.request.return_value = res
         self.duo._set_session_variables()
         self.assertEqual(self.duo._referrer, 'https://duofederal.com/frame/v4/auth/prompt')
+
+    def test_is_verified_push_true(self):
+        """Should detect Verified Push transactions via several field variants"""
+        # Primary observed-on-the-wire format
+        self.assertTrue(self.duo._is_verified_push({'step_up_code_info': {'num_digits': 3}}))
+        # Fallback/older API variants
+        self.assertTrue(self.duo._is_verified_push({'verified_push': True}))
+        self.assertTrue(self.duo._is_verified_push({'is_verified_push': True}))
+        self.assertTrue(self.duo._is_verified_push({'step_up_code_type': 'digits'}))
+        self.assertTrue(self.duo._is_verified_push({'verified_push_num_digits': 3}))
+
+    def test_is_verified_push_false(self):
+        """Should not flag plain approve/deny transactions as verified push"""
+        self.assertFalse(self.duo._is_verified_push({'urgid': 'x', 'type': 'Login'}))
+        self.assertFalse(self.duo._is_verified_push({'step_up_code_type': 'none'}))
+        self.assertFalse(self.duo._is_verified_push({'step_up_code_type': ''}))
+        # step_up_code_info present but without num_digits must not trip it
+        self.assertFalse(self.duo._is_verified_push({'step_up_code_info': {}}))
+        self.assertFalse(self.duo._is_verified_push({'step_up_code_info': None}))
+
+    def test_answer_transaction_no_urgid(self):
+        """Should return None and make no request without a urgid"""
+        result = self.duo._answer_transaction({'type': 'Login'})
+        self.assertIsNone(result)
+        self.duo._api.request.assert_not_called()
+
+    def test_answer_transaction_plain(self):
+        """Should POST approve without a code for a plain transaction"""
+        self.duo._generate_push_signature = MagicMock(return_value='Basic sig')
+        self.duo._db.duo_akey = 'akey'
+        self.duo._db.duo_host = 'api.duosecurity.com'
+        self.duo._answer_transaction({'urgid': 'txn123'}, 'approve')
+        call_args = self.duo._api.request.call_args
+        self.assertEqual(call_args[0][0], 'POST')
+        self.assertIn('txn123', call_args[0][1])
+        self.assertNotIn('step_up_code', call_args[1]['data'])
+        self.assertEqual(call_args[1]['data']['answer'], 'approve')
+
+    def test_answer_transaction_verified_push_code(self):
+        """Should include verified_push_code in the signed body when provided"""
+        captured = {}
+
+        def _sig(method, path, now, data):
+            captured['data'] = dict(data)
+            return 'Basic sig'
+
+        self.duo._generate_push_signature = _sig
+        self.duo._db.duo_akey = 'akey'
+        self.duo._db.duo_host = 'api.duosecurity.com'
+        self.duo._answer_transaction({'urgid': 'txn123'}, 'approve',
+                                     verified_push_code=244)
+        call_args = self.duo._api.request.call_args
+        self.assertEqual(call_args[1]['data']['step_up_code'], '244')
+        # Signature must be computed over the body that includes the code
+        self.assertEqual(captured['data'].get('step_up_code'), '244')
+
+    def test_set_duo_push_approved_verified_push(self):
+        """Should answer a verified push transaction with the provided code"""
+        self.duo._get_push_transactions = MagicMock(return_value=[
+            {'urgid': 'txn123', 'verified_push': True}
+        ])
+        self.duo._generate_push_signature = MagicMock(return_value='Basic sig')
+        self.duo._db.duo_akey = 'akey'
+        self.duo._db.duo_host = 'api.duosecurity.com'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo.set_duo_push_approved(verified_push_code='244')
+        call_args = self.duo._api.request.call_args
+        self.assertEqual(call_args[1]['data']['step_up_code'], '244')
+
+    def test_set_duo_push_approved_verified_push_no_code_on_plain(self):
+        """Should not attach a code to a plain transaction even if one is set"""
+        self.duo._get_push_transactions = MagicMock(return_value=[
+            {'urgid': 'txn123'}
+        ])
+        self.duo._generate_push_signature = MagicMock(return_value='Basic sig')
+        self.duo._db.duo_akey = 'akey'
+        self.duo._db.duo_host = 'api.duosecurity.com'
+        self.duo._api.request.return_value.status_code = 200
+        self.duo.set_duo_push_approved(verified_push_code='244')
+        call_args = self.duo._api.request.call_args
+        self.assertNotIn('step_up_code', call_args[1]['data'])
+
+    def test_set_duo_verified_push_code(self):
+        """Should poll and answer verified push via convenience wrapper"""
+        self.duo._get_push_transactions = MagicMock(return_value=[
+            {'urgid': 'txn123', 'step_up_code_type': 'digits'}
+        ])
+        self.duo._generate_push_signature = MagicMock(return_value='Basic sig')
+        self.duo._db.duo_akey = 'akey'
+        self.duo._db.duo_host = 'api.duosecurity.com'
+        self.duo._api.request.return_value.status_code = 200
+        acted = self.duo.set_duo_verified_push_code('244', attempts=1)
+        self.assertEqual(len(acted), 1)
+        call_args = self.duo._api.request.call_args
+        self.assertEqual(call_args[1]['data']['step_up_code'], '244')
 
 
 if __name__ == '__main__':

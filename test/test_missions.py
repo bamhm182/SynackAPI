@@ -98,7 +98,7 @@ class MissionsTestCase(unittest.TestCase):
 
     def test_build_summary(self):
         """Should summarize a list of missions"""
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
                                         "%Y-%m-%dT%H:%M:%S.%fZ")
         t2 = datetime.datetime.strftime(now-datetime.timedelta(hours=1),
@@ -131,7 +131,7 @@ class MissionsTestCase(unittest.TestCase):
 
     def test_build_summary_no_milliseconds(self):
         """Should be able to handle claimedOn time without milliseconds"""
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         t1 = datetime.datetime.strftime(now-datetime.timedelta(hours=2),
                                         "%Y-%m-%dT%H:%M:%SZ")
         t2 = datetime.datetime.strftime(now-datetime.timedelta(hours=1),
@@ -473,7 +473,8 @@ class MissionsTestCase(unittest.TestCase):
             "title": "Some Mission",
             "payout": "10",
             "status": "CLAIM",
-            "success": True
+            "success": True,
+            "status_code": 201
         }
         self.missions._api.request.return_value.status_code = 201
         self.assertEqual(ret, self.missions.set_status(m, "CLAIM"))

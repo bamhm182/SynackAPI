@@ -91,7 +91,8 @@ class ApiTestCase(unittest.TestCase):
                                                        headers={},
                                                        proxies=None,
                                                        params=None,
-                                                       verify=True)
+                                                       verify=True,
+                                                       timeout=(10, 30))
 
     def test_request_full_url(self):
         """Base URL should not be added if a full url is passed"""
@@ -102,7 +103,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         url = 'http://www.synack.com/api/test'
         self.api.request('GET', url)
@@ -110,7 +111,8 @@ class ApiTestCase(unittest.TestCase):
                                                        headers=headers,
                                                        proxies=None,
                                                        params=None,
-                                                       verify=True)
+                                                       verify=True,
+                                                       timeout=(10, 30))
 
     def test_request_get(self):
         """GET requests should work"""
@@ -121,7 +123,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         url = 'https://platform.synack.com/api/test'
         self.api.request('GET', 'test')
@@ -129,7 +131,8 @@ class ApiTestCase(unittest.TestCase):
                                                        headers=headers,
                                                        proxies=None,
                                                        params=None,
-                                                       verify=True)
+                                                       verify=True,
+                                                       timeout=(10, 30))
 
     def test_request_head(self):
         """HEAD requests should work"""
@@ -140,7 +143,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         url = 'https://platform.synack.com/api/test'
         self.api.request('HEAD', 'test')
@@ -148,7 +151,8 @@ class ApiTestCase(unittest.TestCase):
                                                         headers=headers,
                                                         proxies=None,
                                                         params=None,
-                                                        verify=True)
+                                                        verify=True,
+                                                        timeout=(10, 30))
 
     def test_request_header_kwargs(self):
         """requests should merge in kwargs headers"""
@@ -159,7 +163,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco',
+            'X-Synack': 'paco',
             'test': 'test'
         }
         url = 'https://platform.synack.com/api/test'
@@ -168,7 +172,8 @@ class ApiTestCase(unittest.TestCase):
                                                        headers=headers,
                                                        proxies=None,
                                                        params=None,
-                                                       verify=True)
+                                                       verify=True,
+                                                       timeout=(10, 30))
 
     def test_request_logged(self):
         """All requests should call the logger"""
@@ -180,7 +185,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         self.api.request('GET', 'test')
         message = "200 -- GET -- https://platform.synack.com/api/test" + \
@@ -201,14 +206,15 @@ class ApiTestCase(unittest.TestCase):
         url = 'https://platform.synack.com/api/test'
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         self.api.request('PATCH', 'test', data=data)
         self.api._state.session.patch.assert_called_with(url,
                                                          json=data,
                                                          headers=headers,
                                                          proxies=None,
-                                                         verify=True)
+                                                         verify=True,
+                                                         timeout=(10, 30))
 
     def test_request_post(self):
         """POST requests should work"""
@@ -221,14 +227,15 @@ class ApiTestCase(unittest.TestCase):
         url = 'https://platform.synack.com/api/test'
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         self.api.request('POST', 'test', data=data)
         self.api._state.session.post.assert_called_with(url,
                                                         json=data,
                                                         headers=headers,
                                                         proxies=None,
-                                                        verify=True)
+                                                        verify=True,
+                                                        timeout=(10, 30))
 
     def test_request_post_urlencoded(self):
         """POST with urlencoded Content-Type should send form data"""
@@ -241,7 +248,7 @@ class ApiTestCase(unittest.TestCase):
         url = 'https://platform.synack.com/api/test'
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco',
+            'X-Synack': 'paco',
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         self.api.request('POST', 'test', data=data,
@@ -250,7 +257,8 @@ class ApiTestCase(unittest.TestCase):
                                                         data=data,
                                                         headers=headers,
                                                         proxies=None,
-                                                        verify=True)
+                                                        verify=True,
+                                                        timeout=(10, 30))
 
     def test_request_proxies(self):
         """Proxies should be used if set"""
@@ -262,7 +270,7 @@ class ApiTestCase(unittest.TestCase):
         self.api._state.api_token = "12345"
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         url = 'https://platform.synack.com/api/test'
         self.api._state.session.get = MagicMock()
@@ -275,7 +283,8 @@ class ApiTestCase(unittest.TestCase):
                                                        headers=headers,
                                                        proxies=proxies,
                                                        params=None,
-                                                       verify=False)
+                                                       verify=False,
+                                                       timeout=(10, 30))
 
     def test_request_put(self):
         """PUT requests should work"""
@@ -288,14 +297,15 @@ class ApiTestCase(unittest.TestCase):
         url = 'https://platform.synack.com/api/test'
         headers = {
             'Authorization': 'Bearer 12345',
-            'user_id': 'paco'
+            'X-Synack': 'paco'
         }
         self.api.request('PUT', 'test', data=data)
         self.api._state.session.put.assert_called_with(url,
                                                        headers=headers,
                                                        proxies=None,
                                                        params=data,
-                                                       verify=True)
+                                                       verify=True,
+                                                       timeout=(10, 30))
 
     def test_request_status_400(self):
         """400/401 responses should log a failure"""
