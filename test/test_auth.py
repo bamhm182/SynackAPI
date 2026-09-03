@@ -118,17 +118,31 @@ class AuthTestCase(unittest.TestCase):
                                                 headers={'X-CSRF-Token': 'csrf123'},
                                                 data={'email': 'user@example.com', 'password': 'secret'})
 
-    def test_get_authentication_response_400(self):
-        """Should clear credentials and raise ValueError on 400"""
+    def test_get_authentication_response_400_confirm(self):
+        """Should clear credentials and raise ValueError on 400 when confirmed"""
         self.auth._state._email = 'user@example.com'
         self.auth._state._password = 'secret'
         res_400 = MagicMock()
         res_400.status_code = 400
         self.auth._api.login.return_value = res_400
-        with self.assertRaises(ValueError):
-            self.auth.get_authentication_response('old_csrf')
+        with unittest.mock.patch('builtins.input', return_value='y'):
+            with self.assertRaises(ValueError):
+                self.auth.get_authentication_response('old_csrf')
         self.assertEqual('', self.auth._db.email)
         self.assertEqual('', self.auth._db.password)
+
+    def test_get_authentication_response_400_declined(self):
+        """Should keep credentials but still raise ValueError on 400 when declined"""
+        self.auth._state._email = 'user@example.com'
+        self.auth._state._password = 'secret'
+        res_400 = MagicMock()
+        res_400.status_code = 400
+        self.auth._api.login.return_value = res_400
+        with unittest.mock.patch('builtins.input', return_value='n'):
+            with self.assertRaises(ValueError):
+                self.auth.get_authentication_response('old_csrf')
+        self.assertNotEqual('', self.auth._db.email)
+        self.assertNotEqual('', self.auth._db.password)
 
     def test_get_authentication_response_423(self):
         """Should raise ValueError on 423 locked"""

@@ -69,9 +69,11 @@ class Auth(Plugin):
         if res.status_code == 200:
             return res.json()
         elif res.status_code == 400:
-            self._db.email = ''
-            self._db.password = ''
-            raise ValueError('Invalid email or password. Credentials cleared.')
+            ans = input('Invalid email or password. Clear credentials? [y/N] ')
+            if ans.lower().startswith('y'):
+                self._db.email = ''
+                self._db.password = ''
+            raise ValueError('Invalid email or password.')
         elif res.status_code == 423:
             raise ValueError('Account locked. Too many failed login attempts.')
 

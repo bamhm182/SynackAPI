@@ -114,6 +114,33 @@ class ApiTestCase(unittest.TestCase):
                                                        verify=True,
                                                        timeout=(10, 30))
 
+    def test_request_follows_unresolved_redirect(self):
+        """A 3xx handed back by the client should be followed to the final page"""
+        self.api._state.use_proxies = False
+        self.api._state.user_id = "paco"
+        self.api._state.api_token = "12345"
+
+        redirect = MagicMock()
+        redirect.status_code = 303
+        redirect.url = 'https://api.duosecurity.com/auth'
+        redirect.headers = {'Location': '/prompt?authkey=KEY123'}
+        final = MagicMock()
+        final.status_code = 200
+        final.url = 'https://api.duosecurity.com/prompt?authkey=KEY123'
+        final.headers = {}
+        self.api._state.session.get = MagicMock(side_effect=[redirect, final])
+
+        res = self.api.request('GET', 'https://api.duosecurity.com/auth')
+        self.assertEqual(200, res.status_code)
+        self.assertEqual('https://api.duosecurity.com/prompt?authkey=KEY123', res.url)
+        self.assertEqual(2, self.api._state.session.get.call_count)
+        self.api._state.session.get.assert_called_with(
+            'https://api.duosecurity.com/prompt?authkey=KEY123',
+            headers={},
+            proxies=None,
+            verify=True,
+            timeout=(10, 30))
+
     def test_request_get(self):
         """GET requests should work"""
         self.api._state.session.get = MagicMock()

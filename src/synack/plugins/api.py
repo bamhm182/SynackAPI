@@ -4,6 +4,7 @@ Functions to handle interacting with the Synack APIs
 """
 
 import time
+import urllib.parse
 import warnings
 
 from .base import Plugin
@@ -150,6 +151,28 @@ class Api(Plugin):
                                           params=data,
                                           verify=verify,
                                           timeout=timeout)
+
+        # Follow any redirect the HTTP client left unresolved. requests chases
+        # well-formed http(s) redirects automatically, but a 3xx with a
+        # relative Location (or one it otherwise declines to follow) is handed
+        # back to us as a raw 3xx -- which stalls flows like Duo that expect to
+        # land on the final page. Resolve the Location against the current URL
+        # and keep following until we reach a non-redirect, capping the chain
+        # to avoid loops. The isinstance guard keeps mocked responses out.
+        redirects = 0
+        while (isinstance(res.status_code, int)
+               and res.status_code in (301, 302, 303, 307, 308)
+               and redirects < 20):
+            location = res.headers.get('Location')
+            if not location:
+                break
+            next_url = urllib.parse.urljoin(res.url, location)
+            res = self._state.session.get(next_url,
+                                          headers=headers,
+                                          proxies=proxies,
+                                          verify=verify,
+                                          timeout=timeout)
+            redirects += 1
 
         self._debug.log("Network Request",
                         f"{res.status_code} -- {method.upper()} -- {url}" +
