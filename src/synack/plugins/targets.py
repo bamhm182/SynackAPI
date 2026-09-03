@@ -321,6 +321,7 @@ class Targets(Plugin):
                 # Get rid of ROE common across all targets to highlight key ROE
                 roe.difference_update([
                     'ASK before you ACT. Contact support via support@synack.com or the Help button for questions about scope, problems with credentials, connectivity issues, etc.',  # noqa: E501
+                    'Always stay in scope and actively check the listing for updates [[more info](http://support.synack.com/hc/en-us/articles/115003352988-Staying-in-scope-during-testing)].',
                     'Attack payload data must use professional language (no vulgarity, profanity, etc).',
                     'Check before you test. If assets seem unrelated to the target (i.e. dynamic IPs), contact Synack Support before proceeding with testing. Vuln submissions may be rejected if they are determined to be unrelated to the target.',  # noqa: E501
                     'Do not host payloads on third party servers, only use Synack servers (request access to TUPoC). If you are found to violate this rule by using a system not controlled by Synack, you will be removed from access to this target and be evaluated for further punishment.',  # noqa: E501
