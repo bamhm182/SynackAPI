@@ -16,6 +16,27 @@ class Api(Plugin):
         for plugin in ['Debug', 'Db']:
             setattr(self, '_'+plugin.lower(), self._registry.get(plugin)(self._state))
 
+    @staticmethod
+    def _redact(mapping):
+        """Return a copy of a headers/data/query dict with secrets masked.
+
+        Debug logging dumps request headers and bodies, which otherwise leak
+        the Authorization bearer, email/password, CSRF and various Duo tokens.
+        Mask anything whose key looks sensitive so logs are safe to share.
+        """
+        if not isinstance(mapping, dict):
+            return mapping
+        sensitive = ('authorization', 'cookie', 'password', 'email',
+                     'csrf', 'token', 'secret', 'passcode', 'signature',
+                     'akey', 'pkey', 'sid', 'xsrf')
+        redacted = dict()
+        for key, value in mapping.items():
+            if any(s in str(key).lower() for s in sensitive):
+                redacted[key] = '***REDACTED***'
+            else:
+                redacted[key] = value
+        return redacted
+
     def login(self, method, path, **kwargs):
         """Modify API Request for Login
 
@@ -176,9 +197,9 @@ class Api(Plugin):
 
         self._debug.log("Network Request",
                         f"{res.status_code} -- {method.upper()} -- {url}" +
-                        f"\n\tHeaders: {headers}" +
-                        f"\n\tQuery: {query}" +
-                        f"\n\tData: {data}" +
+                        f"\n\tHeaders: {self._redact(headers)}" +
+                        f"\n\tQuery: {self._redact(query)}" +
+                        f"\n\tData: {self._redact(data)}" +
                         f"\n\tContent: {res.content}")
 
         if res.status_code in [400, 401]:

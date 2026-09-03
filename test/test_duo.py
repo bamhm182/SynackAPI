@@ -510,6 +510,19 @@ class DuoTestCase(unittest.TestCase):
         self.assertEqual(self.duo._authkey, 'authkey456')
         self.assertEqual(self.duo._req_trace_group, 'rtracegroup789')
 
+    def test_get_session_variables_new_flow_reordered_query(self):
+        """Should parse akey/authkey regardless of query-param order"""
+        self.duo._auth_url = 'https://duo.test/auth'
+        res = MagicMock()
+        res.status_code = 200
+        res.url = ('https://api.duosecurity.com/prompt/akey123'
+                   '?req_trace_group=rtracegroup789&authkey=authkey456')
+        self.duo._api.request.return_value = res
+        self.duo._get_session_variables()
+        self.assertEqual(self.duo._akey, 'akey123')
+        self.assertEqual(self.duo._authkey, 'authkey456')
+        self.assertEqual(self.duo._req_trace_group, 'rtracegroup789')
+
     def test_get_session_variables_no_base_url(self):
         """Should return early when no duo base_url found in redirect"""
         self.duo._auth_url = 'https://duo.test/auth'

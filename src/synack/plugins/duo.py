@@ -586,14 +586,20 @@ class Duo(Plugin):
                 return
             self._base_url = base_url_match.group(1)
             self._referrer = res.url
-            # New synack.com / duosecurity.com prompt-based flow
-            prompt_match = re.search(r'/prompt/([^/?]+)\?authkey=([^&]+)', res.url)
-            if prompt_match:
-                self._akey = prompt_match.group(1)
-                self._authkey = prompt_match.group(2)
-                trace_match = re.search(r'req_trace_group=([^&]+)', res.url)
-                if trace_match:
-                    self._req_trace_group = trace_match.group(1)
+            # New synack.com / duosecurity.com prompt-based flow. Parse the URL
+            # properly rather than assuming query-param order: Duo does not
+            # guarantee `authkey` comes first, so a regex anchored on
+            # `?authkey=` silently misses when it lands as e.g.
+            # `?req_trace_group=...&authkey=...`, leaving akey/authkey unset and
+            # dropping us into the wrong (old) flow.
+            parsed = urllib.parse.urlparse(res.url)
+            prompt_path = re.search(r'/prompt/([^/?]+)', parsed.path)
+            query = urllib.parse.parse_qs(parsed.query)
+            if prompt_path and query.get('authkey'):
+                self._akey = prompt_path.group(1)
+                self._authkey = query['authkey'][0]
+                if query.get('req_trace_group'):
+                    self._req_trace_group = query['req_trace_group'][0]
                 return
             # Old synack.us / duofederal.com frameless v4 flow
             sid_match = re.search('sid=([^&]*)', res.url)

@@ -215,8 +215,9 @@ class ApiTestCase(unittest.TestCase):
             'X-Synack': 'paco'
         }
         self.api.request('GET', 'test')
+        redacted = {'Authorization': '***REDACTED***', 'X-Synack': 'paco'}
         message = "200 -- GET -- https://platform.synack.com/api/test" + \
-                  f"\n\tHeaders: {headers}" + \
+                  f"\n\tHeaders: {redacted}" + \
                   "\n\tQuery: None" + \
                   "\n\tData: None" + \
                   "\n\tContent: Returned Content"
