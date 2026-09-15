@@ -1,0 +1,518 @@
+<!DOCTYPE HTML>
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Db - SynackAPI</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">SynackAPI</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://www.github.com/bamhm182/SynackAPI" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="db"><a class="header" href="#db">Db</a></h1>
+<p>This plugin deals with interacting with the database.</p>
+<p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
+Some properties are Read-Only, while others can be Set.
+Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
+<tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
+<tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
+<tr><td>duo_akey</td><td>No</td><td>Yes</td><td>Duo virtual-device application key used for push approval</td></tr>
+<tr><td>duo_host</td><td>No</td><td>Yes</td><td>Duo API hostname used for push approval</td></tr>
+<tr><td>duo_pkey</td><td>No</td><td>Yes</td><td>Duo virtual-device push key used for request signing</td></tr>
+<tr><td>duo_rsa_key</td><td>No</td><td>Yes</td><td>RSA private key used to sign Duo virtual-device push requests; generated on first access if unset</td></tr>
+<tr><td>email</td><td>No</td><td>Yes</td><td>The email used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>No</td><td>Yes</td><td>The http web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>https_proxy</td><td>No</td><td>Yes</td><td>The https web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>ips</td><td>Yes</td><td>No</td><td>All cached IPs</td></tr>
+<tr><td>notifications_token</td><td>No</td><td>No</td><td>Synack Notifications Token used to authenticate requests</td></tr>
+<tr><td>otp_count</td><td>No</td><td>Yes</td><td>HOTP counter used for Duo offline passcodes</td></tr>
+<tr><td>otp_secret</td><td>No</td><td>Yes</td><td>Synack/Duo OTP secret used for HOTP passcodes</td></tr>
+<tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
+<tr><td>ports</td><td>Yes</td><td>No</td><td>All cached Ports</td></tr>
+<tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
+<tr><td>scratchspace_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your working files (scopes, scans, etc.) are stored</td></tr>
+<tr><td>slack_app_token</td><td>No</td><td>Yes</td><td>Slack app-level token used for Notifications</td></tr>
+<tr><td>slack_channel</td><td>No</td><td>Yes</td><td>Slack channel used for Notifications</td></tr>
+<tr><td>slack_url</td><td>No</td><td>Yes</td><td>The Slack API URL used for Notifications</td></tr>
+<tr><td>smtp_email_from</td><td>No</td><td>Yes</td><td>Email Source for SMTP Notifications</td></tr>
+<tr><td>smtp_email_to</td><td>No</td><td>Yes</td><td>Email Destination for SMTP Notifications</td></tr>
+<tr><td>smtp_password</td><td>No</td><td>Yes</td><td>Password to use for SMTP Server Auth</td></tr>
+<tr><td>smtp_port</td><td>No</td><td>Yes</td><td>Port of SMTP Server (Ex: 465)</td></tr>
+<tr><td>smtp_server</td><td>No</td><td>Yes</td><td>URL of SMTP Server (Ex: smtp.gmail.com)</td></tr>
+<tr><td>smtp_starttls</td><td>No</td><td>Yes</td><td>Boolean to determine whether TLS is used for SMTP</td></tr>
+<tr><td>smtp_username</td><td>No</td><td>Yes</td><td>Username to use for SMTP Server Auth</td></tr>
+<tr><td>synack_domain</td><td>No</td><td>Yes</td><td>Synack domain to use for login/platform URLs (for example, <code>synack.com</code> or <code>synack.us</code>)</td></tr>
+<tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
+<tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
+<tr><td>urls</td><td>Yes</td><td>No</td><td>All cached URLs</td></tr>
+<tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
+<tr><td>use_scratchspace</td><td>No</td><td>Yes</td><td>Enables/disables writing scope and attachment files to scratchspace</td></tr>
+<tr><td>user_id</td><td>No</td><td>Yes</td><td>Your Synack User ID used for requests</td></tr>
+</tbody></table>
+</div>
+<h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
+<blockquote>
+<p>Add Target Categories from the Synack API to the Database
+This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>categories</code></td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_ipsresults-sessionnone"><a class="header" href="#dbadd_ipsresults-sessionnone">db.add_ips(results, session=None)</a></h2>
+<blockquote>
+<p>Add IP Addresses to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing <code>ip</code> addresses and <code>target</code> slugs</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is often used with <code>db.add_ports()</code> and can have a session passed into it</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
+<blockquote>
+<p>Add Organizations from the Synack API to the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is most often used with <code>db.add_targets()</code> and I was having issues getting it to work when it would create a new session</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_portsresults"><a class="header" href="#dbadd_portsresults">db.add_ports(results)</a></h2>
+<blockquote>
+<p>Add port results to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, etc.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         "ip": "1.1.1.1",
+...         "target": "7gh33tjf72",
+...         "source": "nmap",
+...         "ports": [
+...             {
+...                 "port": "443",
+...                 "protocol": "tcp",
+...                 "service": "Super Apache NGINX Deluxe",
+...                 "open": True,
+...                 "updated": 1654969137
+...             },
+...             {
+...                 "port": "53",
+...                 "protocol": "udp",
+...                 "service": "DNS"
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_ports(results)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
+<blockquote>
+<p>Adds Target from the Synack API to the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_urlsresults"><a class="header" href="#dbadd_urlsresults">db.add_urls(results)</a></h2>
+<blockquote>
+<p>Add urls results to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, etc.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         "ip": "1.1.1.1",
+...         "target": "7gh33tjf72",
+...         "urls": [
+...             {
+...                 "url": "https://www.google.com",
+...                 "screenshot_url": "https://imgur.com/2uregtu",
+...             },
+...             {
+...                 "url": "https://www.ebay.com",
+...                 "screenshot_url": "file:///tmp/948grt.png",
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_urls(results)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ips to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ips(codename="SLEEPYPUPPY")
+[{'ip': '1.1.1.1, 'target': '12398h21'}, ... ]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_portsport-protocol-source-ip-kwargs"><a class="header" href="#dbfind_portsport-protocol-source-ip-kwargs">db.find_ports(port, protocol, source, ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ports to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>port</code></td><td>int</td><td>Port number to search for (443, 80, 25, etc.)</td></tr>
+<tr><td><code>protocol</code></td><td>str</td><td>Protocol to search for (tcp, udp, etc.)</td></tr>
+<tr><td><code>source</code></td><td>str</td><td>Source to search for (masscan, nmap, etc.)</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename="SLEEPYPUPPY")
+[
+  {
+    'ip': '1.2.3.4', 'source': 'masscan', 'target': '123hg912',
+      'ports': [
+        { 'open': True, 'port': '443', 'protocol': 'tcp', 'service': 'https - Wordpress', 'updated': 1654840021 },
+        ...
+      ]
+  },
+  ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the targets to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename="SLEEPYPUPPY")
+[&lt;class 'synack.db.models.Target'&gt;, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_urlsurlnone-ipnone-kwargs"><a class="header" href="#dbfind_urlsurlnone-ipnone-kwargs">db.find_urls(url=None, ip=None, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the cached URLs to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>url</code></td><td>str</td><td>Url hosting a service on the IP</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_urls(codename="SLEEPYPUPPY")
+[
+  {
+    'ip': '1.2.3.4',
+    'target': '123hg912',
+    'urls': [
+      {
+        'url': 'https://www.google.com',
+        'screenshot_url': 'file:///tmp/2948geybu24.png'
+      },
+      ...
+    ]
+  },
+  ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
+<blockquote>
+<p>Returns a configuration from the Database.</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
+'reuif...oetuhhj'
+&gt;&gt;&gt; h.db.get_config('user_id')
+'heutih9'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbremove_targetskwargs"><a class="header" href="#dbremove_targetskwargs">db.remove_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Remove targets from the Database based on criteria.
+<strong>If no criteria is provided, all entries are deleted</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
+<blockquote>
+<p>Permanently sets a configuration in the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>Name of the config to set</td></tr>
+<tr><td><code>value</code></td><td>?</td><td>Value to set the config to</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
+&gt;&gt;&gt; h.db.set_config('password', 'password1234')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_migration"><a class="header" href="#dbset_migration">db.set_migration()</a></h2>
+<blockquote>
+<p>Migrates the local database to include the newest changes.
+This may need to be run manually when SynackAPI is updated until I can figure out a better way to have it run automatically.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_migration()
+</code></pre>
+</blockquote>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../usage/plugins/auth.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../usage/plugins/debug.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../usage/plugins/auth.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../usage/plugins/debug.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

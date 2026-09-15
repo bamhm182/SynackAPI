@@ -1,0 +1,2233 @@
+<!DOCTYPE HTML>
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>SynackAPI</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">SynackAPI</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://www.github.com/bamhm182/SynackAPI" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Welcome to the documentation for the SynackAPI Python package!</p>
+<p>This package has been created to give you a place to start interacting with the Synack API.</p>
+<h2 id="disclaimer"><a class="header" href="#disclaimer">Disclaimer</a></h2>
+<p><strong>I am not responsible if you do something that gets you banned!</strong></p>
+<p>It is possible for you to abuse the Synack API.
+Synack will know you have done this and you will be banned or otherwise repremanded.</p>
+<p>The current (10FEB2022) recommendation is that you should abide by the following rules:</p>
+<ul>
+<li>DO NOT poll for missions more than 1x every 30 seconds</li>
+<li>DO NOT generate more than 200 requests in any 5 minute period</li>
+<li>DO NOT be the source of egregious and/or irresponsible traffic</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="support"><a class="header" href="#support">Support</a></h1>
+<p>I have spent countless hours pouring over this project in order to best help you have an easy, reliable way to interact with the Synack API.</p>
+<p>If this has helped you, please consider helping me out in one of the following ways.</p>
+<h2 id="patreon"><a class="header" href="#patreon">Patreon</a></h2>
+<p>You can find my Patreon at the following link:</p>
+<p><a href="https://www.patreon.com/bytepen">BytePen Studios Patreon</a></p>
+<h2 id="contribution"><a class="header" href="#contribution">Contribution</a></h2>
+<p>If you'd like to see extra features be added to this package, please consider contributing code.</p>
+<p>With that said, please take the following items into consideration:</p>
+<ul>
+<li>We will be using Test Driven Development with Unit Testing in order to ensure the stability of the SynackAPI package.
+<ul>
+<li>Run <code>coverage run --source=src --omit='src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py' -m unittest discover test</code>, then run <code>coverage report --fail-under=100</code> before submitting a PR. Ensure that all tests are passing and coverage remains at 100%.</li>
+</ul>
+</li>
+<li>We will be conforming to pep8, which is the Python Style Guide.
+<ul>
+<li>Run <code>flake8 src test</code> from within the primary directory before submitting a PR. Ensure there are no complaints returned.</li>
+</ul>
+</li>
+<li>Public plugin methods should be documented.
+<ul>
+<li>Run <code>python tools/check_docs.py</code> to ensure plugin docs match the code.</li>
+</ul>
+</li>
+<li>We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.</li>
+</ul>
+<p>If you have any questions on how you can contribute, please reach out via the SRT Slack.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tests"><a class="header" href="#tests">Tests</a></h1>
+<p>Honestly, this section is not for most people.
+It explains how to run the tests to ensure that the code is working or to help in writing new functionality for SynackAPI.</p>
+<h2 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h2>
+<p>These tests are run repeatedly while developing the package, on pushes, and before releases.
+If things fail, a new version is not released.</p>
+<p>To run the unit tests directly:</p>
+<pre><code>coverage run --source=src --omit='src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py' -m unittest discover test
+coverage report --fail-under=100
+</code></pre>
+<h2 id="documentation-checks"><a class="header" href="#documentation-checks">Documentation Checks</a></h2>
+<p>Public plugin methods are checked against the plugin documentation. To run that check directly:</p>
+<pre><code>python tools/check_docs.py
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
+<p>The easiest way to get started with the SynackAPI is to install it via <code>pip</code>.
+For example:</p>
+<pre><code class="language-bash">pip3 install --upgrade SynackAPI
+</code></pre>
+<p>After doing this, you can use one of the <a href="usage/./examples/index.html">Examples</a> to understand the basic usage of the package.</p>
+<p>I am not going to provide you with a ton of awesome scripts that will leverage the SynackAPI package.
+That is on you.</p>
+<p>With that in mind, I would highly recommend you become familiar with the <a href="usage/./plugins/index.html">Plugins</a> provided and apply your own ingenuity to come up with your own scripts.</p>
+<h2 id="authentication"><a class="header" href="#authentication">Authentication</a></h2>
+<p>The first time you try to do anything which requires authentication, you will be automatically prompted for your credentials.
+This prompt will expect the <code>Synack Email</code> and <code>Synack Password</code>, which are fairly self explanitory, but it also asks for the <code>Synack OTP Secret</code>.</p>
+<p>The <code>Synack OTP Secret</code> is NOT the 8 digit code you pull out of Duo Mobile.
+Instead, it is a string that you must extract from a jailbroken device.
+It is recommended that you use the Duo Mobile Push Auto-Approval workflow.</p>
+<p>Use the above instructions at your own discression.
+I TAKE NO RESPONSIBILITY IF SOMETHING BAD HAPPENS AS A RESULT.</p>
+<p>Once you complete these steps, your credentials are stored in a SQLiteDB at <code>~/.config/synack/synackapi.db</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>These subpages here will provide a couple of very simple examples of how you can use the SynackAPI.
+These are going to help you get started, but are definitely not intended to be the best of the best.
+I highly encourage you to think about ways you could use the SynackAPI to apply your own logic and make something much better for yourself.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="check-invisible-missions"><a class="header" href="#check-invisible-missions">Check Invisible Missions</a></h1>
+<p>This was originally part of the main package, but it's pretty noisy, so I removed it so people wouldn't accidentally run it.</p>
+<p>Sometimes a condition will arise in which the sidebar states there are missions, but there are not.
+These missions are associated with a specific target.
+If this happens, we can use this script to easily determine which target has the mission so you can submit a ticket.</p>
+<p>This is going to pull a list of all targets you're registered to and cache it in the Database with <code>h.targets.get_registered_summary()</code>.
+It then iterates through them and asks for a mission count with a HEAD request for every single target individually (<code>h.missions.get_count()</code>.
+If a target reports it has missions, it then tries to pull a full list of its missions with <code>h.missions.get()</code>.
+If there are no missions, it adds the codename to a list, which is printed out at the end.</p>
+<p><strong>This will make several hundred requests (1 HEAD, 1 GET for EVERY Target).</strong>
+<strong>DO NOT use it unless you understand the implications and are trying to track down an invisible mission so Synack can fix it.</strong></p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+import time
+
+h = synack.Handler()
+
+h.targets.get_registered_summary()
+
+for t in h.db.targets:
+    time.sleep(1)
+    count = h.missions.get_count("PUBLISHED", t.slug)
+    if count &gt; 0:
+        missions = h.missions.get("PUBLISHED", 1, 1, count, t.slug)
+        if len(missions) == 0:
+            print(t.codename)
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="mission-bot"><a class="header" href="#mission-bot">Mission Bot</a></h1>
+<p>This is a simple example of how you could determine if there are missions every 30 seconds, try to claim some if there are.</p>
+<p>We start by using <code>import synack</code> to bring in the SynackAPI package.
+We then use <code>h = synack.Handler()</code> to create the primary object we will be using; the Handler.
+All plugins are a part of the handler, which allows us to use <code>h.missions.get_count()</code> to make a lightweight HEAD request to determine the number of missions. If there are <strong>currently</strong> more missions than we <strong>know</strong> about from our last check, we can assume that some missions were released. We can then use <code>h.missions.get_available()</code> to get a list of available missions, and request them one at a time with <code>h.missions.set_claimed(m)</code>. When the number of current missions goes back down to 0, we can assume there are no missions left, and we can reset our known missions to <code>0</code>.</p>
+<pre><code class="language-python">#!/usr/bin/env python3
+
+import time
+import synack
+
+h = synack.Handler(login=True)
+print("I just logged in and if it was the first time I logged in, I successfully filled out my credentials!")
+
+known_missions = 0
+print("Since I just started looking, I don't know about any missions!")
+
+while True:
+    print("I had better sleep for a while so that I don't blow up the API, get everyone mad at me, and get myself banned!")
+    time.sleep(30)
+    curr_missions = h.missions.get_count()
+    print(f"There are {curr_missions} missions")
+    if curr_missions and curr_missions &gt; known_missions:
+        print("There are new missions I didn't know about!")
+        known_missions = curr_missions
+        missions = h.missions.get_available()
+        print(f"I grabbed a list of {len(missions)} missions!")
+        for m in missions:
+            print("I had better sleep for a while so that I don't blow up the API, get everyone mad at me, and get myself banned!")
+            time.sleep(1)
+            outcome = h.missions.set_claimed(m)
+            print(f"I tried to claim a mission. You can see the outcome here: {outcome}")
+    elif curr_missions == 0:
+        print("There are currently no missions, I'd better remember that!")
+        known_missions = 0
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="mission-templates"><a class="header" href="#mission-templates">Mission Templates</a></h1>
+<p>I am going to start off this page with a technical explanation of how you can implement templates, then explain some template basics to help you think through how you may wish to build your template library.</p>
+<h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
+<p>This section will show you how to implement a very simple bot to take in templates stored on your disk and upload them to your claimed missions.</p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+
+def replace_placeholders(template, mission):
+    """Replace placeholders in a misson template
+
+    Down below, I mention how you could drop credentials
+    into a template on the fly. This is a super simple
+    example of how that sort of thing could be done.
+    It would replace any instance of __CODENAME__ with
+    the actual codename of the target
+    """
+    for k in template.keys():
+        template[k] = template[k].replace('__CODENAME__',
+                                          mission['listingCodename'])
+
+h = synack.Handler()
+
+msns = h.missions.get_claimed()
+
+for m in msns:
+    template = h.missions.get_file(m)
+    if template:
+        template = replace_placeholders(template)
+        h.missions.set_evidences(m, template)
+
+</code></pre>
+<h3 id="file-structure"><a class="header" href="#file-structure">File Structure</a></h3>
+<p>It is important to understand the file structure of your mission templates.</p>
+<p>The default location for templates is <code>~/Templates</code>, but this could be overridden by setting <code>template_dir</code> in the <a href="usage/examples/../main-components/state.html">State</a>.</p>
+<p>Each mission from the Synack API has a couple of attributes I use to build the file structure.
+There is the <code>taskType</code> (<code>MISSION</code>, <code>SV2M</code>, etc), the <code>asset</code>/<code>assetTypes</code> ('host', 'web', 'ios', 'android', etc.), and the <code>title</code> (Name of the mission).
+Each of these attributes are run thorough <code>templates.build_safe_name()</code>, which makes everything lowercase and removes special characters to make sure there are no issuer with the name of the file.</p>
+<p>As an example, the following mission will turn into the following filepath:</p>
+<pre><code>&gt;&gt;&gt; mission = {
+...     "taskType": "MISSION",
+...     "assetTypes": ["web"],
+...     "title": "SOMe Cr@Z33 Misson Name: The Sequel"
+... }
+&gt;&gt;&gt; targets.build_filepath(mission)
+'/home/jojo/Templates/mission/web/some_cr_z33_mission_name_the_sequel.txt'
+</code></pre>
+<h2 id="template-basics"><a class="header" href="#template-basics">Template Basics</a></h2>
+<p>As someone who is part of the Synack Auto Approve group, I attribute a lot of my success with missions to my templates.
+Hopefully this section will help you understand some of my main considerations when doing templates/missions.</p>
+<p>This section ended up being quite a bit longer that I originally anticipated, but hopefully you find it useful.</p>
+<h3 id="spend-the-time-to-make-a-good-templatereport"><a class="header" href="#spend-the-time-to-make-a-good-templatereport">Spend the time to make a good template/report</a></h3>
+<p>When you are making a template for the first time, make it very good.
+The more time you put in the first time, the less time you need to put into the report each additional time while still having a very solid report.</p>
+<p>It is not uncommon for me to spend an hour or more the first time I do a mission regardless of whether it is a $15 or a $100 mission.
+It seems like a lot of time, but if it is done properly, it really helps you speed through any time you are able to get that mission in the future.</p>
+<p>Also consider that your goal is to make the report good enough that VulnOps will not reject it AND that the customer is HAPPY with the outcome.
+It may be tempting to think about missions as a "quick $X", this is the absolute wrong way to think about them.
+Instead, you should consider it as you selling the idea that the client should purchase more missions from Synack and encourage their peers to do the same.
+While a crappy mission may BARELY squeeze by VulnOps, if it doesn't make the client happy, this means less missions for you in the future.</p>
+<p>With that in mind, I strongly encourage you to set the goal on making sure the client will be happy, which will result in more missions for you in the future.</p>
+<h3 id="spend-a-lot-of-time-on-the-introduction-and-tools-section"><a class="header" href="#spend-a-lot-of-time-on-the-introduction-and-tools-section">Spend a lot of time on the Introduction and Tools section</a></h3>
+<p>I personally find the Introduction and first part of the Testing Methodology sections to be the most important sections of the entire report when doing a mission for the first time.
+This may sound insane because the Details of how the mission was done and Summary seem like they would be the most important, so let me explain.</p>
+<p>The Introduction section and beginning of the Testing Methodology section can be used to CLEARLY and CONSICELY explain why you are working right this second, what your goals are, and how you are going to make a determination on whether the client asset is vulnerable or not.</p>
+<p>This is not only for the client, but I also find it incredibly useful for myself.
+When knocking out a large number of missions, it is easy to forget the details of what exactly you are doing on a specific mission.
+Having that information readily available lets me jump into the mission much quicker than if I had to think about it.</p>
+<p>As an example of what this may look like, consider the following mission template snippets:</p>
+<blockquote>
+<p>Introduction</p>
+<blockquote>
+<p>This mission requests that we determine whether or not the target accepts default credentials as defined in the <a href="https://github.com/synack/wstg/blob/master/document/4-Web_Application_Security_Testing/04-Authentication_Testing/02-Testing_for_Default_Credentials.md">OWASP WSTG</a>.</p>
+<p>Some applications come with default credentials configured out of the box. These default credentials can be very easy to guess if the software is well known and/or they are trivial. To make matters worse, these default credentials often provide access to highly-privileged users, such as Administrators. As such, it is highly recommended that they be changed as soon as possible to prohibit attackers from easily being able to control your application.</p>
+</blockquote>
+<p>Testing Methodology</p>
+<blockquote>
+<p># Plan</p>
+<ol>
+<li>Determine software used within this target</li>
+<li>Attempt Default Credentials, if found</li>
+<li>Attempt common credentials</li>
+</ol>
+<p># Tools / Resources</p>
+<ul>
+<li>Burp Suite Pro: Network proxy that allow for the interception, modification, and automated testing of network requests and endpoints</li>
+<li><a href="https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt">Common Usernames</a>: A list of very common usernames</li>
+<li><a href="https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Common-Credentials/top-passwords-shortlist.txt">Common Passwords</a>: A list of very common passwords</li>
+</ul>
+<p>## Accounts</p>
+<p>No provided credentials were used in this mission.</p>
+<p># Details.</p>
+<p>...</p>
+</blockquote>
+</blockquote>
+<p>With this information already compiled for you, you have something that looks professional and is ready to be submitted.
+It also instantly reminds you that you will be using Burp to try and determine the software used so you can try specific credentials, then falling back to a pre-decided list of usernames and passwords you can throw into Burp Intruder so you don't have to spend time looking for a good list.</p>
+<h3 id="provide-a-spot-for-credentials"><a class="header" href="#provide-a-spot-for-credentials">Provide a spot for credentials</a></h3>
+<p>While in this specific template, Account credentials are not provided, if this were not the case, that section would look similar to the following.</p>
+<blockquote>
+<p>Testing Methodology</p>
+<blockquote>
+<p>## Accounts</p>
+<p>Username: <code>Bob</code>
+Password: <code>password1234</code>
+Auth URL: [https://login.company.com](https://login.company.com)</p>
+</blockquote>
+</blockquote>
+<p>Because this is not going to be the same between missions, the details should not be filled in.
+One way to do this would be to have the structure of this section in the template so it can be very easily filled in.
+If you were feeling exceptionally fancy, it also wouldn't be insane to use the <code>targets.get_credentials()</code> function to pull credentials, format them, then use something like the python <code>re</code> package to inject the credentials into your templates before they are uploaded.</p>
+<h3 id="be-clear-and-detailed-but-generic"><a class="header" href="#be-clear-and-detailed-but-generic">Be clear and detailed, but generic</a></h3>
+<p>Any time that I get a mission I do not have a template for, I will sit down and write the best report that I possibly can, while trying to keep it relatively generic.</p>
+<p>As an example, I will write them similar to the following:</p>
+<blockquote>
+<p>Yes</p>
+<blockquote>
+<p>## Phase 1</p>
+<p>I began my research by visiting the client website seen in <strong>1.1.png</strong>. I then installed magic as can be seen in <strong>1.2.png</strong>. As can be seen in <strong>1.3.png</strong>, the installation was successful and I was given access to the mainframe.</p>
+</blockquote>
+<p>No</p>
+<blockquote>
+<p>## Phase 1</p>
+<p>I began my research on SLEEPYPUPPY by visiting <code>http://www.supersleepy.dog/secret/cat-pics</code> as seen in <strong>cat-pics.png</strong>. I then installed magic as can be seen in <strong>magiccat.png</strong>. As can be ssen in <strong>puppymainframe.png</strong>, the installation was successful and I was given access to the SLEEPYPUPPY mainframe.</p>
+</blockquote>
+</blockquote>
+<p>Both of these segments would be a good start to a mission and provide the client with the information they need in a clear and concise way, but when I need to do this same mission on CATNIPPEDKITTY, the second example means that I need to change a ton of information within the report before I can submit it. Having to</p>
+<h3 id="consider-where-you-will-need-to-deviate-from-generic-templates"><a class="header" href="#consider-where-you-will-need-to-deviate-from-generic-templates">Consider where you will need to deviate from generic templates</a></h3>
+<p>Sometimes, it isn't possible to make a report both good AND generic.
+When these situations arise, consider how you will handle it while fixing up your templates.</p>
+<p>As an example, consider a situation where you are testing SQL Injection and need to explain your work in text.
+Making a template like this would allow you to easily identify that you need to explain your work.</p>
+<blockquote>
+<p>#/# Phase 2</p>
+<p>... I was able to achieve a SQL Injection as seen in <strong>2.3.png</strong> by changing __VARIABLE__ to __SQLI__.</p>
+<p>__EXPLAIN_MORE_ABOUT_THE_SQLI__</p>
+</blockquote>
+<p>When reviewing your mission, these will stick out, and you can identify that you need to change them.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="register-targets"><a class="header" href="#register-targets">Register Targets</a></h1>
+<p>One of the main goals for this project was to be able to create super simple oneliners that I could throw into various places like my i3blocks status bar.</p>
+<p>To show you how this can be done, let's take a look at the following example, which will register all unregistered targets for you.</p>
+<p>If you're unfamiliar with <code>python3 -c</code>, this is how you can execute a small amount of Python from your (bash, zsh, etc.) shell.
+We take that to <code>import synack</code> just as we would in a full script.
+We then have a longer command that creates the handler, then calls the <code>targets.set_registered()</code> function to get and register all unregistered targets.</p>
+<pre><code class="language-bash">python3 -c "import synack; synack.Handler().targets.set_registered()"
+</code></pre>
+<p>This could be thrown into a cronjob (<code>crontab -e</code>) as seen below to register any new targets once an hour:</p>
+<pre><code class="language-sh">0 * * * * python3 -c "import synack; synack.Handler(login=True).targets.set_registered()"
+</code></pre>
+<p>Do note that the <code>login</code> State variable is set to True here.
+This means that every time this function is called, it will confirm you are logged in and if not, it will log you in.
+This is not default behavior because it makes between 1 and 5 requests each time Handler is initiated.
+That said, you likely want to make sure you are having the SynackAPI log in often on one or two scripts.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="main-components"><a class="header" href="#main-components">Main Components</a></h1>
+<p>There are a couple components that are going to be used every single time you use the SynackAPI.
+Information about them can be found here.</p>
+<ul>
+<li>Handler: This component contains all the plugins and tracks the State</li>
+<li>State: This component contains all of the emphemeral settings and information within a single Handler</li>
+<li>Files: There are a couple files you should be aware of</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="files"><a class="header" href="#files">Files</a></h1>
+<h2 id="synackapidb"><a class="header" href="#synackapidb">synackapi.db</a></h2>
+<p>This is a SQLite Database which exists at <code>~/.config/synack/synackapi.db</code> and stores your permanent settings and caches some data from the Synack API.</p>
+<p>Information such as your email, password, and OTP Secret exist here.
+<strong>Keep it protected!</strong></p>
+<p>Some information is automatically cached so that the number of redundant requests you need.
+For example, if you pull a lot of Target information, there is a good chance that some of the basic information (slug, codename, etc.) will not change.
+Once it's pulled the first time, the SQLite Database will hold some of the information so that you can do things like converting Slugs to Codenames and vice versa without sending a request to Synack's API.</p>
+<p>Another example would be the Synack Access Token, which is what authenticates you and is used to make requests.
+There is no reason to generate a new Access Token every time your Handler is initiated, so when you log in, it is stored in the database.
+When you make a new Handler, it will try to use this token.
+If it's valid, it will jump into the requested function, otherwise, it will complete the login workflow, then move onto the requested function.</p>
+<h2 id="loginjs"><a class="header" href="#loginjs">login.js</a></h2>
+<p>This is a JavaScript file which exists at ~/.config/synack/login.js and aids in keeping you logged in.
+It is intended to be used with the following TamperMonkey script in order to do the following:</p>
+<ol>
+<li>See you are on <code>https://login.synack.com</code></li>
+<li>Wait 60 seconds</li>
+<li>Redirect you to <code>https://platform.synack.com</code></li>
+<li>Inject your current Access Token into Chrome</li>
+</ol>
+<pre><code class="language-javascript">// ==UserScript==
+// @name         Synack
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Go to the platform automatically
+// @author       You
+// @run-at       document-start
+// @match        https://*.synack.com/*
+// @require      file:///home/&lt;homedir&gt;/.config/synack/login.js
+// @grant        none
+// ==/UserScript==
+
+
+alert('Change the require line to point to the right place and delete this line. Also modify tampermonkey to be able to read local files. This is probably really dumb, so I will not tell you how to do this in an effort to make certain you have thought it through.');
+</code></pre>
+<p>Note: You must change the @require line to the location of the <code>login.js</code> file.
+Additionally, you will want to delete the <code>alert()</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="handler"><a class="header" href="#handler">Handler</a></h1>
+<p>The Handler is responsible for, you guessed it, handling the flow of data and functions within the SynackAPI package.</p>
+<p>Being totally honest, this isn't strictly required, but it definitely makes things easier.</p>
+<p>It is instantiated after <code>import synack</code> as seen in the following example:</p>
+<pre><code class="language-python3">#!/usr/bin/env python3
+
+import synack
+
+h = synack.Handler()
+</code></pre>
+<p>From there, you can use any of the Plugins as follows:</p>
+<pre><code>h.missions.get_count()
+h.targets.set_registered()
+</code></pre>
+<h2 id="setting-one-off-states"><a class="header" href="#setting-one-off-states">Setting One-Off States</a></h2>
+<p>It's important to note that you can easily change some of the State variables by passing them into the Handler.</p>
+<p>For example, if you want to see all requests being made in the current script, you can enable debugging as following:</p>
+<pre><code class="language-python3">h = synack.Handler(debug=True)
+h.targets.do_register_all()
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="state"><a class="header" href="#state">State</a></h1>
+<p>The State object tracks several variables for a single instance of the Handler.</p>
+<p>As seen in the following example, you can create a State variable externally and control it there.
+In the event that you do not pass in a State, one is created automatically.
+You can also continue to manipulate the State in the ways shown below.</p>
+<pre><code>#!/usr/bin/env python3
+
+import synack
+
+state = synack.State()
+state.debug = True
+handler = synack.Handler(state)
+handler.debug.log("Test", "This message WILL be seen")
+handler.state.debug = False
+handler.debug.log("Test", "This message will NOT be seen")
+state = True
+handler.debug.log("Test", "This message WILL be seen")
+
+# ----- OR -----
+
+handler = synack.Handler(debug=True)
+handler.debug.log("Test", "This message WILL be seen")
+handler.state.debug = False
+handler.debug.log("Test", "This message will NOT be seen")
+handler.state.debug = True
+handler.debug.log("Test", "This message WILL be seen")
+</code></pre>
+<p>Out of all of the State variables, <code>login</code> is the most important to understand.
+If this is set to true, whenever your Handler is created, it will make sure you are logged in.
+If you have a bunch of scripts based on SynackAPI, it is probably a good idea to have <code>login</code> set to False, which is the default, for the majority of scripts.
+Then you can have a couple scripts which are run periodically with <code>login</code> set to True so it becomes responsible for making sure that everything is logged in.</p>
+<p>As an example of a good function to set <code>login</code> to True, check out the <a href="usage/main-components/../examples/register-targets.html">Register Targets</a> Example.</p>
+<h2 id="database-vs-state"><a class="header" href="#database-vs-state">Database vs State</a></h2>
+<p>The observant will notice that there is a lot of overlap between the values stored in the Database and the State.
+This may cause you some confusion as to where data is coming from and how it's being stored and accessed.</p>
+<p>The Database contains <strong>persistent</strong> or <strong>shared</strong> information.
+For example, the api_token, which should be shared by all Handlers or cached Target information that could be quickly referenced.</p>
+<p>The State only persists within <strong>one</strong> instance of the Handler.
+In the event that one of the State variables is set and is <strong>not</strong> constantly at risk of being changed (such as the api_token), the value stored in the State will be provided <strong>instead of</strong> the Database value. This is useful when you want to <strong>override</strong> Database variables in a single Handler. For example, you may wish to enable the <code>debug</code> variable for a single Handler without affecting other Handlers you may have running.</p>
+<h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>str</td><td>This is the Synack Access Token used to authenticate requests</td></tr>
+<tr><td>config_dir</td><td>pathlib.Path</td><td>The location of the Database and Login script</td></tr>
+<tr><td>debug</td><td>bool</td><td>Used to show/hide debugging messages</td></tr>
+<tr><td>duo_akey</td><td>str</td><td>Duo virtual-device application key used for push approval</td></tr>
+<tr><td>duo_host</td><td>str</td><td>Duo API hostname used for push approval</td></tr>
+<tr><td>duo_pkey</td><td>str</td><td>Duo virtual-device push key used for request signing</td></tr>
+<tr><td>duo_rsa_key</td><td>str</td><td>RSA private key used to sign Duo virtual-device push requests</td></tr>
+<tr><td>email</td><td>str</td><td>Your email address used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>str</td><td>A Web Proxy (Burp, etc.) to intercept requests</td></tr>
+<tr><td>https_proxy</td><td>str</td><td>A Web Proxy (Burp, etc.) to intercept requests</td></tr>
+<tr><td>login</td><td>bool</td><td>Used to enable/disable a check of the api_token upon creation of the Handler</td></tr>
+<tr><td>notifications_token</td><td>str</td><td>Token used for authentication when dealing with Synack Notifications</td></tr>
+<tr><td>otp_count</td><td>int</td><td>HOTP counter used for Duo offline passcodes</td></tr>
+<tr><td>otp_secret</td><td>str</td><td>OTP Secret held by Duo Mobile. NOT an OTP. For more information, read the Usage page</td></tr>
+<tr><td>password</td><td>str</td><td>Your Synack Password</td></tr>
+<tr><td>proxies</td><td>dict</td><td>Requests proxy mapping built from <code>http_proxy</code> and <code>https_proxy</code> when <code>use_proxies</code> is enabled</td></tr>
+<tr><td>scratchspace_dir</td><td>pathlib.Path</td><td>The location of scratchspace files</td></tr>
+<tr><td>session</td><td>requests.Session</td><td>Tracks cookies and headers across various functions</td></tr>
+<tr><td>slack_app_token</td><td>str</td><td>Slack app-level token used for Notifications</td></tr>
+<tr><td>slack_channel</td><td>str</td><td>Slack channel used for Notifications</td></tr>
+<tr><td>slack_url</td><td>str</td><td>Slack webhook URL used for Notifications</td></tr>
+<tr><td>smtp_email_from</td><td>str</td><td>Source address for SMTP notifications</td></tr>
+<tr><td>smtp_email_to</td><td>str</td><td>Destination address for SMTP notifications</td></tr>
+<tr><td>smtp_password</td><td>str</td><td>Password for SMTP notifications</td></tr>
+<tr><td>smtp_port</td><td>int</td><td>Port for SMTP notifications</td></tr>
+<tr><td>smtp_server</td><td>str</td><td>Server for SMTP notifications</td></tr>
+<tr><td>smtp_starttls</td><td>bool</td><td>Whether SMTP notifications should use STARTTLS</td></tr>
+<tr><td>smtp_username</td><td>str</td><td>Username for SMTP notifications</td></tr>
+<tr><td>synack_domain</td><td>str</td><td>Synack domain to use for login/platform URLs</td></tr>
+<tr><td>template_dir</td><td>pathlib.Path</td><td>The location of your Mission Templates</td></tr>
+<tr><td>use_proxies</td><td>bool</td><td>Enables/Disables Web Proxy Usage</td></tr>
+<tr><td>use_scratchspace</td><td>bool</td><td>Enables/disables writing scope and attachment files to scratchspace</td></tr>
+<tr><td>user_id</td><td>str</td><td>Your Synack user id used in many requests</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="plugins"><a class="header" href="#plugins">Plugins</a></h1>
+<p>Within the SynackAPI, various "Plugins" exist to allow us to easily separate functions based on their purpose.</p>
+<h2 id="function-naming-convension"><a class="header" href="#function-naming-convension">Function Naming Convension</a></h2>
+<p>Similar to PowerShell, functions within this package will begin with a verb.
+This is a list of approved verbs and their meaning.</p>
+<div class="table-wrapper"><table><thead><tr><th>Verb</th><th>Description</th></tr></thead><tbody>
+<tr><td>add</td><td>Insert/Update item(s) in the Database</td></tr>
+<tr><td>build</td><td>Change data/items in some way</td></tr>
+<tr><td>find</td><td>Query the Database</td></tr>
+<tr><td>get</td><td>Retrieve Data from the Synack API or Local Files</td></tr>
+<tr><td>remove</td><td>Delete item(s) from the Database</td></tr>
+<tr><td>set</td><td>Push changes to the Synack API or Local Files</td></tr>
+</tbody></table>
+</div>
+<p>Additionally, function names should not be redundant.
+In other words, consider the function name <code>missions.get_missions()</code>.
+<code>missions</code> is specified twice, when <code>missions.get()</code> is just as clear.
+<code>missions.get()</code> is the optimal choice.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="alerts"><a class="header" href="#alerts">Alerts</a></h1>
+<p>The Alerts Plugin is used to send alerts to various external services.</p>
+<p>The functions within this plugin don't follow the standard naming convention.</p>
+<h2 id="alertsemailsubject-message"><a class="header" href="#alertsemailsubject-message">alerts.email(subject, message)</a></h2>
+<blockquote>
+<blockquote>
+<p>This function attempts to use SMTP to send an email.
+This function expects <code>h.db.smtp_x</code> attributes to have been set.</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>subject</code></td><td>str</td><td>Email Subject</td></tr>
+<tr><td><code>message</code></td><td>str</td><td>Email Message</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.smtp_server = 'smtp.email.com'
+&gt;&gt;&gt; h.db.smtp_port = 465
+&gt;&gt;&gt; h.db.smtp_starttls = True
+&gt;&gt;&gt; h.db.smtp_username = 'me@email.com'
+&gt;&gt;&gt; h.db.smtp_password = 'password123'
+&gt;&gt;&gt; h.db.smtp_email_to = 'you@email.com'
+&gt;&gt;&gt; h.db.smtp_email_from = 'me@email.com'
+&gt;&gt;&gt; h.alerts.email('Look out!', 'Some other important thing happened!')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="alertssanitizemessage"><a class="header" href="#alertssanitizemessage">alerts.sanitize(message):</a></h2>
+<blockquote>
+<p>This function aims to remove URLs, IPv4, and IPv6 content from a given message.
+Sometimes Synack puts sensitive URLs and IP addresses in content like Mission Titles,
+so if you are sending these through 3rd party networks (Slack, Discord, Email, SMS, etc.),
+please make sure that you do you due dilligence to ensure you aren't sending client information.</p>
+<p>This function has been tested to ensure a wide variety of sensitive data is stripped, but it might
+not be all inclusive. If you find sensitive data that it doesn't properly sanitize, please let me
+know and we'll get it addressed.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to sanitize</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.alerts.sanitize('This is an IPv4: 1.2.3.4')
+This is an IP: [IPv4]
+&gt;&gt;&gt; h.alerts.sanitize('This is an IP: 1234:1d8::4567:2345')
+This is an IPv6: [IPv6]
+&gt;&gt;&gt; h.alerts.sanitize('This is a URL: https://something.com')
+This is a URL: [URL]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="alertsslackmessage"><a class="header" href="#alertsslackmessage">alerts.slack(message)</a></h2>
+<blockquote>
+<p>This function makes a POST request to Slack in order to post a message.
+This function expects <code>h.db.slack_url</code> to be set.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>str</td><td>A message to send to Slack</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.slack_url = 'https://hooks.slack.com/services/x/y/z'
+&gt;&gt;&gt; h.alerts.slack('Something important happened!')
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">Api</a></h1>
+<p>The Api Plugin is used to interact DIRECTLY with the Synack API.
+It is the last stop before our code is sent to the Synack API.</p>
+<p>The functions within this plugin don't follow the standard naming convention.</p>
+<h2 id="apiloginmethod-path-kwargs"><a class="header" href="#apiloginmethod-path-kwargs">api.login(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>This function is used to set up requests sent to <code>https://login.synack.com/api/*</code>.<br />
+This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; headers = {
+...     "X-CSRF-Token": "123"
+... }
+&gt;&gt;&gt; data = {
+...     "email": "some@guy.com",
+...     "password": "password1234"
+... }
+&gt;&gt;&gt; h.api.login('POST', 'authenticate', headers=headers, data=data)
+&lt;class 'requests.models.Response'&gt;
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="apinotificationsmethod-path-kwargs"><a class="header" href="#apinotificationsmethod-path-kwargs">api.notifications(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>This function is used to set up requests sent to <code>https://notifications.synack.com/api/v2/*</code>.<br />
+This function takes in several arguments to build information that is sent to <code>api.request()</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>**kwargs</code></td><td>kwargs</td><td>Passed through to <code>api.request()</code>. Look there for more info</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.api.notifications('GET', 'notifications?meta=1')
+&lt;class 'requests.models.Response'&gt;
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="apirequestmethod-path-kwargs"><a class="header" href="#apirequestmethod-path-kwargs">api.request(method, path, **kwargs)</a></h2>
+<blockquote>
+<p>This function is used to set up requests sent to the primary API at <code>https://platform.synack.com/api/*</code>.\</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>method</code></td><td>str</td><td>HTTP Method (GET, POST, etc.)</td></tr>
+<tr><td><code>path</code></td><td>str</td><td>The full or partial URL to use with the Login API</td></tr>
+<tr><td><code>kwargs['headers']</code></td><td>dict</td><td>Headers that should be applied to only the current request</td></tr>
+<tr><td><code>kwargs['query']</code></td><td>dict</td><td>Query parameters that should be added onto the URL</td></tr>
+<tr><td><code>kwargs['data']</code></td><td>dict</td><td>Data parameters that should be used in the Body</td></tr>
+</tbody></table>
+</div>
+<p>|</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; query = {
+...     "status": "PUBLISHED",
+...     "viewed": "false"
+... }
+&gt;&gt;&gt; h.api.request('HEAD', 'tasks/v1/tasks', query=query)
+&lt;class 'requests.models.Response'&gt;
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="auth"><a class="header" href="#auth">Auth</a></h1>
+<p>This plugin deals with authenticating the user to Synack.</p>
+<h2 id="authget_api_token"><a class="header" href="#authget_api_token">auth.get_api_token()</a></h2>
+<blockquote>
+<p>Walks through the whole authentication workflow to get a new api_token</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_api_token()
+'489hr98hf...eh59'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_authentication_responsecsrf"><a class="header" href="#authget_authentication_responsecsrf">auth.get_authentication_response(csrf)</a></h2>
+<blockquote>
+<p>Send the username and password to Synack and returns the response</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>csrf</code></td><td>CSRF token issued by Synack Authentication Workflow</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; csrf = h.auth.get_login_csrf()
+&gt;&gt;&gt; h.auth.get_authentication_response(csrf)
+{'success': True, ..., 'duo_auth_url': 'https://...'}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_login_csrf"><a class="header" href="#authget_login_csrf">auth.get_login_csrf()</a></h2>
+<blockquote>
+<p>Pulls a CSRF Token from the Login page</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_login_csrf()
+'45h998h4g5...45wh89g9wh'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authget_notifications_token"><a class="header" href="#authget_notifications_token">auth.get_notifications_token()</a></h2>
+<blockquote>
+<p>Walks through the whole process of getting a notifications token</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.get_notifications_token()
+'958htiu...h98f5ht'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authset_api_token_invalid"><a class="header" href="#authset_api_token_invalid">auth.set_api_token_invalid()</a></h2>
+<blockquote>
+<p>Invalidates the API Token by logging out</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.auth.set_api_token_invalid()
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="authset_login_script"><a class="header" href="#authset_login_script">auth.set_login_script()</a></h2>
+<blockquote>
+<p>Writes the current api_token to <code>~/.config/synack/login.js</code> JavaScript file to help with staying logged in.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; auth.set_login_script()
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="db"><a class="header" href="#db">Db</a></h1>
+<p>This plugin deals with interacting with the database.</p>
+<p>This plugin is a little different in most in that it has a couple functions which deal with database queries, in addition to many properties.
+Some properties are Read-Only, while others can be Set.
+Additionally, some properties can be overridden by the State, which allows you to change the way one Handler instance runs without affecting others.</p>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Read-Only</th><th>State Override</th><th>Description</th></tr></thead><tbody>
+<tr><td>api_token</td><td>No</td><td>No</td><td>Synack Access Token used to authenticate requests</td></tr>
+<tr><td>categories</td><td>Yes</td><td>No</td><td>All cached Categories</td></tr>
+<tr><td>debug</td><td>No</td><td>Yes</td><td>Changes the verbosity of some actions, such as network requests</td></tr>
+<tr><td>duo_akey</td><td>No</td><td>Yes</td><td>Duo virtual-device application key used for push approval</td></tr>
+<tr><td>duo_host</td><td>No</td><td>Yes</td><td>Duo API hostname used for push approval</td></tr>
+<tr><td>duo_pkey</td><td>No</td><td>Yes</td><td>Duo virtual-device push key used for request signing</td></tr>
+<tr><td>duo_rsa_key</td><td>No</td><td>Yes</td><td>RSA private key used to sign Duo virtual-device push requests; generated on first access if unset</td></tr>
+<tr><td>email</td><td>No</td><td>Yes</td><td>The email used to log into Synack</td></tr>
+<tr><td>http_proxy</td><td>No</td><td>Yes</td><td>The http web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>https_proxy</td><td>No</td><td>Yes</td><td>The https web proxy (Burp, etc.) to use for requests</td></tr>
+<tr><td>ips</td><td>Yes</td><td>No</td><td>All cached IPs</td></tr>
+<tr><td>notifications_token</td><td>No</td><td>No</td><td>Synack Notifications Token used to authenticate requests</td></tr>
+<tr><td>otp_count</td><td>No</td><td>Yes</td><td>HOTP counter used for Duo offline passcodes</td></tr>
+<tr><td>otp_secret</td><td>No</td><td>Yes</td><td>Synack/Duo OTP secret used for HOTP passcodes</td></tr>
+<tr><td>password</td><td>No</td><td>Yes</td><td>The password used to log into Synack</td></tr>
+<tr><td>ports</td><td>Yes</td><td>No</td><td>All cached Ports</td></tr>
+<tr><td>proxies</td><td>Yes</td><td>Yes</td><td>A dict built from http_proxy and https_proxy</td></tr>
+<tr><td>scratchspace_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your working files (scopes, scans, etc.) are stored</td></tr>
+<tr><td>slack_app_token</td><td>No</td><td>Yes</td><td>Slack app-level token used for Notifications</td></tr>
+<tr><td>slack_channel</td><td>No</td><td>Yes</td><td>Slack channel used for Notifications</td></tr>
+<tr><td>slack_url</td><td>No</td><td>Yes</td><td>The Slack API URL used for Notifications</td></tr>
+<tr><td>smtp_email_from</td><td>No</td><td>Yes</td><td>Email Source for SMTP Notifications</td></tr>
+<tr><td>smtp_email_to</td><td>No</td><td>Yes</td><td>Email Destination for SMTP Notifications</td></tr>
+<tr><td>smtp_password</td><td>No</td><td>Yes</td><td>Password to use for SMTP Server Auth</td></tr>
+<tr><td>smtp_port</td><td>No</td><td>Yes</td><td>Port of SMTP Server (Ex: 465)</td></tr>
+<tr><td>smtp_server</td><td>No</td><td>Yes</td><td>URL of SMTP Server (Ex: smtp.gmail.com)</td></tr>
+<tr><td>smtp_starttls</td><td>No</td><td>Yes</td><td>Boolean to determine whether TLS is used for SMTP</td></tr>
+<tr><td>smtp_username</td><td>No</td><td>Yes</td><td>Username to use for SMTP Server Auth</td></tr>
+<tr><td>synack_domain</td><td>No</td><td>Yes</td><td>Synack domain to use for login/platform URLs (for example, <code>synack.com</code> or <code>synack.us</code>)</td></tr>
+<tr><td>targets</td><td>Yes</td><td>No</td><td>All cached Targets</td></tr>
+<tr><td>template_dir</td><td>No</td><td>Yes</td><td>The path to a directory where your templates are stored</td></tr>
+<tr><td>urls</td><td>Yes</td><td>No</td><td>All cached URLs</td></tr>
+<tr><td>use_proxies</td><td>No</td><td>Yes</td><td>Changes whether or not http_proxy and https_proxies are used</td></tr>
+<tr><td>use_scratchspace</td><td>No</td><td>Yes</td><td>Enables/disables writing scope and attachment files to scratchspace</td></tr>
+<tr><td>user_id</td><td>No</td><td>Yes</td><td>Your Synack User ID used for requests</td></tr>
+</tbody></table>
+</div>
+<h2 id="dbadd_categoriescategories"><a class="header" href="#dbadd_categoriescategories">db.add_categories(categories)</a></h2>
+<blockquote>
+<p>Add Target Categories from the Synack API to the Database
+This is most often used with the <code>targets.get_assessments()</code> function so that you are only returned information about Categories you have access to.</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>categories</code></td><td>list</td><td>A list of Category dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_categories([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_ipsresults-sessionnone"><a class="header" href="#dbadd_ipsresults-sessionnone">db.add_ips(results, session=None)</a></h2>
+<blockquote>
+<p>Add IP Addresses to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing <code>ip</code> addresses and <code>target</code> slugs</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is often used with <code>db.add_ports()</code> and can have a session passed into it</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_ips([{'ip': '1.1.1.1', 'target': '230h94ei'}, ...])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_organizationstargets-session"><a class="header" href="#dbadd_organizationstargets-session">db.add_organizations(targets, session)</a></h2>
+<blockquote>
+<p>Add Organizations from the Synack API to the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>targets</code></td><td>list</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+<tr><td><code>session</code></td><td>sqlalchemy.orm.sessionmaker()</td><td>A database session. This function is most often used with <code>db.add_targets()</code> and I was having issues getting it to work when it would create a new session</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_organizations([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_portsresults"><a class="header" href="#dbadd_portsresults">db.add_ports(results)</a></h2>
+<blockquote>
+<p>Add port results to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, etc.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         "ip": "1.1.1.1",
+...         "target": "7gh33tjf72",
+...         "source": "nmap",
+...         "ports": [
+...             {
+...                 "port": "443",
+...                 "protocol": "tcp",
+...                 "service": "Super Apache NGINX Deluxe",
+...                 "open": True,
+...                 "updated": 1654969137
+...             },
+...             {
+...                 "port": "53",
+...                 "protocol": "udp",
+...                 "service": "DNS"
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_ports(results)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_targetstargets"><a class="header" href="#dbadd_targetstargets">db.add_targets(targets)</a></h2>
+<blockquote>
+<p>Adds Target from the Synack API to the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>targets</td><td>list(dict)</td><td>A list of Target dictionaries returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.add_targets([{...}, {...}, {...}])
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbadd_urlsresults"><a class="header" href="#dbadd_urlsresults">db.add_urls(results)</a></h2>
+<blockquote>
+<p>Add urls results to the database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td>list(dict)</td><td>A list of dictionaries containing results from some scan, etc.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; results = [
+...     {
+...         "ip": "1.1.1.1",
+...         "target": "7gh33tjf72",
+...         "urls": [
+...             {
+...                 "url": "https://www.google.com",
+...                 "screenshot_url": "https://imgur.com/2uregtu",
+...             },
+...             {
+...                 "url": "https://www.ebay.com",
+...                 "screenshot_url": "file:///tmp/948grt.png",
+...             }
+...         ]
+...     }
+... ]
+&gt;&gt;&gt; h.db.add_urls(results)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_ipsip-kwargs"><a class="header" href="#dbfind_ipsip-kwargs">db.find_ips(ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ips to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ips(codename="SLEEPYPUPPY")
+[{'ip': '1.1.1.1, 'target': '12398h21'}, ... ]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_portsport-protocol-source-ip-kwargs"><a class="header" href="#dbfind_portsport-protocol-source-ip-kwargs">db.find_ports(port, protocol, source, ip, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the ports to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>port</code></td><td>int</td><td>Port number to search for (443, 80, 25, etc.)</td></tr>
+<tr><td><code>protocol</code></td><td>str</td><td>Protocol to search for (tcp, udp, etc.)</td></tr>
+<tr><td><code>source</code></td><td>str</td><td>Source to search for (masscan, nmap, etc.)</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_ports(codename="SLEEPYPUPPY")
+[
+  {
+    'ip': '1.2.3.4', 'source': 'masscan', 'target': '123hg912',
+      'ports': [
+        { 'open': True, 'port': '443', 'protocol': 'tcp', 'service': 'https - Wordpress', 'updated': 1654840021 },
+        ...
+      ]
+  },
+  ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_targetskwargs"><a class="header" href="#dbfind_targetskwargs">db.find_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the targets to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_targets(codename="SLEEPYPUPPY")
+[&lt;class 'synack.db.models.Target'&gt;, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbfind_urlsurlnone-ipnone-kwargs"><a class="header" href="#dbfind_urlsurlnone-ipnone-kwargs">db.find_urls(url=None, ip=None, **kwargs)</a></h2>
+<blockquote>
+<p>Filters through all the cached URLs to return ones which match a given criteria</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>url</code></td><td>str</td><td>Url hosting a service on the IP</td></tr>
+<tr><td><code>ip</code></td><td>str</td><td>IP Address to search for</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Any attribute of the Target Database Model (codename, slug, is_active, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.find_urls(codename="SLEEPYPUPPY")
+[
+  {
+    'ip': '1.2.3.4',
+    'target': '123hg912',
+    'urls': [
+      {
+        'url': 'https://www.google.com',
+        'screenshot_url': 'file:///tmp/2948geybu24.png'
+      },
+      ...
+    ]
+  },
+  ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbget_configname"><a class="header" href="#dbget_configname">db.get_config(name)</a></h2>
+<blockquote>
+<p>Returns a configuration from the Database.</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>The desired config to pull. If none provided, the entire config object will return.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.get_config('api_token')
+'reuif...oetuhhj'
+&gt;&gt;&gt; h.db.get_config('user_id')
+'heutih9'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbremove_targetskwargs"><a class="header" href="#dbremove_targetskwargs">db.remove_targets(**kwargs)</a></h2>
+<blockquote>
+<p>Remove targets from the Database based on criteria.
+<strong>If no criteria is provided, all entries are deleted</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Criteria by which to find Targets for deletion (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.remove_targets(codename='SLUGISHPARROT')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_configname-value"><a class="header" href="#dbset_configname-value">db.set_config(name, value)</a></h2>
+<blockquote>
+<p>Permanently sets a configuration in the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>Name of the config to set</td></tr>
+<tr><td><code>value</code></td><td>?</td><td>Value to set the config to</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_config('email', '1@2.com')
+&gt;&gt;&gt; h.db.set_config('password', 'password1234')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="dbset_migration"><a class="header" href="#dbset_migration">db.set_migration()</a></h2>
+<blockquote>
+<p>Migrates the local database to include the newest changes.
+This may need to be run manually when SynackAPI is updated until I can figure out a better way to have it run automatically.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.db.set_migration()
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="debug"><a class="header" href="#debug">Debug</a></h1>
+<h2 id="debuglogtitle-message"><a class="header" href="#debuglogtitle-message">debug.log(title, message)</a></h2>
+<blockquote>
+<p>Prints a debug message to the screen if the State of Database is set to True</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>title</code></td><td>Title for the debug message. Appears in the top line in capital letters</td></tr>
+<tr><td><code>message</code></td><td>Message that appears on the second line</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.debug('Some Title', 'Some Message')
+2022-02-12 09:32:20 -- SOME TITLE
+    Some Message
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="duo"><a class="header" href="#duo">Duo</a></h1>
+<h2 id="duoconfigure_mfa"><a class="header" href="#duoconfigure_mfa">duo.configure_mfa()</a></h2>
+<blockquote>
+<p>Interactively prompts the user to configure MFA. Offers a choice between Duo Push via a
+registered virtual device and HOTP passcode. For push, the user can either activate a new
+virtual device using an activation code or supply existing device credentials directly.
+RSA private key input is accepted as PEM or base64-encoded PEM.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.configure_mfa()
+MFA Type (push/hotp): push
+Setup Type (new/existing): new
+Duo Activation Code: ABCDEF-dGVzdC5kdW9zZWN1cml0eS5jb20=
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="duoget_device_registrationcode"><a class="header" href="#duoget_device_registrationcode">duo.get_device_registration(code)</a></h2>
+<blockquote>
+<p>Registers SynackAPI as a virtual Duo device using an activation code from the Duo admin portal.
+Stores the resulting credentials (<code>akey</code>, <code>pkey</code>, <code>host</code>) in the database for use in subsequent
+logins. This only needs to be run once.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>code</code></td><td>Duo activation code in the format <code>&lt;code&gt;-&lt;base64host&gt;</code> (from the Duo admin QR code)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.get_device_registration('ABCDEF-dGVzdC5kdW9zZWN1cml0eS5jb20=')
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="duoget_grant_tokenauth_url"><a class="header" href="#duoget_grant_tokenauth_url">duo.get_grant_token(auth_url)</a></h2>
+<blockquote>
+<p>Handles Duo Security MFA stages and returns the grant_token used to finish logging into Synack.
+Supports both HOTP passcode and registered virtual device push, selected automatically based
+on configured credentials.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>auth_url</code></td><td>Duo Security Authentication URL generated by sending credentials to Synack</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.get_grant_token('https:///...duosecurity.com/...')
+'Y8....6g'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="duoget_passcode"><a class="header" href="#duoget_passcode">duo.get_passcode()</a></h2>
+<blockquote>
+<p>Generates the next Duo Mobile offline HOTP passcode for the registered virtual device and increments <code>otp_count</code> in the database. Returns <code>None</code> if no HOTP secret is configured.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.get_passcode()
+'029833'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="duoset_push_approvedattempts10-approvals1-sleep5-verified_push_codenone"><a class="header" href="#duoset_push_approvedattempts10-approvals1-sleep5-verified_push_codenone">duo.set_push_approved(attempts=10, approvals=1, sleep=5, verified_push_code=None)</a></h2>
+<blockquote>
+<p>Fetches pending Duo push transactions for the registered virtual device and approves them.
+Called automatically during login when <code>duo_akey</code> is set in the database.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>attempts</code></td><td>Number of polling attempts. <code>0</code> polls forever.</td></tr>
+<tr><td><code>approvals</code></td><td>Stop after approving this many transactions. <code>0</code> approves all transactions found.</td></tr>
+<tr><td><code>sleep</code></td><td>Seconds to wait between polling attempts.</td></tr>
+<tr><td><code>verified_push_code</code></td><td>Optional number-match code for Duo Verified Push transactions.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.set_push_approved()
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="duoset_verified_push_codeverified_push_code-attempts10-approvals1-sleep5"><a class="header" href="#duoset_verified_push_codeverified_push_code-attempts10-approvals1-sleep5">duo.set_verified_push_code(verified_push_code, attempts=10, approvals=1, sleep=5)</a></h2>
+<blockquote>
+<p>Convenience wrapper for approving Duo Verified Push / number-match transactions with the displayed numeric code. Plain push transactions are approved normally.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>verified_push_code</code></td><td>Number shown on the login screen.</td></tr>
+<tr><td><code>attempts</code></td><td>Number of polling attempts. <code>0</code> polls forever.</td></tr>
+<tr><td><code>approvals</code></td><td>Stop after approving this many transactions. <code>0</code> approves all transactions found.</td></tr>
+<tr><td><code>sleep</code></td><td>Seconds to wait between polling attempts.</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.duo.set_verified_push_code('244')
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="missions"><a class="header" href="#missions">Missions</a></h1>
+<h2 id="missionsbuild_ordermissions-sort"><a class="header" href="#missionsbuild_ordermissions-sort">missions.build_order(missions, sort)</a></h2>
+<blockquote>
+<p>Takes in a list of missions and returns them sorted in a particular way</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions pulled from the SynackAPI</td></tr>
+<tr><td><code>sort</code></td><td>srt</td><td>The way the missions should be sorted</br>(Default: "payout-high")</br>(Options: "payout-high", "payout-low", "shuffle", "reverse")</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = [{"title": "Some mission",...}, {"title": "Another mission",...}]
+&gt;&gt;&gt; h.missions.build_order(msns, "reverse")
+[{"title": "Another mission",...}, {"title": "Some mission",...}]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsbuild_summarymissions"><a class="header" href="#missionsbuild_summarymissions">missions.build_summary(missions)</a></h2>
+<blockquote>
+<p>Takes a list of missions and summarizes them</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>missions</code></td><td>list(dict)</td><td>A list of missions returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.build_summary(h.missions.get_claimed())
+{"count": 5, "value": 250, "time": 86158}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsgetstatus-max_pages-page-per_page-listing_uids"><a class="header" href="#missionsgetstatus-max_pages-page-per_page-listing_uids">missions.get(status, max_pages, page, per_page, listing_uids)</a></h2>
+<blockquote>
+<p>Get a list of missions from the Synack API</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: "PUBLISHED")</td></tr>
+<tr><td><code>max_pages</code></td><td>int</td><td>The maximum number of pages to grab</br>(Default: 1)</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>The page you wish to start on</br>(Default: 1)</td></tr>
+<tr><td><code>per_page</code></td><td>int</td><td>The number of missions you wish to return per page</br>(Default: 20)</td></tr>
+<tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query for missions</br>(Default: None)</td></tr>
+</tbody></table>
+</div>
+<p>The default <code>per_page</code> on the Synack API is 20.
+I recommend leaving it there unless you also plan to try and get multiple pages of missions if there are more than 20.
+Don't set this number TOO high, or you may be requesting a lot of data, which may actually be detremental to the speed of your bot and the Synack API.
+Also consider that if there are multiple pages, you may just be better off still requesting 20 missions, but starting with the second page.</p>
+<p>In other words, when using this function, please consider what you are asking the computers to do.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get()
+[{"status": "PUBLISHED", "title": "Some Mission",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_approved"><a class="header" href="#missionsget_approved">missions.get_approved()</a></h2>
+<blockquote>
+<p>Get one page (Up to 20 missions) from the missions you have previously had approved</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_approved()
+[{"status": "APPROVED", "title": "Some Mission",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_available"><a class="header" href="#missionsget_available">missions.get_available()</a></h2>
+<blockquote>
+<p>Get one page (Up to 20 missions) from the missions currently available for claiming</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_available()
+[{"status": "PUBLISHED", "title": "Some Mission",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_claimed"><a class="header" href="#missionsget_claimed">missions.get_claimed()</a></h2>
+<blockquote>
+<p>Get one page (Up to 20 missions) from the missions you currently have</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_claimed()
+[{"status": "CLAIMED", "title": "Some Mission",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_countstatus-listing_uids"><a class="header" href="#missionsget_countstatus-listing_uids">missions.get_count(status, listing_uids)</a></h2>
+<blockquote>
+<p>Get the number of missions</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>str</td><td>Status of missions to claim</br>(Default: "PUBLISHED")</td></tr>
+<tr><td><code>listing_uids</code></td><td>str</td><td>The slug of a specific Target to query</br>(Default: None)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_count()
+10
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_evidencesmission"><a class="header" href="#missionsget_evidencesmission">missions.get_evidences(mission)</a></h2>
+<blockquote>
+<p>Download the text part of a mission</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>Mission dict pulled from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
+&gt;&gt;&gt; h.missions.get_evidences(msns[0])
+{"title": "Some Mission", "asset": "Web", "type": "MISSION",
+    "structuredResponese": "no", "introduction": "This is the intro",
+    "testing_methodology": "This is the testing methodology section",
+    "conclusion": "This is the conclusion section"}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_in_review"><a class="header" href="#missionsget_in_review">missions.get_in_review()</a></h2>
+<blockquote>
+<p>Get a list of missions (Up to 20) which are currently being reviewed</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_in_review()
+[{"status": "FOR_REVIEW", "title": "Some Mission",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_wallet_claimed"><a class="header" href="#missionsget_wallet_claimed">missions.get_wallet_claimed()</a></h2>
+<blockquote>
+<p>Get the amount of missions counting against your Mission Wallet</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_wallet_claimed()
+25
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsget_wallet_limit"><a class="header" href="#missionsget_wallet_limit">missions.get_wallet_limit()</a></h2>
+<blockquote>
+<p>Get the amount you are able to hold in your Missions Wallet</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.missions.get_wallet_limit()
+100
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsset_claimedmission"><a class="header" href="#missionsset_claimedmission">missions.set_claimed(mission)</a></h2>
+<blockquote>
+<p>Try and claim one mission</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
+&gt;&gt;&gt; h.missions.set_claimed(msns[0])
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'CLAIMED', 'success': True}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsset_disclaimedmission"><a class="header" href="#missionsset_disclaimedmission">missions.set_disclaimed(mission)</a></h2>
+<blockquote>
+<p>Release one mission you currently have</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.missions.set_disclaimed(msns[0])
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'DISCLAIMED', 'success': True}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsset_evidencesmission"><a class="header" href="#missionsset_evidencesmission">missions.set_evidences(mission)</a></h2>
+<blockquote>
+<p>Set the evidences (text body) of a mission.</p>
+<p>Note that there are protections in place to ensure you don't accidentally nuke a report you are writing.
+These protections currently include confirming that the current fields of the mission have 20 or less characters.
+If you have a lot of text in a mission and wish to replace it with a template, replace all of the text with a single character and try again.</p>
+<p>Also note that the templates are pulled from your local file templates.
+Check out the <a href="usage/plugins/../examples/mission-templates.html">Mission Templates</a> page for more information.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.missions.set_evidences(msns[0])
+{'evidenceId': 'uuid4...', 'title': 'Some Mission', 'codename': 'SLEEPYPUPPY'}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="missionsset_statusmission-status"><a class="header" href="#missionsset_statusmission-status">missions.set_status(mission, status)</a></h2>
+<blockquote>
+<p>Sets the status of a mission. Used in <code>mission.set_claimed</code> and <code>missions.set_disclaimed</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A single mission dict returned from the SynackAPI</td></tr>
+<tr><td><code>status</code></td><td>str</td><td>Status to set it to (i.e., <code>CLAIM</code>, <code>DISCLAIM</code>)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_available()
+&gt;&gt;&gt; h.missions.set_status(msns[0], 'CLAIM')
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'CLAIMED', 'success': True}
+&gt;&gt;&gt; h.missions.set_status(msns[0], 'DISCLAIM')
+{'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
+    'status': 'DISCLAIMED', 'success': True}
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="notifications"><a class="header" href="#notifications">Notifications</a></h1>
+<h2 id="notificationsget"><a class="header" href="#notificationsget">notifications.get()</a></h2>
+<blockquote>
+<p>Return a list of notifications</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.notifications.get()
+[{"action": "outage_starts", "subject": "SLAPHAPPYMONKEY",...}...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="notificationsget_unread_count"><a class="header" href="#notificationsget_unread_count">notifications.get_unread_count()</a></h2>
+<blockquote>
+<p>Get the number of unread notifications</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.notifications.get_unread_count()
+7
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="notificationsset_read"><a class="header" href="#notificationsset_read">notifications.set_read()</a></h2>
+<blockquote>
+<p>Set all notifications as read</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.notifications.set_read()
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="scratchspace"><a class="header" href="#scratchspace">Scratchspace</a></h1>
+<h2 id="scratchspacebuild_filepathfilename-targetnone-codenamenone"><a class="header" href="#scratchspacebuild_filepathfilename-targetnone-codenamenone">scratchspace.build_filepath(filename, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function return the desired Scratchspace file name based on <code>db.scratchspace_dir</code> and a Target's Codename.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>filename</code></td><td>str</td><td>Desired name of the destination file</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.buildfilepath('test', codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/test.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_assets_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_assets_filecontent-targetnone-codenamenone">scratchspace.set_assets_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>assets.txt</code> scope file within a <code>codename</code> folder within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_web()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_web(codename='ADAMANTANT')
+&gt;&gt;&gt; h.scratchspace.set_assets_file(scope, codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/assets.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_burp_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_burp_filecontent-targetnone-codenamenone">scratchspace.set_burp_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>burp.txt</code> scope file within a <code>codename</code> folder within the <code>self.db.scratchspace_dir</code> folder
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_web()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_web(codename='ADAMANTANT')
+&gt;&gt;&gt; h.scratchspace.set_burp_file(scope, codename='ADAMANTANT')
+'/tmp/Scratchspace/ADAMANTANT/burp.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue"><a class="header" href="#scratchspaceset_download_attachmentsattachments-targetnone-codenamenone-prompt_overwritetrue">scratchspace.set_download_attachments(attachments, target=None, codename=None, prompt_overwrite=True):</a></h2>
+<blockquote>
+<p>This function will take a list of attachments from <code>h.targets.get_attachments()</code> and download them to the <code>codename</code> folder wthin the <code>self.db.scratchspace_dir</code> folder.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>attachments</code></td><td>list(dict)</td><td>A list of attachments from <code>h.targets.get_attachments()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+<tr><td><code>prompt_overwrite</code></td><td>bool</td><td>Boolean to determine if you should be prompted before overwriting an existing file</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; attachments = h.targets.get_attachments()
+&gt;&gt;&gt; slug = attachments[0].get('listing_id')
+&gt;&gt;&gt; codename = h.targets.build_codename_from_slug(slug)
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: Y
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename)
+file1.txt exists. Overwrite? [y/N]: N
+[]
+&gt;&gt;&gt; h.scratchspace.set_download_attachments(attachments, codename=codename, prompt_overwrite=False)
+[PosixPath('/home/user/Scratchspace/SLEEPYTURTLE/file1.txt'), ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_filecontent-filename-targetnone-codenamenone"><a class="header" href="#scratchspaceset_filecontent-filename-targetnone-codenamenone">scratchspace.set_file(content, filename, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a text file with a given name within a <code>codename</code> folder within the <code>sself.db.scratchspace_dir</code> folder.
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or similar.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope_host()</code></td></tr>
+<tr><td><code>filename</code></td><td>str</td><td>Desired filename</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.scratchspace.set_file('some unique string', 'mystring.txt', codename='ADAMANTARDVARK')
+'/tmp/Scratchspace/ADAMANTARDVARK/mystring.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="scratchspaceset_hosts_filecontent-targetnone-codenamenone"><a class="header" href="#scratchspaceset_hosts_filecontent-targetnone-codenamenone">scratchspace.set_hosts_file(content, target=None, codename=None)</a></h2>
+<blockquote>
+<p>This function will save a <code>hosts.txt</code> scope file within a <code>codename</code> folder within the <code>self.db.scratchspace_dir</code> folder.
+If <code>self.db.use_scratchspace</code> is <code>True</code>, this function is automatically run when you do <code>targets.get_scope()</code> or <code>targets.get_scope_host()</code></p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>content</code></td><td>str,list(str)</td><td>Either a preformatted string or (more likely) the return of <code>targets.get_scope_host()</code></td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A Target Database Object</td></tr>
+<tr><td><code>codename</code></td><td>str</td><td>Codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope_host(codename='ADAMANTARDVARK')
+&gt;&gt;&gt; h.scratchspace.set_hosts_file(scope, codename='ADAMANTARDVARK')
+'/tmp/Scratchspace/ADAMANTARDVARK/hosts.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="targets"><a class="header" href="#targets">Targets</a></h1>
+<h2 id="targetsbuild_codename_from_slugslug"><a class="header" href="#targetsbuild_codename_from_slugslug">targets.build_codename_from_slug(slug)</a></h2>
+<blockquote>
+<p>Returns a Target's codename given its slug.</p>
+<p>This hits the local database, then hits the Synack API if it can't find it.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_codename_from_slug('uwfpmfpgjlum')
+'DAPPERDINGO'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_scope_host_dbslug-scope"><a class="header" href="#targetsbuild_scope_host_dbslug-scope">targets.build_scope_host_db(slug, scope)</a></h2>
+<blockquote>
+<p>Prints a list of IPs ready to ingest into the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>slug</code></td><td>str</td><td>The slug of a Target</td></tr>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_host()</code> from Synack's API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='JANGLYJALOPY')
+&gt;&gt;&gt; scope_db = h.targets.build_scope_host_db('2398her8h', scope)
+&gt;&gt;&gt; scope_db
+[
+  {'ip': '1.1.1.1', 'target': '2398her8h'},
+  ...
+]
+&gt;&gt;&gt; h.db.add_ips(scope_db)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_scope_web_burpscope-target"><a class="header" href="#targetsbuild_scope_web_burpscope-target">targets.build_scope_web_burp(scope, target)</a></h2>
+<blockquote>
+<p>Prints a dictionary compatible with Burp Suite from the output of <code>targets.get_scope_web()</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>Target used to populate the Synack session-handling header</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; target = h.db.find_targets(codename='SLAPPYMONKEY')[0]
+&gt;&gt;&gt; scope = h.targets.get_scope_web(target)
+&gt;&gt;&gt; h.targets.build_scope_web_burp(scope, target)
+{'target': {'scope': {
+    'advanced_mode': True,
+    'exclude': [{'enabled': True, 'protocol': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
+    'include': [{'enabled': True, 'protocol': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
+}}}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_scope_web_dbscope"><a class="header" href="#targetsbuild_scope_web_dbscope">targets.build_scope_web_db(scope)</a></h2>
+<blockquote>
+<p>Prints a list of URLs which can be ingested into the Database</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>scope</code></td><td>list(dict)</td><td>Return of <code>targets.get_scope_web()</code> from Synack's API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; scope = h.targets.get_scope(codename='SLAPPYMONKEY')
+&gt;&gt;&gt; scope_db = h.targets.build_scope_web_db(scope)
+&gt;&gt;&gt; scope_db
+[
+  {
+    'target': '94hw8ier',
+    'urls': [{'url': 'https://good.monkey.com'}]
+  },
+  ...
+]
+&gt;&gt;&gt; h.db.add_urls(scope_db)
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsbuild_slug_from_codenamecodename"><a class="header" href="#targetsbuild_slug_from_codenamecodename">targets.build_slug_from_codename(codename)</a></h2>
+<blockquote>
+<p>Returns a Target's slug given its codename.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>codename</code></td><td>str</td><td>The codename of a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.build_slug_from_codename('DAPPERDINGO')
+'uwfpmfpgjlum'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsgetstatusregistered-query_changes"><a class="header" href="#targetsgetstatusregistered-query_changes">targets.get(status='registered', query_changes={})</a></h2>
+<blockquote>
+<p>Pulls back a list of targets matching the specified query</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>status</code></td><td>string</td><td>The type of targets to pull back. (Ex: <code>registered</code>, <code>unregistered</code>, <code>upcoming</code>, <code>all</code>)</td></tr>
+<tr><td><code>query_changes</code></td><td>dict()</td><td>Changes to make to the standard query. (Ex: <code>{"sorting['field']": "dateUploaded"}</code></td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get(status='unregistered')
+[{"codename": "SLEEPYSLUG", ...}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_assessments"><a class="header" href="#targetsget_assessments">targets.get_assessments()</a></h2>
+<blockquote>
+<p>Pull back a list of assessments and whether you have passed them.</p>
+<p>This function caches your status in the Database and will affect certain queries like <code>targets.get_unregistered()</code>, which will only pull back targets in categories you have passed.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assessments()
+[{"id": 1, ...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_assetstargetnone-asset_typenone-host_typenone-activetrue-scopein-discovered-sortlocation-sort_dirasc-page1-perpage5000-organization_uidnone-kwargs"><a class="header" href="#targetsget_assetstargetnone-asset_typenone-host_typenone-activetrue-scopein-discovered-sortlocation-sort_dirasc-page1-perpage5000-organization_uidnone-kwargs">targets.get_assets(target=None, asset_type=None, host_type=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=1, perPage=5000, organization_uid=None, **kwargs)</a></h2>
+<blockquote>
+<p>Pull back a list of assets related to a target.</p>
+<p>If no arguments are provided, whatever target you are currently connected to will be queried with the default parameters.
+You can use the following arguments to specify a target/organization or override default parameters.</p>
+<p>Note that <code>scopeRules</code> and <code>listings</code> both have a <code>scope</code> field, which is confusing.
+From the best I can tell, the one in <code>listings</code> is the one that matters.
+PLEASE double check my math before trusting it blindly and let me know if I'm wrong.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>asset_type</code></td><td>str</td><td>Type of target ('host', 'webapp', etc.)</td></tr>
+<tr><td><code>host_type</code></td><td>str</td><td>Type of information to get back ('cidr')</td></tr>
+<tr><td><code>active</code></td><td>str</td><td>This field appears to specify whether the asset is an active item in the target's scope</td></tr>
+<tr><td><code>scope</code></td><td>str</td><td>I'm honestly not entirely sure what this field is, but the default is ['in', 'discovered'] when made officially.</td></tr>
+<tr><td><code>sort</code></td><td>str</td><td>Field to sort by, or <code>None</code> to omit sorting</td></tr>
+<tr><td><code>sort_dir</code></td><td>str</td><td>SQL-type sort direction (<code>asc</code>, <code>desc</code>), or <code>None</code> to omit</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>The page of assets to return</td></tr>
+<tr><td><code>perPage</code></td><td>int</td><td>Number of assets per page</td></tr>
+<tr><td><code>organization_uid</code></td><td>str</td><td>slug of the organization that owns the target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_assets()
+[{
+'listings': [{'listingUid': 'iuqwehuh4', 'scope': 'in'}, ...],
+'location': 'https://www.something.com (https://www.something.com)',
+'scopeRules': [{'appliesTo': 'both', 'rule': '*.www.something.com/*', 'uid': 'qiuwe'}, ...],
+...
+}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_attachmentsdownloadfalse-targetnone-kwargs"><a class="header" href="#targetsget_attachmentsdownloadfalse-targetnone-kwargs">targets.get_attachments(download=False, target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Gets the attachments of a specific target.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>download</code></td><td>bool</td><td>Download attachments to scratchspace when enabled</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_attachments(codename='SLAPPYFROG')
+[{
+  'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248,
+  'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...'
+}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_connected"><a class="header" href="#targetsget_connected">targets.get_connected()</a></h2>
+<blockquote>
+<p>Return minimal information about your currently connected Target</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_connected()
+{"slug": "ulmpupflgm", "codename": "GOOFYGOPHER", "status": "Connected"}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_connectionstarget-kwargs"><a class="header" href="#targetsget_connectionstarget-kwargs">targets.get_connections(target, **kwargs)</a></h2>
+<blockquote>
+<p>Get the connection details of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_connections(codename='BLINKYBABOON')
+{"lifetime_connections":200,"current_connections":0}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_credentialskwargs"><a class="header" href="#targetsget_credentialskwargs">targets.get_credentials(**kwargs)</a></h2>
+<blockquote>
+<p>Pulls back the credentials for a Target</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Some attribute that will be used to identify a Target</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_credentials(slug='ljufpbgylu')
+[{"credentials": [{...},...],...}]
+&gt;&gt;&gt; h.targets.get_credentials(codename='CHILLINCHILLA')
+[{"credentials": [{...},...],...}]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_infotargetnone-kwargs"><a class="header" href="#targetsget_infotargetnone-kwargs">targets.get_info(target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Gets full target metadata for a target.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_info(codename='SLAPPYFROG')
+{'slug': '...', 'codename': 'SLAPPYFROG', ...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_registered_summary"><a class="header" href="#targetsget_registered_summary">targets.get_registered_summary()</a></h2>
+<blockquote>
+<p>The Registered Summary is a short list of information about every target you have registered.
+The endpoint used by this function is hit every time you refresh a page on the platform, so
+even though it sounds like a lot, it isn't bad.</p>
+<p>Information from this function is cached in the Database</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_registered_summary()
+{"pflupm": {"id": "pflupm",...},...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_roeuniquefalse-dedupetrue-kwargs"><a class="header" href="#targetsget_roeuniquefalse-dedupetrue-kwargs">targets.get_roe(unique=False, dedupe=True, **kwargs)</a></h2>
+<blockquote>
+<p>Returns the rules of engagement for a target as a set of strings. With <code>unique=True</code>, common baseline rules are removed so target-specific rules stand out. With <code>dedupe=True</code>, near-duplicate rules are collapsed.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>unique</code></td><td>bool</td><td>Remove common baseline RoE rules</td></tr>
+<tr><td><code>dedupe</code></td><td>bool</td><td>Collapse near-duplicate rules</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_roe(codename='SILLYFILLY', unique=True)
+{'Client-specific rule', ...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_scopekwargs"><a class="header" href="#targetsget_scopekwargs">targets.get_scope(**kwargs)</a></h2>
+<blockquote>
+<p>Returns scope information for web or host targets when given target identifiers.
+If no kwargs are provided, the scope of your currently connected target will be retrieved.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope(codename='SILLYFILLY')
+['1.1.1.1/32', '10.0.0.0/8', ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_scope_hosttarget-kwargs"><a class="header" href="#targetsget_scope_hosttarget-kwargs">targets.get_scope_host(target, **kwargs)</a></h2>
+<blockquote>
+<p>Return CIDR IP Addresses in scope when given a Target or target identifiers</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; tgt = h.db.find_targets(codename='SILLYFILLY')
+&gt;&gt;&gt; h.targets.get_scope_host(tgt)
+['1.1.1.1/32', '10.0.0.0/8', ...]
+&gt;&gt;&gt; h.targets.get_scope_host(slug='92wg38itur')
+['9,9,9,9/32', ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_scope_webtarget-kwargs"><a class="header" href="#targetsget_scope_webtarget-kwargs">targets.get_scope_web(target, **kwargs)</a></h2>
+<blockquote>
+<p>Returns a ton of information about a web target's scope given a Target or target identifiers</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_scope_web(codename='SLAPPYFROG')
+[{
+  'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
+  'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
+}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_submissionstarget-statusaccepted-kwargs"><a class="header" href="#targetsget_submissionstarget-statusaccepted-kwargs">targets.get_submissions(target, status="accepted", **kwargs)</a></h2>
+<blockquote>
+<p>Get the details of previously submitted vulnerabilities from the analytics of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>status</code></td><td>str</td><td>Query either <code>accepted</code>, <code>rejected</code> or <code>in_queue</code> vulnerabilities</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_submissions(codename='BLINKYBABOON')
+[
+   {
+     "categories": ["Authorization/Permissions","SSRF"],
+     "exploitable_locations":[
+       {"type":"url","value":"https://example.com/index.html","created_at":1625646235,"status":"fixed"},
+       ...
+     ]
+   }, ...
+]
+&gt;&gt;&gt;
+&gt;&gt;&gt; h.targets.get_submissions(status="in_queue", codename='BLINKYBABOON')
+[
+   {
+     "categories": ["Authorization/Permissions","SSRF"],
+     "exploitable_locations":[
+       {"type":"url","value":"https://example.com/login.html","created_at":1625646235,"status":"pending"},
+       ...
+     ]
+   }, ...
+]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_submissions_summarytarget-hours_agonone-kwargs"><a class="header" href="#targetsget_submissions_summarytarget-hours_agonone-kwargs">targets.get_submissions_summary(target, hours_ago=None, **kwargs)</a></h2>
+<blockquote>
+<p>Get a summary of the submission analytics of a target</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>hours_ago</code></td><td>int</td><td>The amount of hours since the current time to query the analytics for. (ex: <code>hours_ago=48</code> will query how many submissions were made in the last <code>48</code> hours. Defaults to lifetime when not set.)</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_submissions_summary(codename='BLINKYBABOON')
+35
+&gt;&gt;&gt; 
+&gt;&gt;&gt; h.targets.get_submissions_summary(hours_ago=48, codename='BLINKYBABOON')
+5
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_unregistered"><a class="header" href="#targetsget_unregistered">targets.get_unregistered()</a></h2>
+<blockquote>
+<p>Gets a list of unregistered Targets from the Synack API.</p>
+<p>Only Targets in Categories you have passed will be returned.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_unregistered()
+[{"slug": "lfjpgmk",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_upcoming"><a class="header" href="#targetsget_upcoming">targets.get_upcoming()</a></h2>
+<blockquote>
+<p>Gets a list of upcoming Targets from the Synack API.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_upcoming()
+[{'codename': 'SLEEPYSLUG', 'upcoming_start_date': 1668430800, ...}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsget_updatestargetnone-page1-max_pages1-per_page10-kwargs"><a class="header" href="#targetsget_updatestargetnone-page1-max_pages1-per_page10-kwargs">targets.get_updates(target=None, page=1, max_pages=1, per_page=10, **kwargs)</a></h2>
+<blockquote>
+<p>Gets update posts for a target. If a page is full and <code>page &lt; max_pages</code>, subsequent pages are fetched recursively.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>First page to request</td></tr>
+<tr><td><code>max_pages</code></td><td>int</td><td>Maximum number of pages to request</td></tr>
+<tr><td><code>per_page</code></td><td>int</td><td>Updates per page</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.targets.get_updates(codename='BLINKYBABOON', max_pages=2)
+[{'title': 'Update', ...}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsset_connectedtarget-kwargs"><a class="header" href="#targetsset_connectedtarget-kwargs">targets.set_connected(target, **kwargs)</a></h2>
+<blockquote>
+<p>Connect to a specified target</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>A single Target returned from the database</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Information used to look up a Target in the database (ex: <code>codename</code>, <code>slug</code>, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">h.targets.set_connected(codename='BLINKYBABOON')
+&gt;&gt;&gt; {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
+h.targets.set_connected(slug='12083y9')
+&gt;&gt;&gt; {'slug': '12083y9', 'codename': 'BLINKYBABOON', 'status': 'Connected'}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="targetsset_registeredtargets"><a class="header" href="#targetsset_registeredtargets">targets.set_registered(targets)</a></h2>
+<blockquote>
+<p>Registers unregistered Targets.</p>
+<p>If no <code>targets</code> are provided, <code>targets.get_unregistered()</code> is used so that all unregistered targets are registered.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>targets</code></td><td>list(dict)</td><td>A list of targets returned from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.targets.get_unregistered()
+&gt;&gt;&gt; h.targets.set_registered([msns[0]])
+[{"id": "jlgbmjpbgm",...}]
+&gt;&gt;&gt;
+&gt;&gt;&gt; h.targets.set_registered()
+[{"id": "pwjlgmf",...},...]
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="templates"><a class="header" href="#templates">Templates</a></h1>
+<h2 id="templatesbuild_filepathmission-generic_okfalse"><a class="header" href="#templatesbuild_filepathmission-generic_okfalse">templates.build_filepath(mission, generic_ok=False)</a></h2>
+<blockquote>
+<p>Builds a safe filepath for the template to exist at.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A mission dict returned from the Synack API</td></tr>
+<tr><td><code>generic_ok</code></td><td>bool</td><td>Return the default mission template if the specified template doesn't exist (Default: False)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msn = {
+...     "taskType": "SV2M",
+...     "assetTypes": ["host"],
+...     "title": "More Realistic Name: CVE-1970-1"
+... }
+&gt;&gt;&gt; h.templates.build_filepath(msn)
+'/home/user/Templates/sv2m/host/more_realistic_name_cve_1970_1.txt'
+&gt;&gt;&gt; msn = {
+...     "taskType": "MISSION",
+...     "assetTypes": ["web"],
+...     "title": "SoME  HoRR!bl3 M!$$!0N"
+... }
+&gt;&gt;&gt; h.templates.build_filepath(msn)
+'/home/user/Templates/mission/web/some_horr_bl3_m_0n.txt'
+&gt;&gt;&gt; msn["title"] = "Mission Without A Template"
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=True)
+'/home/user/Templates/mission/web/generic.txt'
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=False)
+'/home/user/Templates/mission/web/mission_without_a_template.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_replace_variablestext-targetnone-kwargs"><a class="header" href="#templatesbuild_replace_variablestext-targetnone-kwargs">templates.build_replace_variables(text, target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Replaces some variables within a given piece of text based on the target provided</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td>str</td><td>String to replace variables within</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>Target to use for variables</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Key word arguments to use for finding a target (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; target = h.db.find_targets(slug='2oh3ui')[0]
+&gt;&gt;&gt; h.templates.build_replace_variables("This mission is for {{ TARGET_CODENAME }}", target=target)
+This mission is for TRANSFORMERTURKEY
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_safe_namename"><a class="header" href="#templatesbuild_safe_namename">templates.build_safe_name(name)</a></h2>
+<blockquote>
+<p>Takes a name and converts it into something that is definitely safe for a filepath</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>Some string to convert into a standardized string that if definitely safe to use as a filepath</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.build_safe_name('R@ND0M     G@RB@G3!!!!!')
+'r_nd0m_g_rb_ge_'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_sectionspath"><a class="header" href="#templatesbuild_sectionspath">templates.build_sections(path)</a></h2>
+<blockquote>
+<p>Take the text from a local template file and prepare it to be sent to the Synack API</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>path</code></td><td>pathlib.PosixPath</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.templates.build_sections(Path('/home/user/Templates/mission/web/mission.txt'))
+{
+   "introduction": "This is the intro",
+   "testing_methodology": "This is how I tested",
+   "conclusion": "This is the conclusion",
+   "structuredResponse": "no"
+}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesget_filemission"><a class="header" href="#templatesget_filemission">templates.get_file(mission)</a></h2>
+<blockquote>
+<p>Pulls in a local template file to upload to a given mission</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A mission dict from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.templates.get_file(msns[0])
+{"introduction": "This is the intro",...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesset_fileevidences"><a class="header" href="#templatesset_fileevidences">templates.set_file(evidences)</a></h2>
+<blockquote>
+<p>Writes evidences pulled from <code>missions.get_evidences()</code> to a local template file</p>
+<p>Note that if the file already exists, it will not be overwritten</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>evidences</code></td><td>dict</td><td>Evidences from <code>missions.get_evidences()</code></td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
+&gt;&gt;&gt; evidences = h.missions.get_evidences(msns[0])
+&gt;&gt;&gt; h.templates.set_file(evidences)
+'/home/user/Templates/mission/web/some_new_mission.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="transactions"><a class="header" href="#transactions">Transactions</a></h1>
+<h2 id="transactionsgetperiod-max_pages1-page1-per_page15"><a class="header" href="#transactionsgetperiod-max_pages1-page1-per_page15">transactions.get(period='', max_pages=1, page=1, per_page=15)</a></h2>
+<blockquote>
+<p>Returns transaction history. If a page is full and <code>page &lt; max_pages</code>, subsequent pages are fetched recursively.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>period</code></td><td>str</td><td>Period filter sent to Synack. Empty string uses the default API behavior.</td></tr>
+<tr><td><code>max_pages</code></td><td>int</td><td>Maximum number of pages to request</td></tr>
+<tr><td><code>page</code></td><td>int</td><td>First page to request</td></tr>
+<tr><td><code>per_page</code></td><td>int</td><td>Transactions per page</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.transactions.get(max_pages=2)
+[{"amount": "10.0", ...}, ...]
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="transactionsget_balance"><a class="header" href="#transactionsget_balance">transactions.get_balance()</a></h2>
+<blockquote>
+<p>Returns information about your current account balance and pending payouts.</p>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.transactions.get_balance()
+{"total_balance": "30.0", "pending_payout": "0.0"}
+</code></pre>
+</blockquote>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="users"><a class="header" href="#users">Users</a></h1>
+<h2 id="usersget_profileuser_id"><a class="header" href="#usersget_profileuser_id">users.get_profile(user_id)</a></h2>
+<blockquote>
+<p>DESCRIPTION</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>str</td><td>The user id to pull back data for<br>(Default: "me")</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.user.get_profile()
+{"user_id": "qwerty", ...}
+</code></pre>
+</blockquote>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

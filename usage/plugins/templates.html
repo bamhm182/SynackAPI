@@ -1,0 +1,332 @@
+<!DOCTYPE HTML>
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Templates - SynackAPI</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">SynackAPI</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://www.github.com/bamhm182/SynackAPI" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="templates"><a class="header" href="#templates">Templates</a></h1>
+<h2 id="templatesbuild_filepathmission-generic_okfalse"><a class="header" href="#templatesbuild_filepathmission-generic_okfalse">templates.build_filepath(mission, generic_ok=False)</a></h2>
+<blockquote>
+<p>Builds a safe filepath for the template to exist at.</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A mission dict returned from the Synack API</td></tr>
+<tr><td><code>generic_ok</code></td><td>bool</td><td>Return the default mission template if the specified template doesn't exist (Default: False)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msn = {
+...     "taskType": "SV2M",
+...     "assetTypes": ["host"],
+...     "title": "More Realistic Name: CVE-1970-1"
+... }
+&gt;&gt;&gt; h.templates.build_filepath(msn)
+'/home/user/Templates/sv2m/host/more_realistic_name_cve_1970_1.txt'
+&gt;&gt;&gt; msn = {
+...     "taskType": "MISSION",
+...     "assetTypes": ["web"],
+...     "title": "SoME  HoRR!bl3 M!$$!0N"
+... }
+&gt;&gt;&gt; h.templates.build_filepath(msn)
+'/home/user/Templates/mission/web/some_horr_bl3_m_0n.txt'
+&gt;&gt;&gt; msn["title"] = "Mission Without A Template"
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=True)
+'/home/user/Templates/mission/web/generic.txt'
+&gt;&gt;&gt; h.templates.build_filepath(msn, generic_ok=False)
+'/home/user/Templates/mission/web/mission_without_a_template.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_replace_variablestext-targetnone-kwargs"><a class="header" href="#templatesbuild_replace_variablestext-targetnone-kwargs">templates.build_replace_variables(text, target=None, **kwargs)</a></h2>
+<blockquote>
+<p>Replaces some variables within a given piece of text based on the target provided</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td>str</td><td>String to replace variables within</td></tr>
+<tr><td><code>target</code></td><td>db.models.Target</td><td>Target to use for variables</td></tr>
+<tr><td><code>kwargs</code></td><td>kwargs</td><td>Key word arguments to use for finding a target (codename, slug, etc.)</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; target = h.db.find_targets(slug='2oh3ui')[0]
+&gt;&gt;&gt; h.templates.build_replace_variables("This mission is for {{ TARGET_CODENAME }}", target=target)
+This mission is for TRANSFORMERTURKEY
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_safe_namename"><a class="header" href="#templatesbuild_safe_namename">templates.build_safe_name(name)</a></h2>
+<blockquote>
+<p>Takes a name and converts it into something that is definitely safe for a filepath</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>str</td><td>Some string to convert into a standardized string that if definitely safe to use as a filepath</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.build_safe_name('R@ND0M     G@RB@G3!!!!!')
+'r_nd0m_g_rb_ge_'
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesbuild_sectionspath"><a class="header" href="#templatesbuild_sectionspath">templates.build_sections(path)</a></h2>
+<blockquote>
+<p>Take the text from a local template file and prepare it to be sent to the Synack API</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>path</code></td><td>pathlib.PosixPath</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; h.templates.build_sections(Path('/home/user/Templates/mission/web/mission.txt'))
+{
+   "introduction": "This is the intro",
+   "testing_methodology": "This is how I tested",
+   "conclusion": "This is the conclusion",
+   "structuredResponse": "no"
+}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesget_filemission"><a class="header" href="#templatesget_filemission">templates.get_file(mission)</a></h2>
+<blockquote>
+<p>Pulls in a local template file to upload to a given mission</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>mission</code></td><td>dict</td><td>A mission dict from the Synack API</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_claimed()
+&gt;&gt;&gt; h.templates.get_file(msns[0])
+{"introduction": "This is the intro",...}
+</code></pre>
+</blockquote>
+</blockquote>
+<h2 id="templatesset_fileevidences"><a class="header" href="#templatesset_fileevidences">templates.set_file(evidences)</a></h2>
+<blockquote>
+<p>Writes evidences pulled from <code>missions.get_evidences()</code> to a local template file</p>
+<p>Note that if the file already exists, it will not be overwritten</p>
+<div class="table-wrapper"><table><thead><tr><th>Arguments</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>evidences</code></td><td>dict</td><td>Evidences from <code>missions.get_evidences()</code></td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p>Examples</p>
+<pre><code class="language-python3">&gt;&gt;&gt; msns = h.missions.get_approved()
+&gt;&gt;&gt; evidences = h.missions.get_evidences(msns[0])
+&gt;&gt;&gt; h.templates.set_file(evidences)
+'/home/user/Templates/mission/web/some_new_mission.txt'
+</code></pre>
+</blockquote>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../usage/plugins/targets.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../usage/plugins/transactions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../usage/plugins/targets.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../usage/plugins/transactions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+        <script>
+            window.playground_line_numbers = true;
+        </script>
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
