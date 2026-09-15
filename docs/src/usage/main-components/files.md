@@ -34,6 +34,7 @@ It is intended to be used with the following TamperMonkey script in order to do 
 // @version      0.1
 // @description  Go to the platform automatically
 // @author       You
+// @run-at       document-start
 // @match        https://*.synack.com/*
 // @require      file:///home/<homedir>/.config/synack/login.js
 // @grant        none

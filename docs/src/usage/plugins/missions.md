@@ -220,4 +220,5 @@
 >> >>> h.missions.set_status(msns[0], 'DISCLAIM')
 >> {'target': 'jwfplgu', 'title': 'Some Mission', 'payout': 50,
 >>     'status': 'DISCLAIMED', 'success': True}
+>> ```
 

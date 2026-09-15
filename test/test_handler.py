@@ -16,8 +16,8 @@ import synack  # noqa: E402
 
 class HandlerTestCase(unittest.TestCase):
     def setUp(self):
-        for plugin in synack.plugins.base.Plugin.registry.keys():
-            synack.plugins.base.Plugin.registry[plugin] = MagicMock()
+        for plugin in synack.plugins.base.Plugin._registry.keys():
+            synack.plugins.base.Plugin._registry[plugin] = MagicMock()
         self.handler = synack.Handler()
 
     def test_loads_plugins(self):
@@ -31,7 +31,7 @@ class HandlerTestCase(unittest.TestCase):
 
     def test_login(self):
         self.handler.state.login = True
-        self.handler.login()
+        self.handler._login()
         self.handler.auth.get_api_token.assert_called_with()
 
     def test_state_kwargs(self):

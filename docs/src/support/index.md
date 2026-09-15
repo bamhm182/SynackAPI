@@ -16,12 +16,12 @@ If you'd like to see extra features be added to this package, please consider co
 
 With that said, please take the following items into consideration:
 * We will be using Test Driven Development with Unit Testing in order to ensure the stability of the SynackAPI package.
-    * Run `coverage run -m unittest discover test` from within the primary directory, then run `coverage report` before submitting a PR. Ensure that all tests are passing and the test coverage reports 100%.
+    * Run `coverage run --source=src --omit='src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py' -m unittest discover test`, then run `coverage report --fail-under=100` before submitting a PR. Ensure that all tests are passing and coverage remains at 100%.
 * We will be conforming to pep8, which is the Python Style Guide.
-    * Run `flake8 src test live-tests` from within the primary directory before submitting a PR. Ensure there are no complaints returned.
+    * Run `flake8 src test` from within the primary directory before submitting a PR. Ensure there are no complaints returned.
+* Public plugin methods should be documented.
+    * Run `python tools/check_docs.py` to ensure plugin docs match the code.
 * We will be trying to break up Functions by their purpose. For example, a function related to examining a mission would go in the Mission plugin.
-
-There is also the `./check.sh` script in the primary directory that will run everything I would like you to check before submitting a PR.
 
 If you have any questions on how you can contribute, please reach out via the SRT Slack.
 

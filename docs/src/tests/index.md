@@ -5,29 +5,20 @@ It explains how to run the tests to ensure that the code is working or to help i
 
 ## Unit Tests
 
-These tests are run by me repeatedly while developing the package, and every time that I push to the repository.
-They are then run again every time that I tell my GitHub workflow to go release a new version.
+These tests are run repeatedly while developing the package, on pushes, and before releases.
 If things fail, a new version is not released.
 
-That said, you can run them using the `checks.sh` script in the main folder.
-
-## Live Tests
-
-These tests are run manually and sparingly.
-They ensure that Synack has not changed any of their API endpoints in ways we are not expecting.
-If these tests fail, it is very possible that I will need to go in and change some functionality of the SynackAPI so they continue to work as expected.
-
-If you run these, they SHOULD be relatively quiet, but keep in mind that they also might not.
-In other words, make sure you have not been heavily using the Synack API when you run these.
-
-These tests can be run via something like the following for a single test:
+To run the unit tests directly:
 
 ```
-coverage run -m unittest live-tests.test_missions.MissionsTestCase
+coverage run --source=src --omit='src/synack/db/alembic/env.py,src/synack/db/alembic/versions/*.py' -m unittest discover test
+coverage report --fail-under=100
 ```
 
-You can also run the following for all live tests:
+## Documentation Checks
+
+Public plugin methods are checked against the plugin documentation. To run that check directly:
 
 ```
-coverage run -m unittest discover live-tests
+python tools/check_docs.py
 ```

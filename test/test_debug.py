@@ -18,8 +18,9 @@ import synack  # noqa: E402
 class DebugTestCase(unittest.TestCase):
     def setUp(self):
         self.state = synack._state.State()
+        self.state._db = MagicMock()
         self.debug = synack.plugins.Debug(self.state)
-        self.debug.db = MagicMock()
+        self.debug._db = MagicMock()
 
     def test_log_enabled(self):
         with patch('builtins.print') as mock_print:

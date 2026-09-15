@@ -11,16 +11,18 @@ class Handler:
     def __init__(self, state=State(), **kwargs):
         self.state = state
 
+        for name, subclass in Plugin._registry.items():
+            instance = subclass(self.state)
+            setattr(self, name.lower(), instance)
+
+        self.state._db = self.db
+
         for key in kwargs.keys():
             if hasattr(self.state, key):
                 setattr(self.state, key, kwargs.get(key))
 
-        for name, subclass in Plugin.registry.items():
-            instance = subclass(self.state)
-            setattr(self, name.lower(), instance)
+        self._login()
 
-        self.login()
-
-    def login(self):
+    def _login(self):
         if self.state.login:
             self.auth.get_api_token()

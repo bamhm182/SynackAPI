@@ -11,12 +11,12 @@ class Users(Plugin):
         super().__init__(*args, **kwargs)
         for plugin in ['Api', 'Db']:
             setattr(self,
-                    plugin.lower(),
-                    self.registry.get(plugin)(self.state))
+                    '_'+plugin.lower(),
+                    self._registry.get(plugin)(self._state))
 
     def get_profile(self, user_id="me"):
         """Get a user's profile"""
-        res = self.api.request('GET', f'profiles/{user_id}')
+        res = self._api.request('GET', f'profiles/{user_id}')
         if res.status_code == 200:
-            self.db.user_id = res.json().get('user_id')
+            self._db.user_id = res.json().get('user_id')
             return res.json()

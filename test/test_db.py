@@ -6,7 +6,7 @@ Tests for the plugins/db.py Db class
 import alembic.command
 import alembic.config
 import os
-import sqlalchemy
+import sqlalchemy as sa
 import sys
 import pathlib
 import unittest
@@ -21,6 +21,7 @@ import synack  # noqa: E402
 class DbTestCase(unittest.TestCase):
     def setUp(self):
         self.state = synack._state.State()
+        self.state._db = MagicMock()
         self.db = synack.plugins.Db(self.state)
 
     def test_add_categories(self):
@@ -28,12 +29,7 @@ class DbTestCase(unittest.TestCase):
         cats = [{
             "category_id": 10,
             "category_name": "Some Cool Cat",
-            "practical_assessment": {
-                "passed": True
-            },
-            "written_assessment": {
-                "passed": True
-            }
+            "passed": True
         }]
         query = self.db.Session.return_value.query
 
@@ -48,14 +44,9 @@ class DbTestCase(unittest.TestCase):
     def test_add_categories_empty_db(self):
         self.db.Session = MagicMock()
         cats = [{
-            "category_id": 10,
-            "category_name": "Some Cool Cat",
-            "practical_assessment": {
-                "passed": True
-            },
-            "written_assessment": {
-                "passed": True
-            }
+            'category_id': 10,
+            'category_name': 'Some Cool Cat',
+            'passed': True
         }]
         query = self.db.Session.return_value.query
         query.return_value.filter_by.return_value.first.return_value = None
@@ -69,8 +60,21 @@ class DbTestCase(unittest.TestCase):
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_add_ips_existing_ips(self):
-        """Should not add IPs if already in db"""
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ips_batch_flush(self, mock_insert):
+        """Should flush in batches when more than 15000 IPs"""
+        self.db.Session = MagicMock()
+        session = self.db.Session.return_value
+        results = [{'ip': f'10.{i // 65025}.{(i // 255) % 255}.{i % 255}', 'target': f'tgt{i}'}
+                   for i in range(15001)]
+        self.db.add_ips(results)
+        session.execute.assert_called()
+        session.commit.assert_called_with()
+        session.close.assert_called_with()
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ips_existing_ips(self, mock_insert):
+        """Should upsert IPs using on_conflict_do_nothing"""
         self.db.Session = MagicMock()
         results = [
             {
@@ -91,21 +95,23 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_ips(results)
+        to_insert = [
+            {'ip': '1.1.1.1', 'target': '7gh33tjf72'}
+        ]
+        self.db.add_ips(results)
+        mock_insert.assert_called_with(synack.db.models.IP)
+        mock_insert.return_value.values.assert_called_with(to_insert)
+        mock_insert.return_value.values.return_value.on_conflict_do_nothing.assert_called_with(
+            index_elements=['ip', 'target'],
+        )
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_nothing.return_value
+        self.db.Session.return_value.execute.assert_called_with(stmt)
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.IP)
-            query.return_value.filter.assert_called_with('sqlalchemy.and_')
-            query.return_value.filter.return_value.first.assert_called_with()
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
-
-    def test_add_ips_new_ips(self):
-        """Should app IPs if new"""
-        self.db.Session = MagicMock()
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ips_new_ips(self, mock_insert):
+        """Should not commit or close when session is provided externally"""
         results = [
             {
                 "ip": "1.1.1.1",
@@ -125,31 +131,42 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        self.db.Session.return_value.query.return_value.filter.return_value.first.return_value = None
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_ips(results)
+        mock_session = MagicMock()
+        to_insert = [{'ip': '1.1.1.1', 'target': '7gh33tjf72'}]
+        self.db.add_ips(results, mock_session)
+        mock_insert.assert_called_with(synack.db.models.IP)
+        mock_insert.return_value.values.assert_called_with(to_insert)
+        mock_insert.return_value.values.return_value.on_conflict_do_nothing.assert_called_with(
+            index_elements=['ip', 'target'])
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_nothing.return_value
+        mock_session.execute.assert_called_with(stmt)
+        mock_session.commit.assert_not_called()
+        mock_session.close.assert_not_called()
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.IP)
-            query.return_value.filter.assert_called_with('sqlalchemy.and_')
-            query.return_value.filter.return_value.first.assert_called_with()
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
-
-    def test_add_organizations(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_organizations(self, mock_insert):
         """Should update Organizations table if organization.slug provided"""
-        mock = MagicMock()
+        mock_session = MagicMock()
         targets = [{
-            "organization": {"slug": "qweqwe"}
+            "organization": {"slug": "qweqwe", "name": "Qwe Qwe"}
         }]
-        mock.query.return_value.filter_by.return_value.first.return_value = None
-        self.db.add_organizations(targets, mock)
-        mock.query.assert_called_with(synack.db.models.Organization)
-        mock.query.return_value.filter_by.assert_called_with(slug='qweqwe')
-        mock.query.return_value.filter_by.return_value.first.assert_called_with()
-        mock.add.assert_called()
+        self.db.add_organizations(targets, mock_session)
+        mock_insert.assert_called_with(synack.db.models.Organization)
+        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe', 'name': 'Qwe Qwe'}])
+        call_kwargs = mock_insert.return_value.values.return_value.on_conflict_do_update.call_args.kwargs
+        self.assertEqual(call_kwargs['index_elements'], ['slug'])
+        self.assertIsInstance(call_kwargs['set_']['name'], sa.sql.functions.coalesce)
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
+        mock_session.execute.assert_called_with(stmt)
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_organizations_dict_targets(self, mock_insert):
+        """Should handle dict of targets"""
+        mock_session = MagicMock()
+        targets = {'t1': {'organization': {'slug': 'qweqwe', 'name': 'Qwe Qwe'}}}
+        self.db.add_organizations(targets, mock_session)
+        mock_insert.assert_called_with(synack.db.models.Organization)
+        mock_insert.return_value.values.assert_called_with([{'slug': 'qweqwe', 'name': 'Qwe Qwe'}])
 
     def test_add_organizations_no_session(self):
         """Should create and destroy a db session if not provided"""
@@ -163,20 +180,53 @@ class DbTestCase(unittest.TestCase):
         self.db.Session.return_value.commit.assert_called()
         self.db.Session.return_value.close.assert_called()
 
-    def test_add_organizations_organization_id(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_organizations_organization_id(self, mock_insert):
         """Should update Organizations table if organization_id provided"""
-        mock = MagicMock()
+        mock_session = MagicMock()
         targets = [{
             "organization_id": "asdasd"
         }]
-        mock.query.return_value.filter_by.return_value.first.return_value = None
-        self.db.add_organizations(targets, mock)
-        mock.query.assert_called_with(synack.db.models.Organization)
-        mock.query.return_value.filter_by.assert_called_with(slug='asdasd')
-        mock.query.return_value.filter_by.return_value.first.assert_called_with()
-        mock.add.assert_called()
+        self.db.add_organizations(targets, mock_session)
+        mock_insert.assert_called_with(synack.db.models.Organization)
+        mock_insert.return_value.values.assert_called_with([{'slug': 'asdasd', 'name': None}])
+        call_kwargs = mock_insert.return_value.values.return_value.on_conflict_do_update.call_args.kwargs
+        self.assertEqual(call_kwargs['index_elements'], ['slug'])
+        self.assertIsInstance(call_kwargs['set_']['name'], sa.sql.functions.coalesce)
+        stmt = mock_insert.return_value.values.return_value.on_conflict_do_update.return_value
+        mock_session.execute.assert_called_with(stmt)
 
-    def test_add_ports_new(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_organizations_str_organization(self, mock_insert):
+        """Should handle string organization slug directly"""
+        mock_session = MagicMock()
+        targets = [{'organization': 'my_org_slug'}]
+        self.db.add_organizations(targets, mock_session)
+        mock_insert.return_value.values.assert_called_with([{'slug': 'my_org_slug', 'name': None}])
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ports_batch_flush(self, mock_insert):
+        """Should flush in batches when more than 15000 ports"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        mock_ip = MagicMock()
+        mock_ip.ip = '1.1.1.1'
+        mock_ip.id = 1
+        mock_ip.target = 'tgt'
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        result = {
+            'ip': '1.1.1.1',
+            'target': 'tgt',
+            'source': 'nmap',
+            'ports': [{'port': str(i), 'protocol': 'tcp', 'service': f'svc{i}'} for i in range(15001)]
+        }
+        self.db.add_ports([result])
+        self.db.Session.return_value.execute.assert_called()
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ports_new(self, mock_insert):
         """Should add port if new"""
         self.db.Session = MagicMock()
         self.db.add_ips = MagicMock()
@@ -199,19 +249,76 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        query.return_value.filter.return_value = None
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_ports(results)
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.id = 42
+        mock_ip.target = '7gh33tjf72'
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_ports(results)
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.Port)
-            query.return_value.filter.assert_called_with('sqlalchemy.and_')
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
+        expected_ports = [
+            {'port': '443', 'protocol': 'tcp', 'service': 'Super Apache NGINX Deluxe',
+             'ip': 42, 'source': 'nmap', 'open': None, 'updated': None},
+            {'port': '53', 'protocol': 'udp', 'service': 'DNS plz AXFR me',
+             'ip': 42, 'source': 'nmap', 'open': None, 'updated': None}
+        ]
+        mock_insert.assert_called_with(synack.db.models.Port)
+        mock_insert.return_value.values.assert_called_with(expected_ports)
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+        self.db.add_ips.assert_called_with(results, self.db.Session.return_value)
 
-    def test_add_ports_update(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ports_falls_back_to_single_ip_match(self, mock_insert):
+        """Should support older callers that omit target when IP is unambiguous"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [{
+            "ip": "1.1.1.1",
+            "source": "nmap",
+            "ports": [{"port": "443", "protocol": "tcp", "service": "https"}]
+        }]
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.target = "target_a"
+        mock_ip.id = 42
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_ports(results)
+        expected_ports = [{
+            'port': '443', 'protocol': 'tcp', 'service': 'https',
+            'ip': 42, 'source': 'nmap', 'open': None, 'updated': None
+        }]
+        mock_insert.return_value.values.assert_called_with(expected_ports)
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ports_uses_target_in_ip_lookup(self, mock_insert):
+        """Should attach ports to the IP row for the matching target"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [{
+            "ip": "1.1.1.1",
+            "target": "target_b",
+            "source": "nmap",
+            "ports": [{"port": "443", "protocol": "tcp", "service": "https"}]
+        }]
+        wrong_ip = MagicMock()
+        wrong_ip.ip = "1.1.1.1"
+        wrong_ip.target = "target_a"
+        wrong_ip.id = 1
+        right_ip = MagicMock()
+        right_ip.ip = "1.1.1.1"
+        right_ip.target = "target_b"
+        right_ip.id = 2
+        self.db.Session.return_value.query.return_value.all.return_value = [wrong_ip, right_ip]
+        self.db.add_ports(results)
+        expected_ports = [{
+            'port': '443', 'protocol': 'tcp', 'service': 'https',
+            'ip': 2, 'source': 'nmap', 'open': None, 'updated': None
+        }]
+        mock_insert.return_value.values.assert_called_with(expected_ports)
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_ports_update(self, mock_insert):
         """Should update ports if existing"""
         self.db.Session = MagicMock()
         self.db.add_ips = MagicMock()
@@ -227,7 +334,6 @@ class DbTestCase(unittest.TestCase):
                         "service": "Super Apache NGINX Deluxe",
                         "open": True,
                         "updated": 1654969137
-
                     },
                     {
                         "port": "53",
@@ -237,21 +343,24 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_ports(results)
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.id = 42
+        mock_ip.target = '7gh33tjf72'
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_ports(results)
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.Port)
-            query.return_value.filter_by.assert_has_calls([
-                unittest.mock.call(ip='1.1.1.1'),
-                unittest.mock.call().__bool__(),
-                unittest.mock.call().first()
-            ])
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
-            self.db.add_ips.assert_called_with(results)
+        expected_ports = [
+            {'port': '443', 'protocol': 'tcp', 'service': 'Super Apache NGINX Deluxe',
+             'ip': 42, 'source': 'nmap', 'open': True, 'updated': 1654969137},
+            {'port': '53', 'protocol': 'udp', 'service': 'DNS',
+             'ip': 42, 'source': 'nmap', 'open': None, 'updated': None}
+        ]
+        mock_insert.assert_called_with(synack.db.models.Port)
+        mock_insert.return_value.values.assert_called_with(expected_ports)
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+        self.db.add_ips.assert_called_with(results, self.db.Session.return_value)
 
     def test_add_targets(self):
         """Should update Targets table"""
@@ -268,6 +377,20 @@ class DbTestCase(unittest.TestCase):
         self.db.add_targets(targets, is_registered=True)
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_targets_dict(self, mock_insert):
+        """Should handle dict of targets and insert matching orgs"""
+        self.db.Session = MagicMock()
+        self.db.add_organizations = MagicMock()
+        session = self.db.Session.return_value
+        session.query.return_value.all.return_value = [('orgslug',)]
+        targets = {'t1': {'organization': {'slug': 'orgslug'}, 'category': {'id': 10}}}
+        self.db.add_targets(targets)
+        mock_insert.assert_called_with(synack.db.models.Target)
+        session.execute.assert_called()
+        session.commit.assert_called_with()
+        session.close.assert_called_with()
 
     def test_add_targets_empty_db(self):
         """Should update Targets table with new Target"""
@@ -287,13 +410,27 @@ class DbTestCase(unittest.TestCase):
         self.db.Session.return_value.commit.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
 
-    def test_add_urls_new(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_targets_str_organization(self, mock_insert):
+        """Should handle string organization and int category"""
+        self.db.Session = MagicMock()
+        self.db.add_organizations = MagicMock()
+        session = self.db.Session.return_value
+        session.query.return_value.all.return_value = [('orgslug',)]
+        targets = [{'organization': 'orgslug', 'category': 10}]
+        self.db.add_targets(targets)
+        mock_insert.assert_called_with(synack.db.models.Target)
+        session.execute.assert_called()
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_urls_new(self, mock_insert):
         """Should add url if new"""
         self.db.Session = MagicMock()
         self.db.add_ips = MagicMock()
         results = [
             {
                 "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
                 "urls": [
                     {
                         "url": "https://www.google.com",
@@ -306,19 +443,25 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        query.return_value.filter.return_value.first.return_value = None
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_urls(results)
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.id = 42
+        mock_ip.target = '7gh33tjf72'
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_urls(results)
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.Url)
-            query.return_value.filter.assert_called_with('sqlalchemy.and_')
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
+        expected_urls = [
+            {'ip': 42, 'url': 'https://www.google.com', 'screenshot_url': 'https://imgur.com/219hi4'},
+            {'ip': 42, 'url': 'https://www.ebay.com', 'screenshot_url': 'file:///tmp/qwh82938.jpg'}
+        ]
+        mock_insert.assert_called_with(synack.db.models.Url)
+        mock_insert.return_value.values.assert_called_with(expected_urls)
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+        self.db.add_ips.assert_called_with(results, self.db.Session.return_value)
 
-    def test_add_urls_no_ip(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_urls_no_ip(self, mock_insert):
         """Should be fine if IP isn't included"""
         self.db.Session = MagicMock()
         self.db.add_ips = MagicMock()
@@ -336,25 +479,72 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        query.return_value.filter_by.return_value.first.return_value = None
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_urls(results)
+        self.db.Session.return_value.query.return_value.all.return_value = []
+        self.db.add_urls(results)
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.Url)
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
-            self.db.add_ips.assert_called_with(results)
+        mock_insert.assert_not_called()
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+        self.db.add_ips.assert_called_with(results, self.db.Session.return_value)
 
-    def test_add_url_update(self):
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_urls_falls_back_to_single_ip_match(self, mock_insert):
+        """Should support older callers that omit target when IP is unambiguous"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [{
+            "ip": "1.1.1.1",
+            "urls": [{"url": "https://example.com", "screenshot_url": "file:///tmp/screen.png"}]
+        }]
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.target = "target_a"
+        mock_ip.id = 42
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_urls(results)
+        expected_urls = [{
+            'ip': 42,
+            'url': 'https://example.com',
+            'screenshot_url': 'file:///tmp/screen.png'
+        }]
+        mock_insert.return_value.values.assert_called_with(expected_urls)
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_urls_uses_target_in_ip_lookup(self, mock_insert):
+        """Should attach urls to the IP row for the matching target"""
+        self.db.Session = MagicMock()
+        self.db.add_ips = MagicMock()
+        results = [{
+            "ip": "1.1.1.1",
+            "target": "target_b",
+            "urls": [{"url": "https://example.com", "screenshot_url": "file:///tmp/screen.png"}]
+        }]
+        wrong_ip = MagicMock()
+        wrong_ip.ip = "1.1.1.1"
+        wrong_ip.target = "target_a"
+        wrong_ip.id = 1
+        right_ip = MagicMock()
+        right_ip.ip = "1.1.1.1"
+        right_ip.target = "target_b"
+        right_ip.id = 2
+        self.db.Session.return_value.query.return_value.all.return_value = [wrong_ip, right_ip]
+        self.db.add_urls(results)
+        expected_urls = [{
+            'ip': 2,
+            'url': 'https://example.com',
+            'screenshot_url': 'file:///tmp/screen.png'
+        }]
+        mock_insert.return_value.values.assert_called_with(expected_urls)
+
+    @patch('synack.plugins.db.sqlite_insert')
+    def test_add_url_update(self, mock_insert):
         """Should update urls if existing"""
         self.db.Session = MagicMock()
         self.db.add_ips = MagicMock()
         results = [
             {
                 "ip": "1.1.1.1",
+                "target": "7gh33tjf72",
                 "urls": [
                     {
                         "url": "https://www.google.com",
@@ -367,28 +557,34 @@ class DbTestCase(unittest.TestCase):
                 ]
             }
         ]
-        query = self.db.Session.return_value.query
-        with patch.object(sqlalchemy, 'and_') as mock_and:
-            mock_and.return_value = 'sqlalchemy.and_'
-            self.db.add_urls(results)
+        mock_ip = MagicMock()
+        mock_ip.ip = "1.1.1.1"
+        mock_ip.id = 42
+        mock_ip.target = '7gh33tjf72'
+        self.db.Session.return_value.query.return_value.all.return_value = [mock_ip]
+        self.db.add_urls(results)
 
-            mock_and.assert_called()
-            query.asset_called_with(synack.db.models.Url)
-            self.db.Session.return_value.commit.assert_called_with()
-            self.db.Session.return_value.close.assert_called_with()
-            self.db.add_ips.assert_called_with(results)
+        expected_urls = [
+            {'ip': 42, 'url': 'https://www.google.com', 'screenshot_url': 'https://imgur.com/219hi4'},
+            {'ip': 42, 'url': 'https://www.ebay.com', 'screenshot_url': 'file:///tmp/qwh82938.jpg'}
+        ]
+        mock_insert.assert_called_with(synack.db.models.Url)
+        mock_insert.return_value.values.assert_called_with(expected_urls)
+        self.db.Session.return_value.commit.assert_called_with()
+        self.db.Session.return_value.close.assert_called_with()
+        self.db.add_ips.assert_called_with(results, self.db.Session.return_value)
 
     def test_api_token(self):
         """Should set and get the api_token from the database"""
         self.db.get_config = MagicMock()
         self.db.set_config = MagicMock()
 
-        self.db.get_config.return_value = "123"
+        self.db.get_config.return_value = '123'
+        self.assertEqual('123', self.db.api_token)
+        self.db.get_config.assert_called_with('api_token')
 
-        self.db.api_token = "123"
-        self.db.set_config.assert_called_with("api_token", "123")
-        self.assertEqual("123", self.db.api_token)
-        self.db.get_config.assert_called_with("api_token")
+        self.db.api_token = '456'
+        self.db.set_config.assert_called_with('api_token', '456')
 
     def test_categories(self):
         """Should pull the categories from the database"""
@@ -413,18 +609,50 @@ class DbTestCase(unittest.TestCase):
         self.db.get_config.assert_called_with("debug")
 
         self.db.debug = True
-        self.assertEqual(True, self.db.debug)
-        self.assertEqual(True, self.db.state.debug)
+        self.db.set_config.assert_called_with('debug', True)
 
-    def test_debug_state(self):
-        """Should pull debug from the State"""
-        self.db.get_config = MagicMock()
+    def test_duo_akey(self):
+        """Should get and set duo_akey from the database"""
+        self.db.get_config = MagicMock(return_value='akey123')
         self.db.set_config = MagicMock()
-        self.db.get_config.return_value = False
+        self.assertEqual('akey123', self.db.duo_akey)
+        self.db.duo_akey = 'akey123'
+        self.db.set_config.assert_called_with('duo_akey', 'akey123')
 
-        self.db.state.debug = True
-        self.assertEqual(True, self.db.debug)
-        self.assertEqual(True, self.db.state.debug)
+    def test_duo_host(self):
+        """Should get and set duo_host from the database"""
+        self.db.get_config = MagicMock(return_value='api.duo.com')
+        self.db.set_config = MagicMock()
+        self.assertEqual('api.duo.com', self.db.duo_host)
+        self.db.duo_host = 'api.duo.com'
+        self.db.set_config.assert_called_with('duo_host', 'api.duo.com')
+
+    def test_duo_pkey(self):
+        """Should get and set duo_pkey from the database"""
+        self.db.get_config = MagicMock(return_value='pkey123')
+        self.db.set_config = MagicMock()
+        self.assertEqual('pkey123', self.db.duo_pkey)
+        self.db.duo_pkey = 'pkey123'
+        self.db.set_config.assert_called_with('duo_pkey', 'pkey123')
+
+    @patch('synack.plugins.db.RSA')
+    def test_duo_rsa_key(self, mock_rsa):
+        """Should auto-generate and store RSA key when none exists"""
+        self.db.get_config = MagicMock(return_value=None)
+        self.db.set_config = MagicMock()
+        mock_key = MagicMock()
+        mock_rsa.generate.return_value = mock_key
+        mock_key.export_key.return_value = b'FAKE_PEM'
+        result = self.db.duo_rsa_key
+        mock_rsa.generate.assert_called_with(2048)
+        self.db.set_config.assert_called_with('duo_rsa_key', 'FAKE_PEM')
+        self.assertEqual('FAKE_PEM', result)
+
+    def test_duo_rsa_key_setter(self):
+        """Should set duo_rsa_key in the database"""
+        self.db.set_config = MagicMock()
+        self.db.duo_rsa_key = 'MY_PEM'
+        self.db.set_config.assert_called_with('duo_rsa_key', 'MY_PEM')
 
     def test_email(self):
         """Should pull email from the database"""
@@ -444,17 +672,8 @@ class DbTestCase(unittest.TestCase):
             mock_input.return_value = '1@2.com'
             self.assertEqual('1@2.com', self.db.email)
             mock_input.assert_called_with('Synack Email: ')
-        self.assertEqual('1@2.com', self.db.state.email)
         self.db.get_config.assert_called_with("email")
         self.db.set_config.assert_called_with("email", "1@2.com")
-
-    def test_email_state(self):
-        """Should pull email from the state"""
-        self.db.get_config = MagicMock()
-        self.db.state.email = "1@2.com"
-
-        self.assertEqual("1@2.com", self.db.email)
-        self.assertEqual("1@2.com", self.db.state.email)
 
     def test_find_ips(self):
         """Should return a list of IPs"""
@@ -553,16 +772,30 @@ class DbTestCase(unittest.TestCase):
     def test_find_targets(self):
         self.db.Session = MagicMock()
         query = self.db.Session.return_value.query
-        query.return_value.filter_by.return_value.all.return_value = 'ret'
+        query.return_value.filter.return_value.all.return_value = 'ret'
 
         self.assertEqual('ret', self.db.find_targets(codename='SLOPPYFISH'))
 
         self.db.Session.assert_called_with()
         query.assert_called_with(synack.db.models.Target)
-        query.return_value.filter_by.assert_called_with(codename='SLOPPYFISH')
-        query.return_value.filter_by.return_value.all.assert_called_with()
+        query.return_value.filter.assert_called()
+        query.return_value.filter.return_value.all.assert_called_with()
         self.db.Session.return_value.expunge_all.assert_called_with()
         self.db.Session.return_value.close.assert_called_with()
+
+    def test_find_targets_like(self):
+        """Should apply like filter when like=True"""
+        self.db.Session = MagicMock()
+        self.db.Session.return_value.query.return_value.filter.return_value.all.return_value = []
+        self.db.find_targets(codename='FISH', like=True)
+        self.db.Session.return_value.query.return_value.filter.assert_called()
+
+    def test_find_targets_or(self):
+        """Should apply OR filter when or=True"""
+        self.db.Session = MagicMock()
+        self.db.Session.return_value.query.return_value.filter.return_value.all.return_value = []
+        self.db.find_targets(codename='FISH', **{'or': True})
+        self.db.Session.return_value.query.return_value.filter.assert_called()
 
     def test_find_urls(self):
         """Should return a list of Urls"""
@@ -629,14 +862,16 @@ class DbTestCase(unittest.TestCase):
     def test_get_config_empty_db(self):
         self.db.Session = MagicMock()
         query = self.db.Session.return_value.query
-        query.return_value.filter_by.return_value.first.return_value = None
+        mock_config = MagicMock()
+        mock_config.password = None
+        query.return_value.filter_by.return_value.first.side_effect = [None, mock_config]
 
         self.db.get_config('password')
 
         query.assert_called_with(synack.db.models.Config)
         query.return_value.filter_by.assert_called_with(id=1)
-        query.return_value.filter_by.return_value.first.assert_called_with()
         self.db.Session.return_value.add.assert_called()
+        self.db.Session.return_value.commit.assert_called()
         self.db.Session.return_value.close.assert_called_with()
 
     def test_http_proxy(self):
@@ -685,6 +920,29 @@ class DbTestCase(unittest.TestCase):
         self.db.notifications_token = "123"
         self.db.set_config.assert_called_with("notifications_token", "123")
 
+    def test_otp_count(self):
+        """Should pull otp_count from the database"""
+        self.db.get_config = MagicMock()
+        self.db.get_config.return_value = 5
+
+        self.assertEqual(5, self.db.otp_count)
+        self.db.get_config.assert_called_with("otp_count")
+
+    def test_otp_count_none(self):
+        """Should return None without prompting when otp_count is unset"""
+        self.db.get_config = MagicMock()
+        self.db.get_config.return_value = None
+
+        with patch("builtins.input") as mock_input:
+            self.assertIsNone(self.db.otp_count)
+            mock_input.assert_not_called()
+
+    def test_otp_count_set(self):
+        """Should set otp_count in the database"""
+        self.db.set_config = MagicMock()
+        self.db.otp_count = 5
+        self.db.set_config.assert_called_with('otp_count', 5)
+
     def test_otp_secret(self):
         """Should pull otp_secret from the database"""
         self.db.get_config = MagicMock()
@@ -692,29 +950,22 @@ class DbTestCase(unittest.TestCase):
         self.db.get_config.return_value = "ABCDEFGH"
 
         self.assertEqual("ABCDEFGH", self.db.otp_secret)
-        self.assertEqual("ABCDEFGH", self.db.state.otp_secret)
 
-    def test_otp_secret_prompt(self):
-        """Should ask the user for otp_secret if none"""
+    def test_otp_secret_none(self):
+        """Should return None without prompting when otp_secret is unset"""
         self.db.get_config = MagicMock()
-        self.db.set_config = MagicMock()
         self.db.get_config.return_value = None
 
         with patch("builtins.input") as mock_input:
-            mock_input.return_value = 'ABCDEFGH'
-            self.assertEqual('ABCDEFGH', self.db.otp_secret)
-            mock_input.assert_called_with('Synack OTP Secret: ')
-        self.assertEqual('ABCDEFGH', self.db.state.otp_secret)
+            self.assertIsNone(self.db.otp_secret)
+            mock_input.assert_not_called()
         self.db.get_config.assert_called_with("otp_secret")
-        self.db.set_config.assert_called_with("otp_secret", "ABCDEFGH")
 
-    def test_otp_secret_state(self):
-        """Should pull otp_secret from the state"""
-        self.db.get_config = MagicMock()
-        self.db.state.otp_secret = "ABCDEFGH"
-
-        self.assertEqual("ABCDEFGH", self.db.otp_secret)
-        self.assertEqual("ABCDEFGH", self.db.state.otp_secret)
+    def test_otp_secret_set(self):
+        """Should set otp_secret in the database"""
+        self.db.set_config = MagicMock()
+        self.db.otp_secret = 'SECRET123'
+        self.db.set_config.assert_called_with('otp_secret', 'SECRET123')
 
     def test_password(self):
         """Should pull password from the database"""
@@ -734,17 +985,8 @@ class DbTestCase(unittest.TestCase):
             mock_input.return_value = 'password1234'
             self.assertEqual('password1234', self.db.password)
             mock_input.assert_called_with('Synack Password: ')
-        self.assertEqual('password1234', self.db.state.password)
         self.db.get_config.assert_called_with("password")
         self.db.set_config.assert_called_with("password", "password1234")
-
-    def test_password_state(self):
-        """Should pull password from the state"""
-        self.db.get_config = MagicMock()
-        self.db.state.password = "password1234"
-
-        self.assertEqual("password1234", self.db.password)
-        self.assertEqual("password1234", self.db.state.password)
 
     def test_ports(self):
         """Should get all ports from the database"""
@@ -775,20 +1017,7 @@ class DbTestCase(unittest.TestCase):
         ]
 
         self.assertEqual(ret, self.db.proxies)
-        self.db.get_config.has_calls(calls)
-
-    def test_proxies_state(self):
-        """Should pull proxies from the State over the database"""
-        self.db.get_config = MagicMock()
-        self.db.state.http_proxy = 'http://1.2.3.4:8080'
-        self.db.state.https_proxy = 'https://4.3.2.1:8080'
-
-        self.assertEqual(self.db.proxies, {
-            'http': 'http://1.2.3.4:8080',
-            'https': 'https://4.3.2.1:8080'
-        })
-
-        self.db.get_config.assert_not_called()
+        self.db.get_config.assert_has_calls(calls)
 
     def test_remove_targets(self):
         self.db.Session = MagicMock()
@@ -820,18 +1049,9 @@ class DbTestCase(unittest.TestCase):
         self.db.scratchspace_dir
 
         self.assertEqual(pathlib.Path('/tmp'), self.db.scratchspace_dir)
-        self.assertEqual(pathlib.Path('/tmp'), self.db.state.scratchspace_dir)
         self.db.get_config.assert_called_with('scratchspace_dir')
         self.db.scratchspace_dir = '/tmp'
         self.db.set_config.assert_called_with('scratchspace_dir', '/tmp')
-
-    def test_scratchspace_dir_state(self):
-        """Should provide state scratchspace_dir over database"""
-        self.db.get_config = MagicMock()
-        self.db.state.scratchspace_dir = pathlib.Path('/tmp')
-
-        self.assertEqual(pathlib.Path('/tmp'), self.db.scratchspace_dir)
-        self.db.get_config.assert_not_called()
 
     def test_set_config(self):
         self.db.Session = MagicMock()
@@ -867,6 +1087,7 @@ class DbTestCase(unittest.TestCase):
             unittest.mock.call('script_location', str(db_dir / 'alembic')),
             unittest.mock.call('version_locations',
                                str(db_dir / 'alembic/versions')),
+            unittest.mock.call('path_separator', 'os'),
             unittest.mock.call('sqlalchemy.url',
                                'sqlite:///' + str(conf_dir / 'synackapi.db')),
         ]
@@ -876,6 +1097,40 @@ class DbTestCase(unittest.TestCase):
                 self.db.set_migration()
                 mock_config.return_value.set_main_option.assert_has_calls(calls)
                 mock_upgrade.assert_called_with(mock, 'head')
+
+    def test_slack_app_token(self):
+        """Should get and set slack_app_token from the database"""
+        self.db.get_config = MagicMock(return_value='xapp-123')
+        self.db.set_config = MagicMock()
+        self.assertEqual('xapp-123', self.db.slack_app_token)
+        self.db.slack_app_token = 'xapp-123'
+        self.db.set_config.assert_called_with('slack_app_token', 'xapp-123')
+
+    def test_slack_app_token_prompt(self):
+        """Should prompt for slack_app_token when unset"""
+        self.db.get_config = MagicMock(return_value=None)
+        self.db.set_config = MagicMock()
+        with patch('builtins.input', return_value='xapp-456') as mock_input:
+            result = self.db.slack_app_token
+        mock_input.assert_called_with('Slack App Token: ')
+        self.assertEqual('xapp-456', result)
+
+    def test_slack_channel(self):
+        """Should get and set slack_channel from the database"""
+        self.db.get_config = MagicMock(return_value='#general')
+        self.db.set_config = MagicMock()
+        self.assertEqual('#general', self.db.slack_channel)
+        self.db.slack_channel = '#general'
+        self.db.set_config.assert_called_with('slack_channel', '#general')
+
+    def test_slack_channel_prompt(self):
+        """Should prompt for slack_channel when unset"""
+        self.db.get_config = MagicMock(return_value=None)
+        self.db.set_config = MagicMock()
+        with patch('builtins.input', return_value='#random') as mock_input:
+            result = self.db.slack_channel
+        mock_input.assert_called_with('Slack Channel: ')
+        self.assertEqual('#random', result)
 
     def test_slack_url(self):
         """Should set and get the slack_url from the database"""
@@ -973,6 +1228,14 @@ class DbTestCase(unittest.TestCase):
         self.assertEqual("user5", self.db.smtp_username)
         self.db.get_config.assert_called_with("smtp_username")
 
+    def test_synack_domain(self):
+        """Should get and set synack_domain from the database"""
+        self.db.get_config = MagicMock(return_value='synack.us')
+        self.db.set_config = MagicMock()
+        self.assertEqual('synack.us', self.db.synack_domain)
+        self.db.synack_domain = 'synack.us'
+        self.db.set_config.assert_called_with('synack_domain', 'synack.us')
+
     def test_targets(self):
         """Should get all targets from the database"""
         self.db.Session = MagicMock()
@@ -992,18 +1255,9 @@ class DbTestCase(unittest.TestCase):
         self.db.template_dir
 
         self.assertEqual(pathlib.Path('/tmp'), self.db.template_dir)
-        self.assertEqual(pathlib.Path('/tmp'), self.db.state.template_dir)
         self.db.get_config.assert_called_with('template_dir')
         self.db.template_dir = '/tmp'
         self.db.set_config.assert_called_with('template_dir', '/tmp')
-
-    def test_template_dir_state(self):
-        """Should provide state template_dir over database"""
-        self.db.get_config = MagicMock()
-        self.db.state.template_dir = pathlib.Path('/tmp')
-
-        self.assertEqual(pathlib.Path('/tmp'), self.db.template_dir)
-        self.db.get_config.assert_not_called()
 
     def test_urls(self):
         """Should get all urls from the database"""
@@ -1027,19 +1281,6 @@ class DbTestCase(unittest.TestCase):
         self.db.set_config.assert_called_with("use_proxies", True)
         self.assertEqual(True, self.db.use_proxies)
 
-    def test_use_proxies_state(self):
-        """State use_proxies should override database"""
-        self.db.get_config = MagicMock()
-
-        self.db.get_config.return_value = True
-
-        self.assertEqual(True, self.db.use_proxies)
-
-        self.db.state.use_proxies = False
-        self.assertEqual(False, self.db.use_proxies)
-        self.db.state.use_proxies = True
-        self.assertEqual(True, self.db.use_proxies)
-
     def test_user_id(self):
         """Should set and get the user_id from the database"""
         self.db.get_config = MagicMock()
@@ -1061,17 +1302,4 @@ class DbTestCase(unittest.TestCase):
 
         self.db.use_scratchspace = True
         self.db.set_config.assert_called_with("use_scratchspace", True)
-        self.assertEqual(True, self.db.use_scratchspace)
-
-    def test_use_scratchspace_state(self):
-        """State use_scratchspace should override database"""
-        self.db.get_config = MagicMock()
-
-        self.db.get_config.return_value = True
-
-        self.assertEqual(True, self.db.use_scratchspace)
-
-        self.db.state.use_scratchspace = False
-        self.assertEqual(False, self.db.use_scratchspace)
-        self.db.state.use_scratchspace = True
         self.assertEqual(True, self.db.use_scratchspace)

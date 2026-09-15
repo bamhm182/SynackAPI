@@ -28,7 +28,7 @@
 >> Examples
 >> ```python3
 >> >>> scope = h.targets.get_scope(codename='JANGLYJALOPY')
->> >>> scope_db = h.targets.build_scope_host_db(scope)
+>> >>> scope_db = h.targets.build_scope_host_db('2398her8h', scope)
 >> >>> scope_db
 >> [
 >>   {'ip': '1.1.1.1', 'target': '2398her8h'},
@@ -37,22 +37,24 @@
 >> >>> h.db.add_ips(scope_db)
 >> ```
 
-## targets.build_scope_web_burp(scope)
+## targets.build_scope_web_burp(scope, target)
 
-> Prints a dictionary compatible with Burp Suite from the output of `targets.get_scope_web()`
+> Prints a dictionary compatible with Burp Suite from the output of `targets.get_scope_web()`.
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
 > | `scope` | list(dict) | Return of `targets.get_scope_web()` from Synack's API
+> | `target` | db.models.Target | Target used to populate the Synack session-handling header
 >
 >> Examples
 >> ```python3
->> >>> scope = h.targets.get_scope(codename='SLAPPYMONKEY')
->> >>> h.targets.build_scope_web_burp(scope)
+>> >>> target = h.db.find_targets(codename='SLAPPYMONKEY')[0]
+>> >>> scope = h.targets.get_scope_web(target)
+>> >>> h.targets.build_scope_web_burp(scope, target)
 >> {'target': {'scope': {
->>     'advanced_mode': 'true',
->>     'exclude': [{'enabled': True, 'scheme': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
->>     'include': [{'enabled': True, 'scheme': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
+>>     'advanced_mode': True,
+>>     'exclude': [{'enabled': True, 'protocol': 'https', 'host': 'bad.monkey.com', 'file': '/'}, ...]
+>>     'include': [{'enabled': True, 'protocol': 'https', 'host': 'good.monkey.com', 'file': '/'}, ...]
 >> }}}
 >> ```
 
@@ -79,21 +81,6 @@
 >> >>> h.db.add_urls(scope_db)
 >> ```
 
-## targets.build_scope_web_urls(scope)
-
-> Prints a dictionary containing lists of `in` scope and `out` of scope URLs
->
-> | Arguments | Type | Description
-> | --- | --- | ---
-> | `scope` | list(dict) | Return of `targets.get_scope_web()` from Synack's API
->
->> Examples
->> ```python3
->> >>> scope = h.targets.get_scope(codename'SLAPPYMONKEY')
->> >>> h.targets.build_scope_web_urls(scope)
->> {'in': ['good.monkey.com'], 'out': ['bad.monkey.com']}
->> ```
-
 ## targets.build_slug_from_codename(codename)
 
 > Returns a Target's slug given its codename.
@@ -108,6 +95,21 @@
 >> 'uwfpmfpgjlum'
 >> ```
 
+## targets.get(status='registered', query_changes={})
+
+> Pulls back a list of targets matching the specified query
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `status` | string | The type of targets to pull back. (Ex: `registered`, `unregistered`, `upcoming`, `all`)
+> | `query_changes` | dict() | Changes to make to the standard query. (Ex: `{"sorting['field']": "dateUploaded"}`
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get(status='unregistered')
+>> [{"codename": "SLEEPYSLUG", ...}, ...]
+>> ```
+
 ## targets.get_assessments()
 
 > Pull back a list of assessments and whether you have passed them.
@@ -120,11 +122,11 @@
 >> [{"id": 1, ...},...]
 >> ```
 
-## targets.get_assets(self, target=None, asset_type=None, host_type=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=None, organization_uid=None, **kwargs)
+## targets.get_assets(target=None, asset_type=None, host_type=None, active='true', scope=['in', 'discovered'], sort='location', sort_dir='asc', page=1, perPage=5000, organization_uid=None, **kwargs)
 
 > Pull back a list of assets related to a target.
 >
-> If no arguments are provided, whatever target you are currently connected to will be queried with the default paramters.
+> If no arguments are provided, whatever target you are currently connected to will be queried with the default parameters.
 > You can use the following arguments to specify a target/organization or override default parameters.
 >
 > Note that `scopeRules` and `listings` both have a `scope` field, which is confusing.
@@ -138,8 +140,10 @@
 > | `host_type` | str | Type of information to get back ('cidr')
 > | `active` | str | This field appears to specify whether the asset is an active item in the target's scope
 > | `scope` | str | I'm honestly not entirely sure what this field is, but the default is ['in', 'discovered'] when made officially.
-> | `sort_dir` | str | SQL-type sort direction (`asc`, `desc`)
+> | `sort` | str | Field to sort by, or `None` to omit sorting
+> | `sort_dir` | str | SQL-type sort direction (`asc`, `desc`), or `None` to omit
 > | `page` | int | The page of assets to return
+> | `perPage` | int | Number of assets per page
 > | `organization_uid` | str | slug of the organization that owns the target
 >
 >> Examples
@@ -151,13 +155,15 @@
 >> 'scopeRules': [{'appliesTo': 'both', 'rule': '*.www.something.com/*', 'uid': 'qiuwe'}, ...],
 >> ...
 >> }, ...]
+>> ```
 
-## targets.get_attachments(target, **kwargs)
+## targets.get_attachments(download=False, target=None, **kwargs)
 
 > Gets the attachments of a specific target.
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
+> | `download` | bool | Download attachments to scratchspace when enabled
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
 >
@@ -166,8 +172,9 @@
 >> >>> h.targets.get_attachments(codename='SLAPPYFROG')
 >> [{
 >>   'id': 1337, 'listing_id': '7sl4ppyfr0g', 'created_at': 1659461184, 'updated_at': 1659712248,
->>   'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...' 
+>>   'filename': 'FrogApp.apk', 'url': 'https://storage.googleapis.com/...'
 >> }, ...]
+>> ```
 
 ## targets.get_connected()
 
@@ -183,7 +190,7 @@
 
 > Get the connection details of a target
 >
-> | Argments | Type | Description
+> | Arguments | Type | Description
 > | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
@@ -210,33 +217,49 @@
 >> [{"credentials": [{...},...],...}]
 >> ```
 
-## targets.get_query(status='registered', query_changes={})
+## targets.get_info(target=None, **kwargs)
 
-> Pulls back a list of targets matching the specified query
+> Gets full target metadata for a target.
 >
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `status` | string | The type of targets to pull back. (Ex: `registered`, `unregistered`, `upcoming`, `all`)
-> | `query_changes` | dict() | Changes to make to the standard query. (Ex: `{"sorting['field']": "dateUploaded"}`
+> | `target` | db.models.Target | A single Target returned from the database
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
 >
 >> Examples
 >> ```python3
->> >>> h.targets.get_query(status='unregistered')
->> [{"codename": "SLEEPYSLUG", ...}, ...]
+>> >>> h.targets.get_info(codename='SLAPPYFROG')
+>> {'slug': '...', 'codename': 'SLAPPYFROG', ...}
 >> ```
 
 ## targets.get_registered_summary()
 
 > The Registered Summary is a short list of information about every target you have registered.
 > The endpoint used by this function is hit every time you refresh a page on the platform, so
-> eventhough it sounds like a lot, it isn't bad.
+> even though it sounds like a lot, it isn't bad.
 >
 > Information from this function is cached in the Database
 >
 >> Examples
 >> ```python3
->> >>> h.targets.get_unregistered_summary()
+>> >>> h.targets.get_registered_summary()
 >> {"pflupm": {"id": "pflupm",...},...}
+>> ```
+
+## targets.get_roe(unique=False, dedupe=True, **kwargs)
+
+> Returns the rules of engagement for a target as a set of strings. With `unique=True`, common baseline rules are removed so target-specific rules stand out. With `dedupe=True`, near-duplicate rules are collapsed.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `unique` | bool | Remove common baseline RoE rules
+> | `dedupe` | bool | Collapse near-duplicate rules
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_roe(codename='SILLYFILLY', unique=True)
+>> {'Client-specific rule', ...}
 >> ```
 
 ## targets.get_scope(**kwargs)
@@ -288,12 +311,13 @@
 >>   'raw_url': 'https://good.frog.com', 'status': 'in', 'bandwidth': 0, 'notes': '',
 >>   'owners': [{'owner_uid': '97g8ehri', 'owner_type_id': 1, 'codename': 'slappyfrog'}, ...]
 >> }, ...]
+>> ```
 
 ## targets.get_submissions(target, status="accepted", **kwargs)
 
 > Get the details of previously submitted vulnerabilities from the analytics of a target
 >
-> | Argments | Type | Description
+> | Arguments | Type | Description
 > | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `status` | str | Query either `accepted`, `rejected` or `in_queue` vulnerabilities
@@ -328,7 +352,7 @@
 
 > Get a summary of the submission analytics of a target
 >
-> | Argments | Type | Description
+> | Arguments | Type | Description
 > | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `hours_ago` | int | The amount of hours since the current time to query the analytics for. (ex: `hours_ago=48` will query how many submissions were made in the last `48` hours. Defaults to lifetime when not set.)
@@ -365,11 +389,29 @@
 >> [{'codename': 'SLEEPYSLUG', 'upcoming_start_date': 1668430800, ...}, ...]
 >> ```
 
+## targets.get_updates(target=None, page=1, max_pages=1, per_page=10, **kwargs)
+
+> Gets update posts for a target. If a page is full and `page < max_pages`, subsequent pages are fetched recursively.
+>
+> | Arguments | Type | Description
+> | --- | --- | ---
+> | `target` | db.models.Target | A single Target returned from the database
+> | `page` | int | First page to request
+> | `max_pages` | int | Maximum number of pages to request
+> | `per_page` | int | Updates per page
+> | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
+>
+>> Examples
+>> ```python3
+>> >>> h.targets.get_updates(codename='BLINKYBABOON', max_pages=2)
+>> [{'title': 'Update', ...}, ...]
+>> ```
+
 ## targets.set_connected(target, **kwargs)
 
 > Connect to a specified target
 >
-> | Argments | Type | Description
+> | Arguments | Type | Description
 > | --- | --- | ---
 > | `target` | db.models.Target | A single Target returned from the database
 > | `kwargs` | kwargs | Information used to look up a Target in the database (ex: `codename`, `slug`, etc.)
@@ -395,9 +437,9 @@
 >> Examples
 >> ```python3
 >> >>> msns = h.targets.get_unregistered()
->> >>> h.targets.set_unregistered([msns[0]])
+>> >>> h.targets.set_registered([msns[0]])
 >> [{"id": "jlgbmjpbgm",...}]
 >> >>>
->> >>> h.targets.set_unregistered()
+>> >>> h.targets.set_registered()
 >> [{"id": "pwjlgmf",...},...]
 >> ```

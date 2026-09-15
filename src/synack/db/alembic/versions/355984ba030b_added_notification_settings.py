@@ -33,10 +33,10 @@ def downgrade():
     with op.batch_alter_table('config') as batch_op:
         batch_op.drop_column('scratchspace_dir')
         batch_op.drop_column('slack_url')
-        batch_op.drop_column('smtp_from_email')
+        batch_op.drop_column('smtp_email_from')
         batch_op.drop_column('smtp_password')
         batch_op.drop_column('smtp_port')
         batch_op.drop_column('smtp_server')
-        batch_op.drop_column('smtp_to_email')
+        batch_op.drop_column('smtp_email_to')
         batch_op.drop_column('smtp_starttls')
         batch_op.drop_column('smtp_username')

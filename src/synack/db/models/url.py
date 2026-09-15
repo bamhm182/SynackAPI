@@ -16,3 +16,4 @@ class Url(Base):
     ip = sa.Column(sa.Integer, sa.ForeignKey(IP.id))
     url = sa.Column(sa.VARCHAR(1024), default="")
     screenshot_url = sa.Column(sa.VARCHAR(1024), default="")
+    __table_args__ = (sa.UniqueConstraint('ip', 'url', name='uq_url'),)

@@ -12,3 +12,4 @@ Base = declarative_base()
 class Organization(Base):
     __tablename__ = 'organizations'
     slug = sa.Column(sa.VARCHAR(20), primary_key=True)
+    name = sa.Column(sa.VARCHAR(100))

@@ -11,16 +11,23 @@ Additionally, some properties can be overridden by the State, which allows you t
 | api_token | No | No | Synack Access Token used to authenticate requests
 | categories | Yes | No | All cached Categories
 | debug | No | Yes | Changes the verbosity of some actions, such as network requests
+| duo_akey | No | Yes | Duo virtual-device application key used for push approval
+| duo_host | No | Yes | Duo API hostname used for push approval
+| duo_pkey | No | Yes | Duo virtual-device push key used for request signing
+| duo_rsa_key | No | Yes | RSA private key used to sign Duo virtual-device push requests; generated on first access if unset
 | email | No | Yes | The email used to log into Synack
 | http_proxy | No | Yes | The http web proxy (Burp, etc.) to use for requests
 | https_proxy | No | Yes | The https web proxy (Burp, etc.) to use for requests
 | ips | Yes | No | All cached IPs
 | notifications_token | No | No | Synack Notifications Token used to authenticate requests
-| otp_secret | No | Yes | Synack OTP Secret
+| otp_count | No | Yes | HOTP counter used for Duo offline passcodes
+| otp_secret | No | Yes | Synack/Duo OTP secret used for HOTP passcodes
 | password | No | Yes | The password used to log into Synack
 | ports | Yes | No | All cached Ports
 | proxies | Yes | Yes | A dict built from http_proxy and https_proxy
 | scratchspace_dir | No | Yes | The path to a directory where your working files (scopes, scans, etc.) are stored
+| slack_app_token | No | Yes | Slack app-level token used for Notifications
+| slack_channel | No | Yes | Slack channel used for Notifications
 | slack_url | No | Yes | The Slack API URL used for Notifications
 | smtp_email_from | No | Yes | Email Source for SMTP Notifications
 | smtp_email_to | No | Yes | Email Destination for SMTP Notifications
@@ -29,10 +36,13 @@ Additionally, some properties can be overridden by the State, which allows you t
 | smtp_server | No | Yes | URL of SMTP Server (Ex: smtp.gmail.com)
 | smtp_starttls | No | Yes | Boolean to determine whether TLS is used for SMTP
 | smtp_username | No | Yes | Username to use for SMTP Server Auth
+| synack_domain | No | Yes | Synack domain to use for login/platform URLs (for example, `synack.com` or `synack.us`)
 | targets | Yes | No | All cached Targets
 | template_dir | No | Yes | The path to a directory where your templates are stored
+| urls | Yes | No | All cached URLs
 | use_proxies | No | Yes | Changes whether or not http_proxy and https_proxies are used
-| user_id | No | No | Your Synack User ID used for requests
+| use_scratchspace | No | Yes | Enables/disables writing scope and attachment files to scratchspace
+| user_id | No | Yes | Your Synack User ID used for requests
 
 ## db.add_categories(categories)
 
@@ -82,7 +92,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 > 
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `results` | list(dict) | A list of dictionaries containing results from some scan, Hydra, etc.
+> | `results` | list(dict) | A list of dictionaries containing results from some scan, etc.
 >
 >> Examples
 >> ```python3
@@ -96,11 +106,8 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> ...                 "port": "443",
 >> ...                 "protocol": "tcp",
 >> ...                 "service": "Super Apache NGINX Deluxe",
->> ...                 "screenshot_url": "http://127.0.0.1/h3298h23.png",
->> ...                 "url": "http://bubba.net",
 >> ...                 "open": True,
 >> ...                 "updated": 1654969137
->> ...
 >> ...             },
 >> ...             {
 >> ...                 "port": "53",
@@ -119,7 +126,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 > | Argument | Type | Description
 > | --- | --- | ---
-> | targets | list(dict) | A list of Target dictionaties returned from the Synack API
+> | targets | list(dict) | A list of Target dictionaries returned from the Synack API
 >
 >> Examples
 >> ```python3
@@ -132,7 +139,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 > 
 > | Arguments | Type | Description
 > | --- | --- | ---
-> | `results` | list(dict) | A list of dictionaries containing results from some scan, Hydra, etc.
+> | `results` | list(dict) | A list of dictionaries containing results from some scan, etc.
 >
 >> Examples
 >> ```python3
@@ -178,7 +185,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 > | --- | --- | ---
 > | `port` | int | Port number to search for (443, 80, 25, etc.)
 > | `protocol` | str | Protocol to search for (tcp, udp, etc.)
-> | `source` | str | Source to search for (hydra, nmap, etc.)
+> | `source` | str | Source to search for (masscan, nmap, etc.)
 > | `ip` | str | IP Address to search for
 > | `kwargs` | kwargs | Any attribute of the Target Database Model (codename, slug, is_active, etc.)
 >
@@ -187,7 +194,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> >>> h.db.find_ports(codename="SLEEPYPUPPY")
 >> [
 >>   {
->>     'ip': '1.2.3.4', 'source': 'hydra', 'target': '123hg912',
+>>     'ip': '1.2.3.4', 'source': 'masscan', 'target': '123hg912',
 >>       'ports': [
 >>         { 'open': True, 'port': '443', 'protocol': 'tcp', 'service': 'https - Wordpress', 'updated': 1654840021 },
 >>         ...
@@ -213,7 +220,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 
 ## db.find_urls(url=None, ip=None, **kwargs)
 
-> Filters through all the ports to return ones which match a given criteria
+> Filters through all the cached URLs to return ones which match a given criteria
 >
 > | Argument | Type | Description
 > | --- | --- | ---
@@ -223,13 +230,13 @@ Additionally, some properties can be overridden by the State, which allows you t
 >
 >> Examples
 >> ```python3
->> >>> h.db.find_ports(codename="SLEEPYPUPPY")
+>> >>> h.db.find_urls(codename="SLEEPYPUPPY")
 >> [
 >>   {
 >>     'ip': '1.2.3.4',
 >>     'target': '123hg912',
->>     'ports': [
->>       {  
+>>     'urls': [
+>>       {
 >>         'url': 'https://www.google.com',
 >>         'screenshot_url': 'file:///tmp/2948geybu24.png'
 >>       },
@@ -252,7 +259,7 @@ Additionally, some properties can be overridden by the State, which allows you t
 >> ```python3
 >> >>> h.db.get_config('api_token')
 >> 'reuif...oetuhhj'
->> >>> g.db.get_config('user_id')
+>> >>> h.db.get_config('user_id')
 >> 'heutih9'
 >> ```
 

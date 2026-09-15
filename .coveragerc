@@ -1,0 +1,12 @@
+[run]
+source = synack
+omit =
+    # Auto-generated Alembic migration scripts and environment. These are
+    # executed by Alembic's own loader (exercised end-to-end in
+    # test_migrations.py) rather than imported for unit coverage.
+    */db/alembic/*
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover

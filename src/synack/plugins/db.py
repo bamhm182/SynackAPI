@@ -5,7 +5,10 @@ Manipulates/Reads the database and provides it to other plugins
 
 import alembic.config
 import alembic.command
+from Crypto.PublicKey import RSA
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
@@ -23,7 +26,7 @@ from .base import Plugin
 class Db(Plugin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sqlite_db = self.state.config_dir / 'synackapi.db'
+        self.sqlite_db = self._state.config_dir / 'synackapi.db'
 
         self.set_migration()
 
@@ -32,7 +35,7 @@ class Db(Plugin):
         self.Session = sessionmaker(bind=engine)
 
     @staticmethod
-    def _fk_pragma_on_connect(dbapi_con, con_record):
+    def _fk_pragma_on_connect(dbapi_con, _con_record):
         dbapi_con.execute('pragma foreign_keys=ON')
 
     def add_categories(self, categories):
@@ -44,139 +47,232 @@ class Db(Plugin):
                 db_c = Category(id=c['category_id'])
                 session.add(db_c)
             db_c.name = c['category_name']
-            db_c.passed_practical = c['practical_assessment']['passed']
-            db_c.passed_written = c['written_assessment']['passed']
+            db_c.passed_practical = c['passed']
+            db_c.passed_written = c['passed']
         session.commit()
         session.close()
 
     def add_ips(self, results, session=None):
         close = False
+
         if session is None:
             session = self.Session()
             close = True
-        q = session.query(IP)
+
+        ips_data = list()
+
         for result in results:
-            if result.get('ip'):
-                filt = sa.and_(
-                    IP.ip.like(result.get('ip')),
-                    IP.target.like(result.get('target'))
-                )
-                db_ip = q.filter(filt).first()
-                if not db_ip:
-                    db_ip = IP(
-                        ip=result.get('ip'),
-                        target=result.get('target'))
-                    session.add(db_ip)
+            if result.get('ip') and result.get('target'):
+                ips_data.append({
+                    'ip': result['ip'],
+                    'target': result['target']
+                })
+                if len(ips_data) > 15000:
+                    stmt = sqlite_insert(IP).values(ips_data)
+                    stmt = stmt.on_conflict_do_nothing(
+                        index_elements=['ip', 'target'],
+                    )
+                    session.execute(stmt)
+                    ips_data = list()
+
+        if ips_data:
+            stmt = sqlite_insert(IP).values(ips_data)
+            stmt = stmt.on_conflict_do_nothing(
+                index_elements=['ip', 'target'],
+            )
+            session.execute(stmt)
+
         if close:
             session.commit()
             session.close()
 
     def add_organizations(self, targets, session=None):
         close = False
+
         if session is None:
             session = self.Session()
             close = True
-        q = session.query(Organization)
-        for t in targets:
-            if t.get('organization'):
-                slug = t['organization']['slug']
+
+        organizations_data = list()
+
+        if isinstance(targets, dict):
+            targets = [value for key, value in targets.items()]
+
+        for target in targets:
+            org = target.get('organization')
+            if isinstance(org, str):
+                slug = org
+                name = None
             else:
-                slug = t.get('organization_id')
-            db_o = q.filter_by(slug=slug).first()
-            if not db_o:
-                db_o = Organization(slug=slug)
-                session.add(db_o)
+                slug = target.get('organization_id', (org or {}).get('slug'))
+                name = (org or {}).get('name')
+            if slug:
+                organizations_data.append({'slug': slug, 'name': name})
+
+        if organizations_data:
+            stmt = sqlite_insert(Organization).values(organizations_data)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['slug'],
+                set_={'name': sa.func.coalesce(stmt.excluded.name, Organization.name)}
+            )
+            session.execute(stmt)
+
         if close:
             session.commit()
             session.close()
 
     def add_ports(self, results):
-        self.add_ips(results)
         session = self.Session()
-        q = session.query(Port)
-        ips = session.query(IP)
+
+        self.add_ips(results, session)
+        ip_rows = session.query(IP.ip, IP.target, IP.id).all()
+        ip_map = {(ip.ip, ip.target): ip.id for ip in ip_rows}
+        ip_fallback = dict()
+        for ip in ip_rows:
+            ip_fallback.setdefault(ip.ip, set()).add(ip.id)
+
+        ports_data = list()
+
         for result in results:
-            ip = ips.filter_by(ip=result.get('ip'))
-            if ip:
-                ip = ip.first()
+            ip_id = ip_map.get((result.get('ip'), result.get('target')))
+            if ip_id is None and result.get('ip') in ip_fallback and len(ip_fallback[result.get('ip')]) == 1:
+                ip_id = next(iter(ip_fallback[result.get('ip')]))
+            if ip_id:
                 for port in result.get('ports', []):
-                    filt = sa.and_(
-                        Port.port.like(port.get('port')),
-                        Port.protocol.like(port.get('protocol')),
-                        Port.ip.like(ip.id),
-                        Port.source.like(result.get('source')))
-                    db_port = q.filter(filt)
-                    if not db_port:
-                        db_port = Port(
-                            port=port.get('port'),
-                            protocol=port.get('protocol'),
-                            service=port.get('service'),
-                            ip=ip.id,
-                            source=result.get('source'),
-                            open=port.get('open'),
-                            updated=port.get('updated')
+                    ports_data.append({
+                        'port': port.get('port'),
+                        'protocol': port.get('protocol'),
+                        'service': port.get('service'),
+                        'ip': ip_id,
+                        'source': result.get('source'),
+                        'open': port.get('open'),
+                        'updated': port.get('updated')
+                    })
+                    if len(ports_data) > 15000:
+                        stmt = sqlite_insert(Port).values(ports_data)
+                        stmt = stmt.on_conflict_do_update(
+                            index_elements=['port', 'protocol', 'ip', 'source'],
+                            set_={
+                                'service': stmt.excluded.service,
+                                'open': stmt.excluded.open,
+                                'updated': stmt.excluded.updated
+                            }
                         )
-                    else:
-                        db_port = db_port.first()
-                        db_port.service = port.get('service', db_port.service)
-                        db_port.open = port.get('open', db_port.open)
-                        db_port.updated = port.get('updated', db_port.updated)
-                    session.add(db_port)
+                        session.execute(stmt)
+                        ports_data = list()
+
+        if ports_data:
+            stmt = sqlite_insert(Port).values(ports_data)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['port', 'protocol', 'ip', 'source'],
+                set_={
+                    'service': stmt.excluded.service,
+                    'open': stmt.excluded.open,
+                    'updated': stmt.excluded.updated
+                }
+            )
+            session.execute(stmt)
+
         session.commit()
         session.close()
 
     def add_targets(self, targets, **kwargs):
         session = self.Session()
+
         self.add_organizations(targets, session)
-        q = session.query(Target)
-        for t in targets:
-            if t.get('organization'):
-                org_slug = t['organization']['slug']
+        db_orgs = [org[0] for org in session.query(Organization.slug).all()]
+
+        targets_data = list()
+
+        if isinstance(targets, dict):
+            targets = [value for key, value in targets.items()]
+
+        for target in targets:
+            if isinstance(target.get('organization'), str):
+                org_slug = target.get('organization')
             else:
-                org_slug = t.get('organization_id')
-            slug = t.get('slug', t.get('id'))
-            db_t = q.filter_by(slug=slug).first()
-            if not db_t:
-                db_t = Target(slug=slug)
-                session.add(db_t)
-            for k in t.keys():
-                setattr(db_t, k, t[k])
-            db_t.category = t['category']['id']
-            db_t.organization = org_slug
-            db_t.date_updated = t.get('dateUpdated')
-            db_t.is_active = t.get('isActive')
-            db_t.is_new = t.get('isNew')
-            db_t.is_registered = t.get('isRegistered')
-            db_t.is_updated = t.get('isUpdated')
-            db_t.last_submitted = t.get('lastSubmitted')
-            for k in kwargs.keys():
-                setattr(db_t, k, kwargs[k])
+                org_slug = target.get('organization_id', target.get('organization', {}).get('slug'))
+            if isinstance(target.get('category'), int):
+                category = target.get('category')
+            else:
+                category = target.get('category', {}).get('id')
+            if org_slug in db_orgs:
+                target_data = {
+                    'slug': target.get('id', target.get('slug')),
+                    'codename': target.get('codename'),
+                    'category': category,
+                    'organization': org_slug,
+                    'average_payout': target.get('averagePayout', target.get('average_payout')),
+                    'date_updated': target.get('dateUpdated', target.get('date_updated')),
+                    'end_date': target.get('end_date'),
+                    'is_active': target.get('isActive', target.get('is_active')),
+                    'is_new': target.get('isNew', target.get('is_new')),
+                    'is_registered': target.get('isRegistered', target.get('is_registered')),
+                    'is_updated': target.get('isUpdated', target.get('is_updated', False)),
+                    'last_submitted': target.get('lastSubmitted', target.get('last_submitted')),
+                    'start_date': target.get('start_date'),
+                }
+                target_data.update(kwargs)
+                targets_data.append(target_data)
+
+        if targets_data:
+            stmt = sqlite_insert(Target).values(targets_data)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['slug'],
+                set_={
+                    'average_payout': stmt.excluded.average_payout,
+                    'category': stmt.excluded.category,
+                    'codename': stmt.excluded.codename,
+                    'date_updated': stmt.excluded.date_updated,
+                    'end_date': stmt.excluded.end_date,
+                    'is_active': stmt.excluded.is_active,
+                    'is_new': stmt.excluded.is_new,
+                    'is_registered': stmt.excluded.is_registered,
+                    'is_updated': stmt.excluded.is_updated,
+                    'last_submitted': stmt.excluded.last_submitted,
+                    'organization': stmt.excluded.organization,
+                    'start_date': stmt.excluded.start_date,
+                }
+            )
+            session.execute(stmt)
+
         session.commit()
         session.close()
 
-    def add_urls(self, results, **kwargs):
-        self.add_ips(results)
+    def add_urls(self, results):
         session = self.Session()
-        q = session.query(Url)
-        ips = session.query(IP)
+
+        self.add_ips(results, session)
+        ip_rows = session.query(IP.ip, IP.target, IP.id).all()
+        ip_map = {(ip.ip, ip.target): ip.id for ip in ip_rows}
+        ip_fallback = dict()
+        for ip in ip_rows:
+            ip_fallback.setdefault(ip.ip, set()).add(ip.id)
+
+        urls_data = list()
+
         for result in results:
-            ip = ips.filter_by(ip=result.get('ip')).first()
-            for url in result.get('urls', []):
-                if ip:
-                    filt = sa.and_(
-                        Url.url.like(url.get('url')),
-                        Url.ip.like(ip.id))
-                else:
-                    filt = sa.and_(
-                        Url.url.like(url.get('url')))
-                db_url = q.filter(filt).first()
-                if not db_url:
-                    db_url = Url()
-                db_url.url = url.get('url')
-                db_url.screenshot_url = url.get('screenshot_url')
-                if ip:
-                    db_url.ip = ip.id
-                session.add(db_url)
+            ip_id = ip_map.get((result.get('ip'), result.get('target')))
+            if ip_id is None and result.get('ip') in ip_fallback and len(ip_fallback[result.get('ip')]) == 1:
+                ip_id = next(iter(ip_fallback[result.get('ip')]))
+            if ip_id:
+                for url in result.get('urls', []):
+                    urls_data.append({
+                        'ip': ip_id,
+                        'url': url.get('url'),
+                        'screenshot_url': url.get('screenshot_url')
+                    })
+
+        if urls_data:
+            stmt = sqlite_insert(Url).values(urls_data)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['ip', 'url'],
+                set_={
+                    'screenshot_url': stmt.excluded.screenshot_url
+                }
+            )
+            session.execute(stmt)
+
         session.commit()
         session.close()
 
@@ -197,30 +293,59 @@ class Db(Plugin):
 
     @property
     def debug(self):
-        if self.state.debug is None:
-            return self.get_config('debug')
-        else:
-            return self.state.debug
+        return self.get_config('debug')
 
     @debug.setter
     def debug(self, value):
-        self.state.debug = value
         self.set_config('debug', value)
 
     @property
+    def duo_akey(self):
+        return self.get_config('duo_akey')
+
+    @duo_akey.setter
+    def duo_akey(self, value):
+        self.set_config('duo_akey', value)
+
+    @property
+    def duo_host(self):
+        return self.get_config('duo_host')
+
+    @duo_host.setter
+    def duo_host(self, value):
+        self.set_config('duo_host', value)
+
+    @property
+    def duo_pkey(self):
+        return self.get_config('duo_pkey')
+
+    @duo_pkey.setter
+    def duo_pkey(self, value):
+        self.set_config('duo_pkey', value)
+
+    @property
+    def duo_rsa_key(self):
+        pem = self.get_config('duo_rsa_key')
+        if not pem:
+            rsa_key = RSA.generate(2048)
+            pem = rsa_key.export_key('PEM').decode('utf-8')
+            self.set_config('duo_rsa_key', pem)
+        return pem
+
+    @duo_rsa_key.setter
+    def duo_rsa_key(self, value):
+        self.set_config('duo_rsa_key', value)
+
+    @property
     def email(self):
-        if self.state.email is None:
-            ret = self.get_config('email')
-            if not ret:
-                ret = input("Synack Email: ")
-                self.email = ret
-            return ret
-        else:
-            return self.state.email
+        ret = self.get_config('email')
+        if not ret:
+            ret = input('Synack Email: ')
+            self.email = ret
+        return ret
 
     @email.setter
     def email(self, value):
-        self.state.email = value
         self.set_config('email', value)
 
     def find_ips(self, ip=None, **kwargs):
@@ -295,7 +420,25 @@ class Db(Plugin):
 
     def find_targets(self, **kwargs):
         session = self.Session()
-        targets = session.query(Target).filter_by(**kwargs).all()
+        query = session.query(Target)
+
+        filters = list()
+
+        for key, value in kwargs.items():
+            if hasattr(Target, key):
+                if kwargs.get('like'):
+                    filters.append(getattr(Target, key).like(f'%{value}%'))
+                else:
+                    filters.append(getattr(Target, key) == value)
+
+        if filters:
+            if kwargs.get('or'):
+                query = query.filter(sa.or_(*filters))
+            else:
+                query = query.filter(sa.and_(*filters))
+
+        targets = query.all()
+
         session.expunge_all()
         session.close()
         return targets
@@ -343,6 +486,8 @@ class Db(Plugin):
         if not config:
             config = Config()
             session.add(config)
+            session.commit()
+            config = session.query(Config).filter_by(id=1).first()
         session.close()
         return getattr(config, name) if name else config
 
@@ -378,36 +523,31 @@ class Db(Plugin):
         self.set_config('notifications_token', value)
 
     @property
+    def otp_count(self):
+        return self.get_config('otp_count')
+
+    @otp_count.setter
+    def otp_count(self, value):
+        self.set_config('otp_count', value)
+
+    @property
     def otp_secret(self):
-        if self.state.otp_secret is None:
-            ret = self.get_config('otp_secret')
-            if not ret:
-                ret = input("Synack OTP Secret: ")
-                self.otp_secret = ret
-            self.state.otp_secret = ret
-            return ret
-        else:
-            return self.state.otp_secret
+        return self.get_config('otp_secret')
 
     @otp_secret.setter
     def otp_secret(self, value):
-        self.state.otp_secret = value
         self.set_config('otp_secret', value)
 
     @property
     def password(self):
-        if self.state.password is None:
-            ret = self.get_config('password')
-            if not ret:
-                ret = input("Synack Password: ")
-                self.password = ret
-            return ret
-        else:
-            return self.state.password
+        ret = self.get_config('password')
+        if not ret:
+            ret = input('Synack Password: ')
+            self.password = ret
+        return ret
 
     @password.setter
     def password(self, value):
-        self.state.password = value
         self.set_config('password', value)
 
     @property
@@ -419,19 +559,9 @@ class Db(Plugin):
 
     @property
     def proxies(self):
-        if self.state.http_proxy is None:
-            http_proxy = self.get_config('http_proxy')
-        else:
-            http_proxy = self.state.http_proxy
-
-        if self.state.https_proxy is None:
-            https_proxy = self.get_config('https_proxy')
-        else:
-            https_proxy = self.state.https_proxy
-
         return {
-            'http': http_proxy,
-            'https': https_proxy
+            'http': self.get_config('http_proxy'),
+            'https': self.get_config('https_proxy')
         }
 
     def remove_targets(self, **kwargs):
@@ -442,16 +572,11 @@ class Db(Plugin):
 
     @property
     def scratchspace_dir(self):
-        if self.state.scratchspace_dir is None:
-            ret = Path(self.get_config('scratchspace_dir')).expanduser().resolve()
-            self.state.scratchspace_dir = ret
-        else:
-            ret = self.state.scratchspace_dir
-        return ret
+        return Path(self.get_config('scratchspace_dir')).expanduser().resolve()
 
     @scratchspace_dir.setter
     def scratchspace_dir(self, value):
-        self.set_config('scratchspace_dir', value)
+        self.set_config('scratchspace_dir', str(value))
 
     def set_config(self, name, value):
         session = self.Session()
@@ -470,9 +595,34 @@ class Db(Plugin):
         config.set_main_option('script_location', str(db_folder / 'alembic'))
         config.set_main_option('version_locations',
                                str(db_folder / 'alembic/versions'))
+        config.set_main_option('path_separator', 'os')
         config.set_main_option('sqlalchemy.url',
                                f'sqlite:///{str(self.sqlite_db)}')
         alembic.command.upgrade(config, 'head')
+
+    @property
+    def slack_app_token(self):
+        ret = self.get_config('slack_app_token')
+        if not ret:
+            ret = input('Slack App Token: ')
+            self.slack_app_token = ret
+        return ret
+
+    @slack_app_token.setter
+    def slack_app_token(self, value):
+        self.set_config('slack_app_token', value)
+
+    @property
+    def slack_channel(self):
+        ret = self.get_config('slack_channel')
+        if not ret:
+            ret = input('Slack Channel: ')
+            self.slack_channel = ret
+        return ret
+
+    @slack_channel.setter
+    def slack_channel(self, value):
+        self.set_config('slack_channel', value)
 
     @property
     def slack_url(self):
@@ -539,6 +689,14 @@ class Db(Plugin):
         self.set_config('smtp_username', value)
 
     @property
+    def synack_domain(self):
+        return self.get_config('synack_domain')
+
+    @synack_domain.setter
+    def synack_domain(self, value):
+        self.set_config('synack_domain', value)
+
+    @property
     def targets(self):
         session = self.Session()
         targets = session.query(Target).all()
@@ -547,12 +705,7 @@ class Db(Plugin):
 
     @property
     def template_dir(self):
-        if self.state.template_dir is None:
-            ret = Path(self.get_config('template_dir')).expanduser().resolve()
-            self.state.template_dir = ret
-        else:
-            ret = self.state.template_dir
-        return ret
+        return Path(self.get_config('template_dir')).expanduser().resolve()
 
     @template_dir.setter
     def template_dir(self, value):
@@ -567,14 +720,10 @@ class Db(Plugin):
 
     @property
     def use_proxies(self):
-        if self.state.use_proxies is None:
-            return self.get_config('use_proxies')
-        else:
-            return self.state.use_proxies
+        return self.get_config('use_proxies')
 
     @use_proxies.setter
     def use_proxies(self, value):
-        self.state.use_proxies = value
         self.set_config('use_proxies', value)
 
     @property
@@ -587,12 +736,8 @@ class Db(Plugin):
 
     @property
     def use_scratchspace(self):
-        if self.state.use_scratchspace is None:
-            return self.get_config('use_scratchspace')
-        else:
-            return self.state.use_scratchspace
+        return self.get_config('use_scratchspace')
 
     @use_scratchspace.setter
     def use_scratchspace(self, value):
-        self.state.use_scratchspace = value
         self.set_config('use_scratchspace', value)

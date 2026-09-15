@@ -15,3 +15,4 @@ class IP(Base):
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     ip = sa.Column(sa.VARCHAR(40))
     target = sa.Column(sa.VARCHAR(20), sa.ForeignKey(Target.slug))
+    __table_args__ = (sa.UniqueConstraint('ip', 'target', name='uq_ip'),)
